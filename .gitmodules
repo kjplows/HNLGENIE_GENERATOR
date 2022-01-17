@@ -1,0 +1,3 @@
+[submodule "HNLModules"]
+	path = HNLModules
+	url = https://github.com/kjplows/HNLGENIE.git

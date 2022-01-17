@@ -1,0 +1,57 @@
+# Prerequisites
+*.d
+
+# Compiled Object Files
+*.slo
+*.lo
+*.o
+*.obj
+
+# Precompiled Headers
+*.gch
+*.pch
+
+# Fortran module files
+*.mod
+*.smod
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+*.lib
+
+# Executables
+*.exe
+*.out
+*.app
+
+# Other GENIE stuff I don't want to track
+*.bak
+*.pcm
+*.rootmap
+*.rootmap.bak
+
+# Ignore all but these directories in src/
+**src/*
+!**src/Algorithm
+!**src/Apps
+!**src/Base
+!**src/contrib
+!**src/Decay
+!**src/EVG*
+!**src/Interaction
+!**src/Messenger
+!**src/make
+!**src/PDG
+!**src/scripts
+!**src/SimpleHNL
+!**src/Utils
+
+# Ignore all but a few of the xml files in config
+**config/*
+!**config/master_config.xml
+!**config/SimpleHNLDecayer.xml
+
+# no autosaves plz
+*~
