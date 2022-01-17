@@ -200,6 +200,7 @@ const int kPdgHNLEBar      = -1912;
 
 // generic HNL code
 const int kPdgHNL          =  1911;
+const int kPdgHNLBar       = -1911;
 
 
 }      // genie namespace

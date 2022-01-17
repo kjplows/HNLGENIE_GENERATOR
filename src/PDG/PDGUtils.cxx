@@ -118,6 +118,15 @@ bool genie::pdg::IsChargedLepton(int pdgc)
   return is_charged_lepton;
 }
 //____________________________________________________________________________
+bool genie::pdg::IsHeavyNeutralLepton(int pdgc)
+{
+  bool isGeneric = genie::pdg::IsGenericHNL(pdgc) || genie::pdg::IsGenericHNLBar(pdgc);
+  bool isMuCoup  = genie::pdg::IsMuHNL(pdgc) || genie::pdg::IsMuHNLBar(pdgc);
+  bool isECoup   = genie::pdg::IsEHNL(pdgc) || genie::pdg::IsEHNLBar(pdgc);
+
+  return ( isGeneric || isMuCoup || isECoup );
+}
+//____________________________________________________________________________
 bool genie::pdg::IsNeutrino(int pdgc)
 {
   bool is_nu = (pdgc == kPdgNuE)  ||
@@ -151,6 +160,30 @@ bool genie::pdg::IsPosChargedLepton(int pdgc)
                        (pdgc ==  kPdgAntiTau);
 
   return is_pos_lepton;
+}
+
+bool genie::pdg::IsGenericHNL(int pdgc){
+  return (pdgc == kPdgHNL);
+}
+//____________________________________________________________________________
+bool genie::pdg::IsGenericHNLBar(int pdgc){
+  return (pdgc == kPdgHNLBar);
+}
+//____________________________________________________________________________
+bool genie::pdg::IsMuHNL(int pdgc){
+  return (pdgc == kPdgHNLMu);
+}
+//____________________________________________________________________________
+bool genie::pdg::IsMuHNLBar(int pdgc){
+  return (pdgc == kPdgHNLMuBar);
+}
+//____________________________________________________________________________
+bool genie::pdg::IsEHNL(int pdgc){
+  return (pdgc == kPdgHNLE);
+}
+//____________________________________________________________________________
+bool genie::pdg::IsEHNLBar(int pdgc){
+  return (pdgc == kPdgHNLEBar);
 }
 //____________________________________________________________________________
 

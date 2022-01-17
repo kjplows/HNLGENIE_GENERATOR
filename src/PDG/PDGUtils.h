@@ -35,11 +35,19 @@ namespace pdg
   bool IsLepton           (int pdgc);
   bool IsNeutralLepton    (int pdgc);
   bool IsChargedLepton    (int pdgc);
+  bool IsHeavyNeutralLepton (int pdgc);
 
   bool IsNeutrino         (int pdgc);
   bool IsAntiNeutrino     (int pdgc);
   bool IsNegChargedLepton (int pdgc);
   bool IsPosChargedLepton (int pdgc);
+
+  bool IsGenericHNL       (int pdgc);
+  bool IsGenericHNLBar    (int pdgc);
+  bool IsMuHNL            (int pdgc);
+  bool IsMuHNLBar         (int pdgc);
+  bool IsEHNL             (int pdgc);
+  bool IsEHNLBar          (int pdgc);
 
   bool IsNuE              (int pdgc);
   bool IsNuMu             (int pdgc);
