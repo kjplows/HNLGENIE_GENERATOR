@@ -36,7 +36,8 @@ typedef enum EInteractionType {
   kIntWeakNC,
   kIntWeakMix, /* cc+nc+interference */
   kIntNDecay,
-  kIntNOsc
+  kIntNOsc,
+  kIntHNLDecay /* HNL breaks up, not really an interaction */
 
 } InteractionType_t;
 
@@ -50,13 +51,14 @@ public:
   {
     switch (type) {
 
-      case(kIntEM) :      return "EM";                        break;
-      case(kIntWeakCC)  : return "Weak[CC]";                  break;
-      case(kIntWeakNC)  : return "Weak[NC]";                  break;
-      case(kIntWeakMix) : return "Weak[CC+NC+interference]";  break;
-      case(kIntNDecay)  : return "NucleonDecay";              break;
-      case(kIntNOsc)    : return "NeutronOsc";                break;
-      default :           return "Unknown";                   break;
+      case(kIntEM)       : return "EM";                        break;
+      case(kIntWeakCC)   : return "Weak[CC]";                  break;
+      case(kIntWeakNC)   : return "Weak[NC]";                  break;
+      case(kIntWeakMix)  : return "Weak[CC+NC+interference]";  break;
+      case(kIntNDecay)   : return "NucleonDecay";              break;
+      case(kIntNOsc)     : return "NeutronOsc";                break;
+      case(kIntHNLDecay) : return "HNLDecay";                  break; 
+      default            : return "Unknown";                   break;
     }
     return "Unknown";    
   }
@@ -94,6 +96,8 @@ public:
     else if ( strcmp(t,"NDECAY") == 0 ) return kIntNDecay;
 
     else if ( strcmp(t,"NOSC") == 0 ) return kIntNOsc;
+
+    else if ( strcmp(t,"HNLDECAY") == 0 ) return kIntHNLDecay;
 
     else return kIntNull;
   }
