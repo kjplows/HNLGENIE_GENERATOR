@@ -51,7 +51,7 @@
 # Ignore all but a few of the xml files in config
 **config/*
 !**config/master_config.xml
-!**config/SimpleHNLDecayer.xml
+!**config/HNLDecayer.xml
 
 # no autosaves plz
 *~

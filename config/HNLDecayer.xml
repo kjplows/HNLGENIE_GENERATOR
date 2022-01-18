@@ -3,7 +3,7 @@
 <alg_conf>
 
   <!--
-      Configuration sets for the SimpleHNLDecayer
+      Configuration sets for the HNLDecayer
       
       Configurable Parameters:
       ..........................................................................................
@@ -17,7 +17,7 @@
 
       exclusive-decays        bool          yes          Use exclusive decay alg       false
 
-      hnl-mass                double        no           HNL mass                      245.229 MeV
+      hnl-mass                double        no           HNL mass                      255.229 MeV
 
       hnl-e-coupling          double        yes          |U_e4|^2                      0.0
 
@@ -38,7 +38,7 @@
 
   <param_set name="MuonOnly">
 
-    <param type="double" name="hnl-mass">           245.229 * genie::units/MeV   </param>
+    <param type="double" name="hnl-mass">           255.229 * genie::units/MeV   </param>
     <param type="double" name="hnl-e-coupling">     0.0                          </param>
     <param type="double" name="hnl-mu-coupling">    1.0                          </param>
     <param type="double" name="hnl-tau-coupling">   0.0                          </param>
@@ -47,7 +47,7 @@
 
   <param_set name="ElectronOnly">
 
-    <param type="double" name="hnl-mass">           245.229 * genie::units/MeV   </param>
+    <param type="double" name="hnl-mass">           255.229 * genie::units/MeV   </param>
     <param type="double" name="hnl-e-coupling">     1.0                          </param>
     <param type="double" name="hnl-mu-coupling">    0.0                          </param>
     <param type="double" name="hnl-tau-coupling">   0.0                          </param>
@@ -56,7 +56,7 @@
 
   <param_set name="EqualLeptons">
 
-    <param type="double" name="hnl-mass">           245.229 * genie::units/MeV   </param>
+    <param type="double" name="hnl-mass">           255.229 * genie::units/MeV   </param>
     <param type="double" name="hnl-e-coupling">     1.0                          </param>
     <param type="double" name="hnl-mu-coupling">    1.0                          </param>
     <param type="double" name="hnl-tau-coupling">   0.0                          </param>
