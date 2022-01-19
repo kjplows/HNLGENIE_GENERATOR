@@ -50,6 +50,7 @@
 
 # Ignore all but a few of the xml files in config
 **config/*
+!**config/UserPhysicsOptions.xml
 !**config/master_config.xml
 !**config/HNLDecayer.xml
 
