@@ -25,5 +25,37 @@ Name             Type     Optional   Comment               Default
      <param type="bool"   name="RunBeforeHadronTransport"> false                                    </param>
   </param_set>
 
+  <param_set name="IncludeHNL_Default"> 
+     <param type="int"    name="NDecayers">                3                                        </param>
+     <param type="alg"    name="Decayer-0">                genie::PythiaDecayer/Default             </param>
+     <param type="alg"    name="Decayer-1">                genie::BaryonResonanceDecayer/Default    </param>
+     <param type="alg"    name="Decayer-2">                genie::HNLDecayer/Default                </param>
+     <param type="bool"   name="RunBeforeHadronTransport"> false                                    </param>
+  </param_set>
+
+  <param_set name="IncludeHNL_MuonOnly"> 
+     <param type="int"    name="NDecayers">                3                                        </param>
+     <param type="alg"    name="Decayer-0">                genie::PythiaDecayer/Default             </param>
+     <param type="alg"    name="Decayer-1">                genie::BaryonResonanceDecayer/Default    </param>
+     <param type="alg"    name="Decayer-2">                genie::HNLDecayer/MuonOnly               </param>
+     <param type="bool"   name="RunBeforeHadronTransport"> false                                    </param>
+  </param_set>
+
+  <param_set name="IncludeHNL_ElectronOnly"> 
+     <param type="int"    name="NDecayers">                3                                        </param>
+     <param type="alg"    name="Decayer-0">                genie::PythiaDecayer/Default             </param>
+     <param type="alg"    name="Decayer-1">                genie::BaryonResonanceDecayer/Default    </param>
+     <param type="alg"    name="Decayer-2">                genie::HNLDecayer/ElectronOnly           </param>
+     <param type="bool"   name="RunBeforeHadronTransport"> false                                    </param>
+  </param_set>
+
+  <param_set name="IncludeHNL_EqualLeptons"> 
+     <param type="int"    name="NDecayers">                3                                        </param>
+     <param type="alg"    name="Decayer-0">                genie::PythiaDecayer/Default             </param>
+     <param type="alg"    name="Decayer-1">                genie::BaryonResonanceDecayer/Default    </param>
+     <param type="alg"    name="Decayer-2">                genie::HNLDecayer/EqualLeptons           </param>
+     <param type="bool"   name="RunBeforeHadronTransport"> false                                    </param>
+  </param_set>
+
 </alg_conf>
 
