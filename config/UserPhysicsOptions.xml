@@ -703,7 +703,18 @@ STFC, Rutherford Appleton Laboratory
   ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
   Particle decayer parameters
   -->
-
+ 
+  <!--												     
+   HNL: Decays Heavy Neutral Leptons								     
+   Actual decay is handled by src/EVGModules/UnstableParticleDecayer				     
+  -->												     
+  <param type="bool" name="DecayParticleWithCode=1911">  true  </param>  <!--  Generic HNL        -->
+  <param type="bool" name="DecayParticleWithCode=-1911"> true  </param>  <!--  Generic HNLBar     -->
+  <param type="bool" name="DecayParticleWithCode=1914">  true  </param>  <!--  Mu-produced HNL    -->
+  <param type="bool" name="DecayParticleWithCode=-1914"> true  </param>  <!--  Mubar-produced HNL -->
+  <param type="bool" name="DecayParticleWithCode=1912">  true  </param>  <!--  E-produced HNL     -->
+  <param type="bool" name="DecayParticleWithCode=-1912"> true  </param>  <!--  Ebar-produced HNL  -->
+ 
   <!--
    Pi0's: Decays inhibited by default, as per popular request
    -->
