@@ -67,11 +67,12 @@ TParticlePDG * PDGLibrary::Find(int pdgc)
   return fDatabasePDG->GetParticle(pdgc);
 }
 //____________________________________________________________________________
+/*
 void AddSimpleHNL( double mass )
 {
-    TParticlePDG * HNL_particle = fDatabasePDG( kPdgHNL );
+    TParticlePDG * HNL_particle = TDatabasePDG( genie::kPdgHNL );
     if( ! HNL_particle ){
-	fDatabasePDG->AddParticle( "HNL", "HNL", mass, false, 1.0, 0.0, "SimpleHNL", kPDGHNL );
+	fDatabasePDG->AddParticle( "HNL", "HNL", mass, false, 1.0, 0.0, "SimpleHNL", genie::kPdgHNL );
 	// the "DecayWidth==1.0" thing I've written is WAY off!! Need to integrate with HNLModules
 	// But first I've got to decide how to write coupling info!!
     }
@@ -79,6 +80,7 @@ void AddSimpleHNL( double mass )
 	assert( HNL_particle->Mass() == mass );
     }
 }
+*/
 //____________________________________________________________________________
 bool PDGLibrary::LoadDBase(void)
 {

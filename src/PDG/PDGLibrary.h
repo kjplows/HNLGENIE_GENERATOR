@@ -22,6 +22,8 @@
 #include <TDatabasePDG.h>
 #include <TParticlePDG.h>
 
+#include "PDG/PDGCodes.h"
+
 namespace genie {
 
 class PDGLibrary 
