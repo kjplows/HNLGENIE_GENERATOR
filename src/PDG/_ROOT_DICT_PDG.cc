@@ -38,8 +38,8 @@ namespace std {} using namespace std;
 
 // Header files passed as explicit arguments
 #include "PDGLibrary.h"
-#include "PDGUtils.h"
 #include "PDGCodeList.h"
+#include "PDGUtils.h"
 
 // Header files passed via #pragma extra_include
 
@@ -52,7 +52,7 @@ namespace genie {
       inline ::ROOT::TGenericClassInfo *GenerateInitInstance()
       {
          static ::ROOT::TGenericClassInfo 
-            instance("genie", 0 /*version*/, "", 30,
+            instance("genie", 0 /*version*/, "PDGCodes.h", 23,
                      ::ROOT::Internal::DefineBehavior((void*)0,(void*)0),
                      &genie_Dictionary, 0);
          return &instance;
@@ -80,7 +80,7 @@ namespace genie {
       inline ::ROOT::TGenericClassInfo *GenerateInitInstance()
       {
          static ::ROOT::TGenericClassInfo 
-            instance("genie::pdg", 0 /*version*/, "", 91,
+            instance("genie::pdg", 0 /*version*/, "", 166,
                      ::ROOT::Internal::DefineBehavior((void*)0,(void*)0),
                      &geniecLcLpdg_Dictionary, 0);
          return &instance;
@@ -109,7 +109,7 @@ namespace ROOT {
       ::genie::PDGLibrary *ptr = 0;
       static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(::genie::PDGLibrary));
       static ::ROOT::TGenericClassInfo 
-         instance("genie::PDGLibrary", "", 32,
+         instance("genie::PDGLibrary", "", 34,
                   typeid(::genie::PDGLibrary), ::ROOT::Internal::DefineBehavior(ptr, ptr),
                   &geniecLcLPDGLibrary_Dictionary, isa_proxy, 0,
                   sizeof(::genie::PDGLibrary) );
@@ -149,7 +149,7 @@ namespace ROOT {
       ::genie::PDGCodeList *ptr = 0;
       static ::TVirtualIsAProxy* isa_proxy = new ::TIsAProxy(typeid(::genie::PDGCodeList));
       static ::ROOT::TGenericClassInfo 
-         instance("genie::PDGCodeList", "", 190,
+         instance("genie::PDGCodeList", "", 104,
                   typeid(::genie::PDGCodeList), ::ROOT::Internal::DefineBehavior(ptr, ptr),
                   &geniecLcLPDGCodeList_Dictionary, isa_proxy, 0,
                   sizeof(::genie::PDGCodeList) );
@@ -226,9 +226,9 @@ namespace {
 "/cvmfs/larsoft.opensciencegrid.org/products/log4cpp/v1_1_3b/Linux64bit+3.10-2.17-e17-prof/include",
 "/cvmfs/larsoft.opensciencegrid.org/products/root/v6_16_00/Linux64bit+3.10-2.17-e17-prof/include",
 "/cvmfs/larsoft.opensciencegrid.org/products/lhapdf/v5_9_1k/Linux64bit+3.10-2.17-e17-prof/include",
-"/minerva/app/users/xlu/software/GENIE/inuse//Generator/src/",
+"/GENIEv2/Generator/src/",
 "/cvmfs/larsoft.opensciencegrid.org/products/root/v6_16_00/Linux64bit+3.10-2.17-e17-prof/include",
-"/minerva/app/users/xlu/software/GENIE/v2.12.10/Generator/src/PDG/",
+"/GENIEv2/Generator/src/PDG/",
 0
     };
     static const char* fwdDeclCode = R"DICTFWDDCLS(
@@ -272,6 +272,8 @@ namespace genie{class PDGCodeList;}
 #include <TDatabasePDG.h>
 #include <TParticlePDG.h>
 
+#include "PDG/PDGCodes.h"
+
 namespace genie {
 
 class PDGLibrary 
@@ -293,6 +295,8 @@ private:
 
   static PDGLibrary * fInstance;
   TDatabasePDG      * fDatabasePDG;
+
+  void AddSimpleHNL( double mass );
   
   struct Cleaner {
       void DummyMethodAndSilentCompiler() { }
@@ -309,95 +313,6 @@ private:
 }      // genie namespace
 
 #endif // _PDG_LIBRARY_H_
-//____________________________________________________________________________
-/*!
-
-\namespace genie::pdg
-
-\brief     Utilities for improving the code readability when using PDG codes.
-
-\author    Costas Andreopoulos <costas.andreopoulos \at stfc.ac.uk>
-           University of Liverpool & STFC Rutherford Appleton Lab
-
-\created   May 06, 2004
-
-\cpright   Copyright (c) 2003-2017, GENIE Neutrino MC Generator Collaboration
-           For the full text of the license visit http://copyright.genie-mc.org
-           or see $GENIE/LICENSE
-*/
-//____________________________________________________________________________
-
-#ifndef _PDG_UTILS_H_
-#define _PDG_UTILS_H_
-
-namespace genie {
-
-namespace pdg
-{
-  bool IsPseudoParticle   (int pdgc);
-  bool IsIon              (int pdgc);
-  bool IsParticle         (int pdgc); ///< not ion or pseudo-particle
-
-  int  IonPdgCodeToZ      (int pdgc);
-  int  IonPdgCodeToA      (int pdgc);
-  int  IonPdgCode         (int A, int Z);
-  int  IonPdgCode         (int A, int Z, int L, int I);
-  
-  bool IsLepton           (int pdgc);
-  bool IsNeutralLepton    (int pdgc);
-  bool IsChargedLepton    (int pdgc);
-
-  bool IsNeutrino         (int pdgc);
-  bool IsAntiNeutrino     (int pdgc);
-  bool IsNegChargedLepton (int pdgc);
-  bool IsPosChargedLepton (int pdgc);
-
-  bool IsNuE              (int pdgc);
-  bool IsNuMu             (int pdgc);
-  bool IsNuTau            (int pdgc);
-  bool IsAntiNuE          (int pdgc);
-  bool IsAntiNuMu         (int pdgc);
-  bool IsAntiNuTau        (int pdgc);
-  
-  bool IsElectron         (int pdgc);
-  bool IsPositron         (int pdgc);
-  bool IsMuon             (int pdgc);
-  bool IsAntiMuon         (int pdgc);
-  bool IsTau              (int pdgc);
-  bool IsAntiTau          (int pdgc);
-  
-  bool IsDiQuark          (int pdgc);
-  bool IsQuark            (int pdgc);
-  bool IsUQuark           (int pdgc);
-  bool IsDQuark           (int pdgc);
-  bool IsSQuark           (int pdgc);
-  bool IsCQuark           (int pdgc);
-  bool IsAntiQuark        (int pdgc);
-  bool IsAntiUQuark       (int pdgc);
-  bool IsAntiDQuark       (int pdgc);
-  bool IsAntiSQuark       (int pdgc);
-  bool IsAntiCQuark       (int pdgc);
-  
-  bool IsKaon             (int pdgc);
-  bool IsPion             (int pdgc);
-  bool IsProton           (int pdgc);
-  bool IsNeutron          (int pdgc);
-  bool IsNucleon          (int pdgc);
-  bool IsNeutronOrProton  (int pdgc);
-  bool IsHadron           (int pdgc);
-  bool IsBaryonResonance  (int pdgc);
-  bool Is2NucleonCluster  (int pdgc);
-  
-  int  SwitchProtonNeutron    (int pdgc);
-  int  ModifyNucleonCluster   (int pdgc, int dQ);
-  int  Neutrino2ChargedLepton (int pdgc);
-
-  int  GeantToPdg (int geant_code);
-
-}      // pdg namespace
-}      // genie namespace
-
-#endif // _PDG_UTILS_H_
 //____________________________________________________________________________
 /*!
 
@@ -468,6 +383,103 @@ private:
 }      // genie namespace
 
 #endif // _PDG_CODE_LIST_H_
+//____________________________________________________________________________
+/*!
+
+\namespace genie::pdg
+
+\brief     Utilities for improving the code readability when using PDG codes.
+
+\author    Costas Andreopoulos <costas.andreopoulos \at stfc.ac.uk>
+           University of Liverpool & STFC Rutherford Appleton Lab
+
+\created   May 06, 2004
+
+\cpright   Copyright (c) 2003-2017, GENIE Neutrino MC Generator Collaboration
+           For the full text of the license visit http://copyright.genie-mc.org
+           or see $GENIE/LICENSE
+*/
+//____________________________________________________________________________
+
+#ifndef _PDG_UTILS_H_
+#define _PDG_UTILS_H_
+
+namespace genie {
+
+namespace pdg
+{
+  bool IsPseudoParticle   (int pdgc);
+  bool IsIon              (int pdgc);
+  bool IsParticle         (int pdgc); ///< not ion or pseudo-particle
+
+  int  IonPdgCodeToZ      (int pdgc);
+  int  IonPdgCodeToA      (int pdgc);
+  int  IonPdgCode         (int A, int Z);
+  int  IonPdgCode         (int A, int Z, int L, int I);
+  
+  bool IsLepton           (int pdgc);
+  bool IsNeutralLepton    (int pdgc);
+  bool IsChargedLepton    (int pdgc);
+  bool IsHeavyNeutralLepton (int pdgc);
+
+  bool IsNeutrino         (int pdgc);
+  bool IsAntiNeutrino     (int pdgc);
+  bool IsNegChargedLepton (int pdgc);
+  bool IsPosChargedLepton (int pdgc);
+
+  bool IsGenericHNL       (int pdgc);
+  bool IsGenericHNLBar    (int pdgc);
+  bool IsMuHNL            (int pdgc);
+  bool IsMuHNLBar         (int pdgc);
+  bool IsEHNL             (int pdgc);
+  bool IsEHNLBar          (int pdgc);
+
+  bool IsNuE              (int pdgc);
+  bool IsNuMu             (int pdgc);
+  bool IsNuTau            (int pdgc);
+  bool IsAntiNuE          (int pdgc);
+  bool IsAntiNuMu         (int pdgc);
+  bool IsAntiNuTau        (int pdgc);
+  
+  bool IsElectron         (int pdgc);
+  bool IsPositron         (int pdgc);
+  bool IsMuon             (int pdgc);
+  bool IsAntiMuon         (int pdgc);
+  bool IsTau              (int pdgc);
+  bool IsAntiTau          (int pdgc);
+  
+  bool IsDiQuark          (int pdgc);
+  bool IsQuark            (int pdgc);
+  bool IsUQuark           (int pdgc);
+  bool IsDQuark           (int pdgc);
+  bool IsSQuark           (int pdgc);
+  bool IsCQuark           (int pdgc);
+  bool IsAntiQuark        (int pdgc);
+  bool IsAntiUQuark       (int pdgc);
+  bool IsAntiDQuark       (int pdgc);
+  bool IsAntiSQuark       (int pdgc);
+  bool IsAntiCQuark       (int pdgc);
+  
+  bool IsKaon             (int pdgc);
+  bool IsPion             (int pdgc);
+  bool IsProton           (int pdgc);
+  bool IsNeutron          (int pdgc);
+  bool IsNucleon          (int pdgc);
+  bool IsNeutronOrProton  (int pdgc);
+  bool IsHadron           (int pdgc);
+  bool IsBaryonResonance  (int pdgc);
+  bool Is2NucleonCluster  (int pdgc);
+  
+  int  SwitchProtonNeutron    (int pdgc);
+  int  ModifyNucleonCluster   (int pdgc, int dQ);
+  int  Neutrino2ChargedLepton (int pdgc);
+
+  int  GeantToPdg (int geant_code);
+
+}      // pdg namespace
+}      // genie namespace
+
+#endif // _PDG_UTILS_H_
 
 #undef  _BACKWARD_BACKWARD_WARNING_H
 )DICTPAYLOAD";
