@@ -1,0 +1,353 @@
+//----------------------------------------------------------------------------
+/*!
+
+  Class for the HNL itself
+  A `SimpleHNL` object is *not* one individual HNL, but rather a *class* of HNLs:
+  i.e. all those HNL with M = 245 MeV and couplings 0:1:0 .	
+  Then we can construct one such SimpleHNL and make, say, 1M particles out of it,
+  each with its own beta, 4P, origin vertex & parent, (polarisation?),
+  & decay mode + kinematics.
+
+\namespace  genie::HNL
+
+\class      genie::HNL::SimpleHNL
+
+\brief      HNL object
+
+\author     John Plows <komninos-john.plows@physics.ox.ac.uk>
+
+\created    December 10th, 2021
+
+\cpright    ??? - TBD
+
+*/
+//----------------------------------------------------------------------------
+// TODO: write exception for (set E > fMass)??
+//       Figure out way to sample co-produced lepton direction for HNL polVector
+//       Ensure betaVec is in *lab* coords, not *beam* coords (i.e. rotate 101 mrad down)
+//----------------------------------------------------------------------------
+
+#ifndef JSIMPLEHNL_H
+#define JSIMPLEHNL_H
+
+#include "Conventions/Constants.h"
+//#include "HNLAuxiliary/DecayChannels.h"
+//#include "HNLAuxiliary/DecaySelector.h"
+//#include "HNLAuxiliary/Defaults.h"
+//#include "HNLAuxiliary/Enums.h"  
+//#include "HNLAuxiliary/Stepper.h"
+#include "Messenger/Messenger.h"
+
+#include "DecayChannels.h"
+#include "DecaySelector.h"
+#include "Defaults.h"
+#include "Enums.h"  
+#include "Stepper.h"
+
+namespace genie {
+    
+    namespace HNL {
+
+	namespace gu     = ::genie::units;
+	namespace ghs    = ::genie::HNL::Selector;
+	namespace gc     = ::genie::constants;
+	namespace ghd    = ::genie::HNL::defaults;
+	namespace ghe    = ::genie::HNL::enums;
+	
+	class SimpleHNL
+	{
+	public:
+	    inline SimpleHNL( std::string name, int index ) :
+		fName( name ), fIndex( index ),
+		fPDG( defPDG ), fParentPDG( defParPDG ), fMass( defMass ),
+		fUe42( defUe42 ), fUmu42( defUmu42 ), fUt42( defUt42 ),
+		fIsMajorana( false ),
+		fValidChannels(
+		    ghs::GetValidChannelWidths( defMass,
+						defUe42, defUmu42, defUt42,
+						false ) ),
+		fCoMLifetime(
+		    ghs::CalcCoMLifetime( defMass,
+					  defUe42, defUmu42, defUt42,
+					  false ) )
+	    { } /// default c'tor
+
+	    inline SimpleHNL(
+		std::string name, int index,
+		const int PDG, const int parPDG, const double mass,
+		const double Ue42, const double Umu42, const double Ut42,
+		const bool IsMajorana
+		) : fName( name ), fIndex( index ),
+		    fPDG( PDG ), fParentPDG( parPDG ), fMass( mass ),
+		    fUe42( Ue42 ), fUmu42( Umu42 ), fUt42( Ut42 ),
+		    fIsMajorana( IsMajorana ),
+		    fValidChannels(
+			ghs::GetValidChannelWidths( mass,
+						    Ue42, Umu42, Ut42,
+						    IsMajorana ) ),
+		    fCoMLifetime(
+			ghs::CalcCoMLifetime( mass,
+					      Ue42, Umu42, Ut42,
+					      IsMajorana ) )
+	    { } /// normal constructor
+
+	    inline ~SimpleHNL( ) { }
+
+	    // TODO: Getters, setters, calculators
+
+	    // Getters
+
+	    inline const std::string GetName( ) { return fName; }
+
+	    inline const int    GetIndex( ) { return fIndex; }
+
+	    inline const double GetMass( ) { return fMass; }
+
+	    inline const std::vector< double > GetCouplings( ) {
+		std::vector< double > coupVec;
+		coupVec.emplace_back( fUe42 );
+		coupVec.emplace_back( fUmu42 );
+		coupVec.emplace_back( fUt42 );
+		return coupVec; }
+
+	    inline const bool   GetIsMajorana( ) { return fIsMajorana; }
+
+	    inline const double GetBeta( ) { return fBeta; }
+
+	    inline const double GetGamma( ) { return fGamma; }
+
+	    inline const double GetCoMLifetime( ) { return fCoMLifetime; }
+
+	    inline const double GetLifetime( ) { /* return fLifetime; */
+		return CalcLifetime( fBeta, fGamma ); }
+
+	    inline const int    GetPDG( ) { return fPDG; }
+
+	    inline const int    GetParentPDG( ) { return fParentPDG; }
+
+	    inline const ghe::nutype_t GetHType( ) { return fHType; }
+
+	    inline const double GetDecayThrow( ) { return fDecayThrow; }
+
+	    inline const double GetSelectThrow( ) { return fSelectThrow; }
+
+	    inline const ghe::HNLDecay_t GetDecayMode( ) { return fDecayMode; }
+
+	    inline const std::vector< double > GetDecay4VX( ) {
+		std::vector< double > decVec;
+		decVec.emplace_back(fT);
+		decVec.emplace_back(fX);
+		decVec.emplace_back(fY);
+		decVec.emplace_back(fZ);
+		return decVec; }
+
+	    inline const std::vector< double > GetOrigin4VX( ) {
+		std::vector< double > oriVec;
+		oriVec.emplace_back(fT0);
+		oriVec.emplace_back(fX0);
+		oriVec.emplace_back(fY0);
+		oriVec.emplace_back(fZ0);
+		return oriVec; }
+
+	    inline const std::vector< double > Get4VP( ) {
+		std::vector< double > momVec;
+		momVec.emplace_back(fE);
+		momVec.emplace_back(fPx);
+		momVec.emplace_back(fPy);
+		momVec.emplace_back(fPz);
+		return momVec; }
+
+	    inline const std::vector< double > GetBetaVec( ) {
+		std::vector< double > betaVec;
+		const double mom = GetMomentum( );
+		betaVec.emplace_back( fPx / fE * fPx / mom );
+		betaVec.emplace_back( fPy / fE * fPz / mom );
+		betaVec.emplace_back( fPy / fE * fPz / mom );
+		return betaVec; }
+
+	    inline const double GetMomentum( ) { return fPx*fPx + fPy*fPy + fPz*fPz; }
+
+	    inline const double GetPolarisationMag( ) { return fPol; }
+	    inline const std::vector< double > * GetPolarisationDir( ) {
+		return fPolDir; }
+
+	    inline const std::map< ghe::HNLDecay_t, double > GetValidChannels( ) {
+		return fValidChannels; }
+
+	    inline const std::map< ghe::HNLDecay_t, double > GetInterestingChannels( ) {
+		return fInterestingChannels; }
+
+	    // setters
+
+	    inline void SetName( const std::string name ) { fName = name; }
+
+	    inline void SetIndex( const int idx ) { fIndex = idx; }
+
+	    inline void SetEnergy( const double E ) { // TODO make exception & error code!!
+		// updates beta, gamma, 4P, lifetime. Doesn't change angles.
+		if( E < fMass ) { LOG( "SimpleHNL", pERROR ) << 
+		    "genie::HNL::SimpleHNL:: Set E too low." <<
+			"\nE = " << E << ", M = " << fMass; exit(3); }
+		double mom3 = std::sqrt( E*E - fMass*fMass );
+		double oldmom = GetMomentum( );
+		if( oldmom == 0.0 ) oldmom = 1.0;
+		    
+		fPx *= mom3 / oldmom; fPy *= mom3 / oldmom; fPz *= mom3 / oldmom;
+		fE = E;
+		fBeta = CalcBeta( E, mom3 );
+		fGamma = CalcGamma( fBeta );
+		fLifetime = fCoMLifetime / ( fGamma * ( 1.0 + fBeta ) );
+	    }
+
+	    inline void SetBeta( const double bet ) {
+		// TODO: exception for beta >= 1
+		fBeta = bet;
+		fGamma = CalcGamma( bet );
+		fE = fGamma * fMass;
+		double mom3 = std::sqrt( fE*fE - fMass*fMass );
+		double oldmom = GetMomentum( );
+		if( oldmom == 0.0 ) oldmom = 1.0;
+		
+		fPx *= mom3 / oldmom; fPy *= mom3 / oldmom; fPz *= mom3 / oldmom;
+		fLifetime = fCoMLifetime / ( fGamma * ( 1.0 + bet ) );
+	    }
+
+	    inline void SetMomentumAngles( double theta, double phi ) {
+		/// does not change magnitude
+		// bring angles into [0,\pi]*[0,2\pi) 
+		if( std::abs( theta ) > gc::kPi ) {
+		    const int nabs = std::floor( std::abs( theta ) / gc::kPi );
+		    theta += ( theta < 0 ) ? nabs * gc::kPi : -nabs * gc::kPi; }
+		if( std::abs( phi ) > 2.0 * gc::kPi ) {
+		    const int nabs = std::floor( std::abs( phi ) / ( 2.0 * gc::kPi ) );
+		    phi += ( phi < 0 ) ? nabs * 2.0 * gc::kPi : -nabs * 2.0 * gc::kPi; }
+		phi += ( phi < 0 ) ? 2.0 * gc::kPi : 0.0;
+
+		if( theta < 0 ){
+		    double ap = ( phi < gc::kPi ) ? gc::kPi : -gc::kPi;
+		    theta *= -1.0; phi += ap; 
+		}
+
+		const double Pmag = GetMomentum( );
+		fPx = Pmag * std::sin( theta ) * std::cos( phi );
+		fPy = Pmag * std::sin( theta ) * std::sin( phi );
+		fPz = Pmag * std::cos( theta );
+	    }
+
+	    inline void SetMomentumDirection( double ux, double uy, double uz ) {
+		/// does not change magnitude
+		// TODO polish the null exception
+		if( ux == 0.0 && uy == 0.0 && uz == 0.0 ){
+		    LOG( "SimpleHNL", pERROR ) << 
+		      "genie::HNL::SimpleHNL::SetMomentumDirection:: " <<
+		      "Zero vector entered. Exiting."; exit(3); }
+		const double Pmag = GetMomentum( );
+		const double umag = std::sqrt( ( ux*ux + uy*uy + uz*uz ) );
+		const double invu = 1.0 / umag;
+		ux *= invu; uy *= invu; uz *= invu;
+		fPx = Pmag * ux; fPy = Pmag * uy; fPz = Pmag * uz;
+	    }
+
+	    inline void Set4Momentum( const std::vector< double > fourP ){
+		SetEnergy( fourP.at(0) ); // also takes care of mag P
+		SetMomentumDirection( fourP.at(1), fourP.at(2), fourP.at(3) ); }
+
+	    inline void SetPolMag( const double pm ){
+		// TODO polish this exception
+		if( pm < -1.0 || pm > 1.0 ){
+		    LOG( "SimpleHNL", pERROR ) << 
+		      "genie::HNL::SimpleHNL::SetPolMag:: " <<
+		      "Pol.vec. magnitude must be in [-1,1]. Exiting."; exit(3); }
+		fPol = pm; }
+
+	    inline void SetPolarisationDirection( const double plx,
+						  const double ply, const double plz ){
+		if( plx == 0.0 && ply == 0.0 && plz == 0.0 ){
+		    LOG( "SimpleHNL", pERROR ) << 
+		      "genie::HNL::SimpleHNL::SetPolarisationDirection:: " <<
+		      "Zero vector entered. Exiting."; exit(1); }
+		const double PM = std::sqrt( plx*plx + ply*ply * plz*plz );
+		fPolUx = plx / PM; fPolUy = ply / PM; fPolUz = plz / PM;
+	        fPolDir = new std::vector< double >( );
+		fPolDir->emplace_back( fPolUx ); fPolDir->emplace_back( fPolUy );
+		fPolDir->emplace_back( fPolUz ); }
+
+	    inline void SetProdVtx( const std::vector< double > fourV ){
+		fT0 = fourV.at(0); fX0 = fourV.at(1);
+		fY0 = fourV.at(2); fZ0 = fourV.at(3); }
+
+	    inline void SetDecayVtx( const std::vector< double > fourV ){
+		fT = fourV.at(0); fX = fourV.at(1);
+		fY = fourV.at(2); fZ = fourV.at(3); }
+
+	    inline void SetInterestingChannels(
+		const std::map< ghe::HNLDecay_t, double > gammaMap ){
+		fInterestingChannels = gammaMap; }
+
+	    inline void SetDecayMode( const ghe::HNLDecay_t decayMode ){
+		fDecayMode = decayMode; }
+
+	    inline void SetParentPDG( const int parPDG ){
+		fParentPDG = parPDG; }
+
+	    inline void SetPDG( const int PDG ){
+		fPDG = PDG; }
+
+	    inline void SetHType( const ghe::nutype_t HType ){
+		fHType = HType; }
+	    
+	protected:
+	    // default c'tor values
+	    int defPDG = ghd::HNLDefaultPDG; 
+	    int defParPDG = ghd::HNLDefaultParPDG;
+	    double defMass  = ghd::HNLDefaultMass;
+	    double defUe42  = ghd::HNLDefaultECoup;
+	    double defUmu42 = ghd::HNLDefaultMuCoup;
+	    double defUt42  = ghd::HNLDefaultTauCoup;
+
+	    // basic calculators
+	    inline const double CalcBeta( const double E, const double P3 ) {
+		return P3 / E; }
+	    
+	    inline const double CalcGamma( const double bet ) {
+		return std::sqrt( 1.0 / ( 1.0 - bet*bet ) ); }
+
+	    inline const double CalcLifetime( const double bet, const double gam ) {
+		return fCoMLifetime / ( gam * ( 1.0 + bet ) ); } // rest-to-lab transf
+
+	private:
+
+	    std::string      fName;
+	    int              fIndex;
+	    int              fPDG;
+	    int              fParentPDG;
+	    double     fMass;
+	    double     fUe42, fUmu42, fUt42;
+	    bool       fIsMajorana;
+	    std::map< ghe::HNLDecay_t, double > fValidChannels;
+	    double     fCoMLifetime;
+
+	    ghe::nutype_t    fHType;
+	    
+	    double           fDecayThrow;  // determines where decay happens
+	    double           fSelectThrow; // determines what channel to decay to
+	    ghe::HNLDecay_t  fDecayMode;
+	    
+	    std::map< ghe::HNLDecay_t, double > fInterestingChannels; // owned by this
+	    
+	    double                  fBeta, fGamma;
+	    double                  fLifetime;
+	    double                  fT, fX, fY, fZ; // LAB, decay
+	    double                  fT0, fX0, fY0, fZ0; // LAB, origin
+	    double                  fE, fPx, fPy, fPz; // LAB, momentum
+	    double                  fPol; // polarisation magnitude
+	    double                  fPolUx, fPolUy, fPolUz;
+	    std::vector< double > * fPolDir; // polarisation direction
+	    
+	}; // class SimpleHNL
+
+    } // namespace HNL
+
+} // namespace genie
+
+#endif // #ifndef JSIMPLEHNL_H
