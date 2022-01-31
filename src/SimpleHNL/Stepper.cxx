@@ -6,8 +6,10 @@
 
 #include "Stepper.h"
 
+using namespace ::genie::HNL::Selector;
+
 // empty the vector of counters
-void emptyCounters( ){
+void ::genie::HNL::Selector::emptyCounters( ){
     while( fCounterMap.size() > 0 ){ fCounterMap.erase( fCounterMap.begin() ); }
 }
 
@@ -61,14 +63,16 @@ void ghs::PropagateAndSelectChannel( gh::SimpleHNL sh ){
 
     // TODO: exception for empty map!
     const int vSize = ValidMap.size();
-    if( vSize == 0 ){ std::cerr << "genie::HNL::Selector::PropagateAndSelectChannel:: " <<
-	    "\nNo valid channels!! This HNL cannot decay, which is bogus." <<
-	    "\nExiting." << std::endl; exit(1); }
+    if( vSize == 0 ){ LOG( "SimpleHNL", pERROR ) << 
+	  "genie::HNL::Selector::PropagateAndSelectChannel:: " <<
+	  "\nNo valid channels!! This HNL cannot decay, which is bogus." <<
+	  "\nExiting."; exit( 3 ); }
     
     const int iSize = InterestingMap.size( );
-    if( iSize == 0 ){ std::cerr << "genie::HNL::Selector::PropagateAndSelectChannel::" <<
-	    "\nNo interesting channels!! This HNL is invisible." <<
-	    "\nExiting." << std::endl; exit(1); }
+    if( iSize == 0 ){ LOG( "SimpleHNL", pERROR ) << 
+	  "genie::HNL::Selector::PropagateAndSelectChannel::" <<
+	  "\nNo interesting channels!! This HNL is invisible." <<
+	  "\nExiting."; exit( 3 ); }
     
     // ensure vector of counters is empty, then fill
     emptyCounters( );

@@ -15,15 +15,19 @@
 
 #include "DecayKinematics.h"
 
-using namespace genie::HNL::decayKinematics;
+//using namespace genie::HNL::decayKinematics;
 
-void ghdk::TwoBodyEnergies( const double mN, const double mh, const double ml,
+void genie::HNL::decayKinematics::initRandom( ){
+    fRngD = new TRandom3(0); fIsRngInitD = true; 
+}
+
+void genie::HNL::decayKinematics::TwoBodyEnergies( const double mN, const double mh, const double ml,
 			    double &Eh, double &El ){
     Eh = ( mN*mN + mh*mh - ml*ml ) / ( 2.0 * mN );
     El = ( mN*mN - mh*mh + ml*ml ) / ( 2.0 * mN );
 }
 
-void ghdk::TwoBodyAngle( genie::HNL::SimpleHNL sh, const double mh, const double ml,
+void genie::HNL::decayKinematics::TwoBodyAngle( genie::HNL::SimpleHNL sh, const double mh, const double ml,
 			 double &thetaPol ){
     if( mh == gc::kPionMass && ( ml == gc::kElectronMass || ml == gc::kMuonMass ) ){
 	// construct differential decay width. Get pol info from sh
@@ -57,7 +61,7 @@ void ghdk::TwoBodyAngle( genie::HNL::SimpleHNL sh, const double mh, const double
 }
 
 // returns full kinematic information about both products in lab frame
-void ghdk::TwoBodyKinematics( genie::HNL::SimpleHNL sh, const double mh, const double ml,
+void genie::HNL::decayKinematics::TwoBodyKinematics( genie::HNL::SimpleHNL sh, const double mh, const double ml,
 			      double &Eh, double &El,
 			      double &slx, double &sly, double &slz,
 			      double &shx, double &shy, double &shz ){
@@ -66,9 +70,9 @@ void ghdk::TwoBodyKinematics( genie::HNL::SimpleHNL sh, const double mh, const d
 
     double thetaPolEll = 0.0, phiPolEll = 0.0; // wrt polarisation axis
     TwoBodyAngle( sh, mh, ml, thetaPolEll );
-    if( !fIsRngInit ){ initRandom( ); } // assume cylidrical symmetry for phi
+    if( !fIsRngInitD ){ initRandom( ); } // assume cylidrical symmetry for phi
     const double phiLow = 0.0, phiHigh = 2.0 * gc::kPi;
-    phiPolEll = fRng->Uniform( phiLow, phiHigh );
+    phiPolEll = fRngD->Uniform( phiLow, phiHigh );
 
     // Cartesian coordinates on unit sphere, wrt polarisation axis
     const double pax = std::sin( thetaPolEll ) * std::cos( phiPolEll );
@@ -98,7 +102,7 @@ void ghdk::TwoBodyKinematics( genie::HNL::SimpleHNL sh, const double mh, const d
 }
 
 // define characteristic rest frame axis
-const TVector3* ghdk::RestFrameAxis( genie::HNL::SimpleHNL sh ){
+const TVector3* genie::HNL::decayKinematics::RestFrameAxis( genie::HNL::SimpleHNL sh ){
     /* We make a choice of axis for reference in rest frame.
        I choose this to be separation vector: decay vtx to detector centre.
 
@@ -120,7 +124,7 @@ const TVector3* ghdk::RestFrameAxis( genie::HNL::SimpleHNL sh ){
 }
 
 // translate TLorentzVector between rest <--> lab frames
-TLorentzVector* ghdk::RestToLabFrame( genie::HNL::SimpleHNL sh, TLorentzVector* rest4V ){
+TLorentzVector* genie::HNL::decayKinematics::RestToLabFrame( genie::HNL::SimpleHNL sh, TLorentzVector* rest4V ){
     // first, HNL betaVec in lab frame
     const std::vector< double > betaVec = sh.GetBetaVec( );
     const TVector3* betaTVec = new TVector3( -betaVec.at(0), -betaVec.at(1), -betaVec.at(2) ); // rest --> lab boosts by -beta
@@ -130,7 +134,7 @@ TLorentzVector* ghdk::RestToLabFrame( genie::HNL::SimpleHNL sh, TLorentzVector* 
     return lab4V;
 }
 
-TLorentzVector* ghdk::LabToRestFrame( genie::HNL::SimpleHNL sh, TLorentzVector* lab4V ){
+TLorentzVector* genie::HNL::decayKinematics::LabToRestFrame( genie::HNL::SimpleHNL sh, TLorentzVector* lab4V ){
     // first, HNL betaVec in lab frame
     const std::vector< double > betaVec = sh.GetBetaVec( );
     const TVector3* betaTVec = new TVector3( betaVec.at(0), betaVec.at(1), betaVec.at(2) );     // lab --> rest boosts by +beta
@@ -140,7 +144,7 @@ TLorentzVector* ghdk::LabToRestFrame( genie::HNL::SimpleHNL sh, TLorentzVector* 
     return rest4V;
 }
 
-const double ghdk::ExtractVarFromDifferentialGamma( const std::string name, const char * formChar,
+const double genie::HNL::decayKinematics::ExtractVarFromDifferentialGamma( const std::string name, const char * formChar,
 					      const double x1, const double x2,
 					      const double params[],
 					      const int nSteps ){
@@ -153,8 +157,8 @@ const double ghdk::ExtractVarFromDifferentialGamma( const std::string name, cons
     // we have dG/dv ==> 1/G dG/dv is a pdf on v-space
     const double varInt = varTF1->Integral( x1, x2 );
 
-    if( !fIsRngInit ) initRandom( );
-    const double ranthrow = fRng->Uniform( );
+    if( !fIsRngInitD ) initRandom( );
+    const double ranthrow = fRngD->Uniform( );
 
     // return root of ( \int_{x_{1}}^{x} dv 1/G dG/dv - ranthrow )
     // G = \int_{x_{1}}^{x_{2}} dv dG/dv

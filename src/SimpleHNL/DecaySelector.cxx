@@ -9,75 +9,77 @@
 
 #include "DecaySelector.h"
 
+//using namespace ::genie::HNL::Selector;
+
 // Takes parameter space, outputs all available channels + widths
-std::map< ghe::HNLDecay_t, double > ghs::GetValidChannelWidths( const double M, const double Ue42, const double Umu42, const double Ut42, const bool IsMajorana = false ){
+std::map< ghe::HNLDecay_t, double > genie::HNL::Selector::GetValidChannelWidths( const double M, const double Ue42, const double Umu42, const double Ut42, const bool IsMajorana ){
 
     std::map< ghe::HNLDecay_t, double > allChannels;
 
     // invisible decay is always possible
-    double GINV = ghs::DWidth_Invisible( M, Ue42, Umu42, Ut42 );
-    allChannels.insert( std::pair< ghe::HNLDecay_t, double >( kNuNuNu, GINV ) );
+    double GINV = genie::HNL::Selector::DWidth_Invisible( M, Ue42, Umu42, Ut42 );
+    allChannels.insert( std::pair< ghe::HNLDecay_t, double >( ghe::kNuNuNu, GINV ) );
 
     // nu-e-e is next lightest
     if( M < 2.0 * gc::kElectronMass ) return allChannels;
 
-    double GNEE = ghs::DWidth_SameLepton( M, Ue42, Umu42, Ut42, gc::kElectronMass, false );
-    allChannels.insert( std::pair< ghe::HNLDecay_t, double >( kNuEE, GNEE ) );
+    double GNEE = genie::HNL::Selector::DWidth_SameLepton( M, Ue42, Umu42, Ut42, gc::kElectronMass, false );
+    allChannels.insert( std::pair< ghe::HNLDecay_t, double >( ghe::kNuEE, GNEE ) );
 
     // nu-e-mu is next lightest
     if( M < gc::kElectronMass + gc::kMuonMass ) return allChannels;
 
-    double GNEM = ghs::DWidth_DiffLepton( M, Ue42, Umu42, IsMajorana ); 
-    allChannels.insert( std::pair< ghe::HNLDecay_t, double >( kNuMuE, GNEM ) );
+    double GNEM = genie::HNL::Selector::DWidth_DiffLepton( M, Ue42, Umu42, IsMajorana ); 
+    allChannels.insert( std::pair< ghe::HNLDecay_t, double >( ghe::kNuMuE, GNEM ) );
 
     // pi0-nu is next lightest
     if( M < gc::kPi0Mass ) return allChannels;
 
-    double GP0N = ghs::DWidth_PiZeroAndNu( M, Ue42, Umu42, Ut42 );
-    allChannels.insert( std::pair< ghe::HNLDecay_t, double >( kpi0Nu, GP0N ) );
+    double GP0N = genie::HNL::Selector::DWidth_PiZeroAndNu( M, Ue42, Umu42, Ut42 );
+    allChannels.insert( std::pair< ghe::HNLDecay_t, double >( ghe::kPi0Nu, GP0N ) );
 
     // pi-e is next lightest
     if( M < gc::kPionMass + gc::kElectronMass ) return allChannels;
 
-    double GPIE = ghs::DWidth_PiAndLepton( M, Ue42, gc::kElectronMass );
-    allChannels.insert( std::pair< ghe::HNLDecay_t, double >( kPiE, GPIE) );
+    double GPIE = genie::HNL::Selector::DWidth_PiAndLepton( M, Ue42, gc::kElectronMass );
+    allChannels.insert( std::pair< ghe::HNLDecay_t, double >( ghe::kPiE, GPIE) );
 
     // nu-mu-mu is next lightest
     if( M < 2.0 * gc::kMuonMass ) return allChannels;
 
-    double GNMM = ghs::DWidth_SameLepton( M, Ue42, Umu42, Ut42, gc::kMuonMass, false );
-    allChannels.insert( std::pair< ghe::HNLDecay_t, double >( kNuMuMu, GNMM ) );
+    double GNMM = genie::HNL::Selector::DWidth_SameLepton( M, Ue42, Umu42, Ut42, gc::kMuonMass, false );
+    allChannels.insert( std::pair< ghe::HNLDecay_t, double >( ghe::kNuMuMu, GNMM ) );
 
     // pi-mu is next lightest
     if( M < gc::kPionMass + gc::kMuonMass ) return allChannels;
 
-    double GPIM = ghs::DWidth_PiAndLepton( M, Umu42, gc::kMuonMass );
-    allChannels.insert( std::pair< ghe::HNLDecay_t, double >( kPiMu, GPIM ) );
+    double GPIM = genie::HNL::Selector::DWidth_PiAndLepton( M, Umu42, gc::kMuonMass );
+    allChannels.insert( std::pair< ghe::HNLDecay_t, double >( ghe::kPiMu, GPIM ) );
 
     // pi0-pi0-nu is next lightest
     if( M < 2.0 * gc::kPi0Mass ) return allChannels;
 
-    double GP02 = ghs::DWidth_Pi0Pi0Nu( args ); //RETHERE
-    allChannels.insert( std::pair< ghe::HNLDecay_t, double >( kPiPi0Nu, GP02 ) );
+    double GP02 = genie::HNL::Selector::DWidth_Pi0Pi0Nu( 1.0 ); //RETHERE: GOTTA IMPLEMENT
+    allChannels.insert( std::pair< ghe::HNLDecay_t, double >( ghe::kPi0Pi0Nu, GP02 ) );
 
     // pi-pi0-e is next lightest
     if( M < gc::kPionMass + gc::kPi0Mass + gc::kElectronMass ) return allChannels;
 
-    double GP0E = ghs::DWidth_PiPi0Ell( M, gc::kElectronMass, Ue42, Umu42, Ut42, true );
-    allChannels.insert( std::pair< ghe::HNLDecay_t, double >( kPiPi0E, GP0E ) );
+    double GP0E = genie::HNL::Selector::DWidth_PiPi0Ell( M, gc::kElectronMass, Ue42, Umu42, Ut42, true );
+    allChannels.insert( std::pair< ghe::HNLDecay_t, double >( ghe::kPiPi0E, GP0E ) );
 
     // pi-pi0-mu is next lightest
     if( M < gc::kPionMass + gc::kPi0Mass + gc::kMuonMass ) return allChannels;
 
-    double GP0M = ghs::DWidth_PiP0Ell( M, gc::kMuonMass, Ue42, Umu42, Ut42, false );
-    allChannels.insert( std::pair< ghe::HNLDecay_t, double >( kPiPi0Mu, GP0M ) );
+    double GP0M = genie::HNL::Selector::DWidth_PiPi0Ell( M, gc::kMuonMass, Ue42, Umu42, Ut42, false );
+    allChannels.insert( std::pair< ghe::HNLDecay_t, double >( ghe::kPiPi0Mu, GP0M ) );
 
     //all done! Return
     return allChannels;
 }
 
 // Calculates the *total* decay width from all the valid channels
-double ghs::GetTotalDecayWidth( std::map< ghe::HNLDecay_t, double > gammaMap ) {
+double genie::HNL::Selector::GetTotalDecayWidth( std::map< ghe::HNLDecay_t, double > gammaMap ) {
     
     double totGamma = 0.0;
 
@@ -86,28 +88,28 @@ double ghs::GetTotalDecayWidth( std::map< ghe::HNLDecay_t, double > gammaMap ) {
 }
 
 // Returns lifetime of particle with mass and couplings
-const double ghs::CalcCoMLifetime( const double M, const double Ue42, const double Umu42, const double Ut42, const bool IsMajorana = false ){
+double genie::HNL::Selector::CalcCoMLifetime( const double M, const double Ue42, const double Umu42, const double Ut42, const bool IsMajorana ){
 
-    std::map< ghe::HNLDecay_t, double > allChannels = ghs::GetValidChannelWidths( M, Ue42, Umu42, Ut42, IsMajorana );
-    double totGamma = ghs::GetTotalDecayWidth( allChannels );
+    std::map< ghe::HNLDecay_t, double > allChannels = genie::HNL::Selector::GetValidChannelWidths( M, Ue42, Umu42, Ut42, IsMajorana );
+    double totGamma = genie::HNL::Selector::GetTotalDecayWidth( allChannels );
     return 1.0 / totGamma;
 }
 
 // let's pick the interesting channels
-std::map< ghe::HNLDecay_t, double > ghs::SetInterestingChannels( std::vector< ghe::HNLDecay_t > intChannels, std::map< ghe::HNLDecay_t, double > gammaMap ){
+std::map< ghe::HNLDecay_t, double > genie::HNL::Selector::SetInterestingChannels( std::vector< ghe::HNLDecay_t > intChannels, std::map< ghe::HNLDecay_t, double > gammaMap ){
 
     std::map< ghe::HNLDecay_t, double > interestingMap;
 
     for( std::vector< ghe::HNLDecay_t >::iterator it = intChannels.begin(); it != intChannels.end(); ++it ){
 	ghe::HNLDecay_t decType = (*it);
-	double gamma = gammaMmap.find( (*it) )->second;
+	double gamma = gammaMap.find( (*it) )->second;
 	interestingMap.insert( std::pair< ghe::HNLDecay_t, double >( decType, gamma ) );
     }
     return interestingMap;
 } // this is now a reduced map with only the channels we want to decay HNL to
 
 // and transform decay widths to branching ratios (probabilities)
-std::map< ghe::HNLDecay_t, double > ghs::GetProbabilities( std::map< ghe::HNLDecay_t, double >  gammaMap ){
+std::map< ghe::HNLDecay_t, double > genie::HNL::Selector::GetProbabilities( std::map< ghe::HNLDecay_t, double >  gammaMap ){
 
     double totGamma = GetTotalDecayWidth( gammaMap );
     std::map< ghe::HNLDecay_t, double > Pmap;
@@ -120,7 +122,7 @@ std::map< ghe::HNLDecay_t, double > ghs::GetProbabilities( std::map< ghe::HNLDec
 }
 
 // choose a particular channel to decay to
-ghe::HNLDecay_t ghs::SelectChannelInclusive( std::map< ghe::HNLDecay_t, double > Pmap, double ranThrow ){
+ghe::HNLDecay_t genie::HNL::Selector::SelectChannelInclusive( std::map< ghe::HNLDecay_t, double > Pmap, double ranThrow ){
 
     // in inclusive method, decay is factorised in three parts:
     // a) Decay vertex placement
@@ -130,7 +132,7 @@ ghe::HNLDecay_t ghs::SelectChannelInclusive( std::map< ghe::HNLDecay_t, double >
 
     // first get P(all interesting channels)
     double PInt = 0.0, all_before = 0.0;
-    ghe::HNLDecay_t selectedChannel = kInit;
+    ghe::HNLDecay_t selectedChannel = ghe::kInit;
     
     for( std::map< ghe::HNLDecay_t, double >::iterator it = Pmap.begin(); it != Pmap.end(); ++it ){ PInt += (*it).second; }
 

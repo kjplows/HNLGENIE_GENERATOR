@@ -27,16 +27,25 @@
 #ifndef JDECAYSELECTOR_H
 #define JDECAYSELECTOR_H
 
-#include "TRandom3.h"
+// -- C++ includes
 #include <map>
+
+// -- ROOT includes
+#include "TRandom3.h"
+
+// -- GENIE includes
+#include "Conventions/Constants.h"
+
+#include "BRFunctions.h"
+#include "Enums.h"
+
+namespace ghe = ::genie::HNL::enums;
+namespace gc  = ::genie::constants; 
 
 namespace genie {
 namespace HNL {
 
     namespace Selector {
-
-	namespace ghe = ::genie::HNL::enums;
-	namespace gc  = ::genie::constants; 
 	
 	// valid channels with widths
 	std::map< ghe::HNLDecay_t, double > GetValidChannelWidths( const double M, const double Ue42, const double Umu42, const double Ut42, const bool IsMajorana = false );

@@ -81,6 +81,9 @@ namespace HNL {
 	static const double BR_C1 = 1./4. * ( 1. - 4. * s2w + 8. * s2w * s2w );
 	static const double BR_C2 = 1./2. * ( -s2w + 2. * s2w * s2w );
 
+	// declaration of PiPi0EllForm as extern?
+	extern double PiPi0EllForm( double *x, double *par );
+
 	// kinematic functions
 
 	// placeholder
@@ -157,31 +160,6 @@ namespace HNL {
 	    return preFac * kinPart * coupPart;
 	}
 
-	// formula for N --> pi pi0 ell decay rate
-	double PiPi0EllForm( double *x, double *par ){
-	    double MN = par[0];
-	    double MMu = par[1];
-	    double MPi = par[2];
-	    double MPi0 = par[3];
-
-	    double Emu = x[0];
-	    double Epi = x[1];
-
-	    double ETerm =
-		std::sqrt( Emu*Emu - MMu*MMu ) *
-		std::sqrt( Epi*Epi - MPi*MPi ) *
-		std::sqrt( std::pow( ( MN - Emu - Epi ), 2.0 ) - MPi0*MPi0 ) / ( MN - Emu - Epi );
-
-	    double FracNum1 = MN*MN - 2.0*( MN-Emu-Epi )*MN + MPi0*MPi0;
-	    double FracNum2 = MN*MN - 2.0*Emu*MN + 2.0*MMu*MMu;
-	    double FracNum3 = MN*MN - MPi0*MPi0;
-	    double FracNum4 = MN*MN - 2.0*( MN-Emu-Epi )*MN + MPi0*MPi0 + MMu*MMu - MPi*MPi;
-	    double FracNum = FracNum1*FracNum2 - FracNum3*FracNum4;
-	    double FracDen = std::pow( MN*MN - 2.0*( MN - Emu - Epi ) * MN + MPi0*MPi0 , 2.0 );
-
-	    return ETerm * FracNum / FracDen;
-	}
-
 	// N --> pi^\pm + pi^0 + \ell_{\alpha}^\mp, \alpha = e or mu
 	inline double DWidth_PiPi0Ell( const double M, const double ml,
 				       const double Ue42, const double Umu42, const double Ut42,
@@ -255,6 +233,12 @@ namespace HNL {
 
 	    return intNow;
 	    
+	}
+
+	inline double DWidth_Pi0Pi0Nu( const double dummyArg ){
+	    // complete dummy, returns zero
+	    // once I have the formula I will implement it
+	    return 0.0;
 	}
 
 	//============================================

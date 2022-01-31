@@ -32,7 +32,7 @@ using namespace genie::HNL::enums;
                     --ElectronOnly    --FHC_iso_mp50.root  --nuebar --(TH3D*)parent3P
  */
 
-std::string selectCoup( const double Ue42, const double Umu42, const double Ut42 ){
+std::string genie::HNL::FluxReader::selectCoup( const double Ue42, const double Umu42, const double Ut42 ){
     // I am not sensitive to the tau coupling so only Ue42, Umu42 matter
 
     std::string theCoups = std::string("Init");
@@ -51,7 +51,7 @@ std::string selectCoup( const double Ue42, const double Umu42, const double Ut42
     return theCoups;
 }
 
-int selectMass( const double mN ){
+int genie::HNL::FluxReader::selectMass( const double mN ){
     /// move mass to closest mass hypothesis
 
     const massHyp_t masses[] = {
@@ -85,9 +85,9 @@ int selectMass( const double mN ){
     
 }
 
-void selectFile( const std::string strconf,
-		      const double Ue42, const double Umu42, const double Ut42,
-		      const double mN ){
+void genie::HNL::FluxReader::selectFile( const std::string strconf,
+					 const double Ue42, const double Umu42, const double Ut42,
+					 const double mN ){
     std::string filePath = std::string( "" );
     filePath.append( strconf + "/" );
     filePath.append( selectCoup( Ue42, Umu42, Ut42 ) + "/" );
@@ -96,18 +96,19 @@ void selectFile( const std::string strconf,
     fPath = filePath;
 }
 
-void selectParent( const int parPDG ){
+void genie::HNL::FluxReader::selectParent( const int parPDG ){
     fParent = kNoPar; fParPDG = parPDG;
     
     if( std::abs( parPDG ) == ::genie::kPdgPiP ) fParent = kPion;
     else if( std::abs( parPDG ) == ::genie::kPdgKP ) fParent = kKaon;
     else if( std::abs( parPDG ) == ::genie::kPdgMuon ) fParent = kMuon;
-    else if( std::abs( parPDG ) == kPdgK0L ) fParent = kNeuk;
-    else{ std::cerr << "genie::HNL::FluxReader::selectFile: Unknown parent with mass " <<
-	    mpar << std::endl; exit(3); }
+    else if( std::abs( parPDG ) == ::genie::kPdgK0L ) fParent = kNeuk;
+    else{ LOG( "SimpleHNL", pERROR ) << 
+	  "genie::HNL::FluxReader::selectFile: Unknown parent with PDG code " <<
+	  parPDG; exit( 3 ); }
 }
 
-void selectNuType( const int HType ){
+void genie::HNL::FluxReader::selectNuType( const int hType ){
     fNuType = kNone;
     if( hType == 1 ){ fNuType == kNumu; }
     else if( hType == 2 ){ fNuType == kNumubar; }
@@ -116,8 +117,8 @@ void selectNuType( const int HType ){
 }
 
 template< typename T >
-T * getFluxHist( std::string fin, std::string hName,
-		       parent_t par, nutype_t HType ){
+T * genie::HNL::FluxReader::getFluxHist( std::string fin, std::string hName,
+					 parent_t par, nutype_t HType ){
     // flux file contains 4 dirs: numu, numubar, nue, nuebar. Each has flux + helper hists
     TFile *f = TFile::Open( fin.c_str() );
 
@@ -154,7 +155,7 @@ T * getFluxHist( std::string fin, std::string hName,
     return histPtr;
 }
 
-double generatePolMag( const int lPDG, const int parPDG ){
+double genie::HNL::FluxReader::generatePolMag( const int lPDG, const int parPDG ){
     /* Assumes 2-body decay. 
        If parent is neuk then assume we have kaon polarisation
        If parent is muon then assume we have pion polarisation
@@ -186,9 +187,9 @@ double generatePolMag( const int lPDG, const int parPDG ){
     else{ std::cerr << "genie::HNL::FluxReader::generatePolMag: Unknown parent PDG = " <<
 	    parPDG << std::endl; exit(3); }
 
-    const double num = ( ml*ml - fmN*fmN ) *
+    double num = ( ml*ml - fmN*fmN ) *
 	std::sqrt( ghu::Kallen( mpar*mpar, fmN*fmN, ml*ml ) );
-    const double den = mpar*mpar * ( ml*ml + fmN*fmN ) -
+    double den = mpar*mpar * ( ml*ml + fmN*fmN ) -
 	std::pow( ml*ml - fmN*fmN , 2.0 );
 
     if( std::abs( num / den ) > 1.0 ){ std::cerr << "genie::HNL::FluxReader::" <<
@@ -199,7 +200,7 @@ double generatePolMag( const int lPDG, const int parPDG ){
     return num / den;
 }
 
-std::vector< double > * generatePolDir( const int parPDG, const int HType ){
+std::vector< double > * genie::HNL::FluxReader::generatePolDir( const int parPDG, const int HType ){
     // coproduced lepton is always mu/e if HType == nu{mu/e}(bar)
     // and always e if parPDG == mu
 
@@ -207,7 +208,7 @@ std::vector< double > * generatePolDir( const int parPDG, const int HType ){
     std::string polHistName = std::string("polHist");
     selectParent( parPDG );
     selectNuType( HType );
-    TH3D * polHist = getFluxHist( fPath, polHistName, fParent, fNuType );
+    TH3D * polHist = getFluxHist< TH3D >( fPath, polHistName, fParent, fNuType );
 
     // now get random.
     // polHist will be unit vector components, i.e. on the unit sphere
@@ -225,12 +226,12 @@ std::vector< double > * generatePolDir( const int parPDG, const int HType ){
 // double generateVtxT( const int parPDG, const int HType ){}
 // need to think about this more!
 
-std::vector< double > * generateVtx3X( const int parPDG, const int HType ){
+std::vector< double > * genie::HNL::FluxReader::generateVtx3X( const int parPDG, const int HType ){
     // first, select parent, nutype and load histo
     std::string vtxHistName = std::string("vtxHist");
     selectParent( parPDG );
     selectNuType( HType );
-    TH3D * vtxHist = getFluxHist( fPath, vtxHistName, fParent, fNuType );
+    TH3D * vtxHist = getFluxHist< TH3D >( fPath, vtxHistName, fParent, fNuType );
 
     // now get random.
     double ux = 0.0, uy = 0.0, uz = 0.0;
@@ -244,27 +245,26 @@ std::vector< double > * generateVtx3X( const int parPDG, const int HType ){
     return vtxDir;
 }
 
-double generateVtxE( const int parPDG, const int HType ){
+double genie::HNL::FluxReader::generateVtxE( const int parPDG, const int HType ){
     // first, select parent, nutype and load histo
     std::string eneHistName = std::string("eneHist");
     selectParent( parPDG );
     selectNuType( HType );
-    TH1F * eneHist = getFluxHist( fPath, eneHistName, fParent, fNuType );
+    TH1F * eneHist = getFluxHist< TH1F >( fPath, eneHistName, fParent, fNuType );
 
     // now get random.
-    double E = 0.0;
-    eneHist->GetRandom( E );
+    double E = eneHist->GetRandom( );
 
     return E;
 }
 
-std::vector< double > * generateVtx3P( const int parPDG, const int HType,
-					    const double inE = -1.0 ){
+std::vector< double > * genie::HNL::FluxReader::generateVtx3P( const int parPDG, const int HType,
+							       const double inE ){
     // first, select parent, nutype and load histo
     std::string momHistName = std::string("momHist");
     selectParent( parPDG );
     selectNuType( HType );
-    TH3D * momHist = getFluxHist( fPath, momHistName, fParent, fNuType );
+    TH3D * momHist = getFluxHist< TH3D >( fPath, momHistName, fParent, fNuType );
 
     // now get random.
     // momHist will be unit vector components, i.e. on the unit sphere
@@ -273,7 +273,7 @@ std::vector< double > * generateVtx3P( const int parPDG, const int HType,
     momHist->GetRandom3( ux, uy, uz );
 
     const double E = ( inE > 0.0 ) ? inE : generateVtxE( parPDG, HType );
-    const double P = std::sqrt( E*E - mN*mN );
+    const double P = std::sqrt( E*E - fmN*fmN );
     ux *= P; uy *= P; uz *= P;
 
     std::vector< double > * momVec = new std::vector< double >( );
@@ -284,19 +284,19 @@ std::vector< double > * generateVtx3P( const int parPDG, const int HType,
     return momVec;
 }
 
-genie::HNL::SimpleHNL generateHNL( ){
+genie::HNL::SimpleHNL genie::HNL::FluxReader::generateHNL( ){
     return genie::HNL::SimpleHNL( "HNL", 0, 1914, ::genie::kPdgKP, fmN, fUe, fUm, fUt, false );
 }
 
-genie::HNL::SimpleHNL generateHNL( const int PDG, const int parPDG,
-				const double mN, const double Ue42,
-				const double Umu42, const double Ut42 ){
+genie::HNL::SimpleHNL genie::HNL::FluxReader::generateHNL( const int PDG, const int parPDG,
+							   const double mN, const double Ue42,
+							   const double Umu42, const double Ut42 ){
     return genie::HNL::SimpleHNL( "HNL", 0, PDG, parPDG, mN, Ue42, Umu42, Ut42, false );
 }
 
-void setFluxInfo( genie::HNL::SimpleHNL sh ){
+void genie::HNL::FluxReader::setFluxInfo( genie::HNL::SimpleHNL sh ){
     const int shPDG    = sh.GetPDG( ); fPDG = shPDG;
-    const int shParPDG = sh.GetParPDG( ); fParPDG = shParPDG;
+    const int shParPDG = sh.GetParentPDG( ); fParPDG = shParPDG;
 
     switch( shParPDG ){
 	case ::genie::kPdgPiP:  fParent = kPion; break;
@@ -340,5 +340,5 @@ void setFluxInfo( genie::HNL::SimpleHNL sh ){
     vtx4X->emplace_back( vtx3X->at(0) );
     vtx4X->emplace_back( vtx3X->at(1) );
     vtx4X->emplace_back( vtx3X->at(2) );
-    sh.SetProdVtx( vtx4X );
+    sh.SetProdVtx( (*vtx4X) );
 }

@@ -95,6 +95,7 @@ namespace HNL {
     namespace gh  = ::genie::HNL;
     namespace ghe = ::genie::HNL::enums;
     namespace ghf = ::genie::HNL::FluxReader;
+    namespace ghs = ::genie::HNL::Selector;
     namespace gut = ::genie::utils;
     namespace ghdk = ::genie::HNL::decayKinematics;
 

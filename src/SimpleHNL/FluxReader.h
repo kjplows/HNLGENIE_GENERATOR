@@ -30,9 +30,16 @@
 #ifndef JFLUXREADER_H
 #define JFLUXREADER_H
 
+// -- ROOT includes
+#include "TFile.h"
+#include "TH1.h"
+#include "TH2.h"
+#include "TH3.h"
+
 // -- GENIE includes
 
 #include "Conventions/Units.h"
+#include "Messenger/Messenger.h"
 
 #include "Enums.h"
 #include "KinUtils.h"

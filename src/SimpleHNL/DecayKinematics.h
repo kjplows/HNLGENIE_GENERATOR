@@ -118,10 +118,10 @@ namespace HNL {
 
 	const double kEND     = -1234.56789; // special number signalling param array end
 
-	extern TRandom3 * fRng;
-	extern bool fIsRngInit;
+	extern TRandom3 * fRngD;
+	extern bool fIsRngInitD;
 
-	inline void initRandom( ) { fRng = new TRandom3(0); fIsRngInit = true; }
+	void initRandom( );
 	
     } //namespace decayKinematics
 

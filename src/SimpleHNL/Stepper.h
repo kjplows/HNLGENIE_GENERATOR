@@ -31,9 +31,15 @@
 #include "Conventions/Units.h"
 //#include "HNLAuxiliary/Enums.h"    
 //#include "HNLAuxiliary/SimpleHNL.h"
+#include "Messenger/Messenger.h"
 
 #include "Enums.h"    
 #include "SimpleHNL.h"
+
+namespace gu  = ::genie::units;
+namespace gc  = ::genie::constants;
+namespace gh  = ::genie::HNL;
+namespace ghe = ::genie::HNL::enums;
 
 namespace genie {
 namespace HNL {
@@ -41,11 +47,6 @@ namespace HNL {
     class SimpleHNL;
 
     namespace Selector {
-
-	namespace gu  = ::genie::units;
-	namespace gc  = ::genie::constants;
-	namespace gh  = ::genie::HNL;
-	namespace ghe = ::genie::HNL::enums;
 
 	extern TRandom3 * fRng;
 	extern bool fIsRngInit;
