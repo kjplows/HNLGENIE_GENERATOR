@@ -54,6 +54,9 @@ fi
 if test "$GOPT_ENABLE_NEUTRON_OSC" = "YES"; then
   phys_libs="$phys_libs -lGNeutronOsc"
 fi
+if test "$GOPT_ENABLE_SIMPLE_HNL" = "YES"; then
+  phys_libs="$phys_libs -lGSimpleHNL"
+fi 
 
 # Assemble the final libs variable
 libs="-L$libdir $util_libs $phys_libs "

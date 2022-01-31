@@ -14,7 +14,7 @@ include $(GENIE)/src/make/Make.include
 
 PACKAGE           = SimpleHNL
 DICTIONARY        = _ROOT_DICT_SimpleHNL
-LIBNAME           = libGDecay
+LIBNAME           = libGSimpleHNL
 
 all     : rootcint lib lib-link
 install : install-inc install-lib
