@@ -94,15 +94,6 @@
 namespace genie {
 namespace HNL {
 
-    namespace gp  = ::genie::pdg;
-    namespace gc  = ::genie::constants;
-    namespace ghd = ::genie::HNL::defaults;
-    namespace gh  = ::genie::HNL;
-    namespace ghe = ::genie::HNL::enums;
-    namespace ghf = ::genie::HNL::FluxReader;
-    namespace gut = ::genie::utils;
-    namespace ghdk = ::genie::HNL::decayKinematics;
-
     class HNLDecayer : public DecayModelI {
 
     public:
@@ -112,7 +103,7 @@ namespace HNL {
 
 	bool           IsHandled      (int pdgc)                       const;
 	void           Initialize     (void)                           const;
-	void           InitializeParticle ( gh::SimpleHNL sh )         const; // seen or not? idk
+	void           InitializeParticle ( genie::HNL::SimpleHNL sh )         const; // seen or not? idk
 	TClonesArray * Decay          (const DecayerInputs_t & inp)    const;
 	double         Weight         (void)                           const;
 	void           InhibitDecay   (int pdgc, TDecayChannel * dc=0) const;
@@ -140,7 +131,7 @@ namespace HNL {
 	mutable TGenPhaseSpace fPhaseSpaceGenerator;
 	mutable double fWeight;
 
-	mutable gh::SimpleHNL fSh = gh::SimpleHNL( "dummy", -1 ); 
+	mutable genie::HNL::SimpleHNL fSh = genie::HNL::SimpleHNL( "dummy", -1 ); 
 	// construct an HNL object that knows its mass + couplings
 	// This can also return its own decay channels + widths + do selection
 
@@ -149,12 +140,12 @@ namespace HNL {
 	mutable bool fIsIsotropicPol; // non-weighted input seems to give isotropic polVec ==> no angular dependence of products in HNL rest frame!
 	mutable bool fIsExclusive; // inclusive v exclusive decay mode
 	
-	mutable double fMass; const double fDefMass = ghd::HNLDefaultMass;
-	mutable double fECoup; const double fDefECoup = ghd::HNLDefaultECoup;
-	mutable double fMuCoup; const double fDefMuCoup = ghd::HNLDefaultMuCoup; // assuming pseudo-unitarity!
-	mutable double fTauCoup; const double fDefTauCoup = ghd::HNLDefaultTauCoup;
+	mutable double fMass; const double fDefMass = genie::HNL::defaults::HNLDefaultMass;
+	mutable double fECoup; const double fDefECoup = genie::HNL::defaults::HNLDefaultECoup;
+	mutable double fMuCoup; const double fDefMuCoup = genie::HNL::defaults::HNLDefaultMuCoup; // assuming pseudo-unitarity!
+	mutable double fTauCoup; const double fDefTauCoup = genie::HNL::defaults::HNLDefaultTauCoup;
 	mutable std::string fCoupConf; 
-	mutable ghe::coupIdx_t fCoupIdx; // which coupling configuration?
+	mutable genie::HNL::enums::coupIdx_t fCoupIdx; // which coupling configuration?
 
 	mutable TRandom3 *fRng;
 

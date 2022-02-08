@@ -13,19 +13,19 @@ using namespace genie;
 using namespace genie::HNL;
 
 /// c'tors
-HNLDecayer::HNLDecayer( ) :
+genie::HNL::HNLDecayer::HNLDecayer( ) :
     DecayModelI( "genie::HNLDecayer" ) { }
 
-HNLDecayer::HNLDecayer( std::string config ) :
+genie::HNL::HNLDecayer::HNLDecayer( std::string config ) :
     DecayModelI( "genie::HNLDecayer", config ) { }
 
-HNLDecayer::~HNLDecayer( ) { }
+genie::HNL::HNLDecayer::~HNLDecayer( ) { }
 
 /// isHandled asks if this alg can decay this particle
-bool HNLDecayer::IsHandled( int pdgc ) const {
-    if( gp::IsGenericHNL( pdgc ) || gp::IsGenericHNLBar( pdgc ) ||
-	gp::IsMuHNL( pdgc ) || gp::IsMuHNLBar( pdgc ) ||
-	gp::IsEHNL( pdgc ) || gp::IsEHNLBar( pdgc ) ) { return true; }
+bool genie::HNL::HNLDecayer::IsHandled( int pdgc ) const {
+    if( genie::pdg::IsGenericHNL( pdgc ) || genie::pdg::IsGenericHNLBar( pdgc ) ||
+	genie::pdg::IsMuHNL( pdgc ) || genie::pdg::IsMuHNLBar( pdgc ) ||
+	genie::pdg::IsEHNL( pdgc ) || genie::pdg::IsEHNLBar( pdgc ) ) { return true; }
 
     LOG( "Decay", pINFO ) <<
 	"This algorithm can only decay HNL. Particle with code " << pdgc <<
@@ -35,7 +35,7 @@ bool HNLDecayer::IsHandled( int pdgc ) const {
 }
 
 /// construct the SimpleHNL object
-void HNLDecayer::Initialize( void ) const {
+void genie::HNL::HNLDecayer::Initialize( void ) const {
 
     //fCoupConf = std::string( "Placeholder" );
 
@@ -43,35 +43,35 @@ void HNLDecayer::Initialize( void ) const {
     if( fECoup == 0.0 ){
 	if( fMuCoup == 0.0 ){ LOG( "HNLDecayer", pERROR ) << "Both e and mu couplings are zero!";
 	    exit(3); }
-	else { fCoupConf = std::string( "MuonOnly" ); fCoupIdx = ghe::kMuonIdx; }
+	else { fCoupConf = std::string( "MuonOnly" ); fCoupIdx = genie::HNL::enums::kMuonIdx; }
     }
     else {
-	if( fMuCoup == 0.0 ){ fCoupConf =  std::string( "ElectronOnly" );fCoupIdx = ghe::kElectronIdx; }
-	else if( fMuCoup == fECoup ){ fCoupConf = std::string( "EqualCouplings" ); fCoupIdx = ghe::kEqualIdx; }
+	if( fMuCoup == 0.0 ){ fCoupConf =  std::string( "ElectronOnly" );fCoupIdx = genie::HNL::enums::kElectronIdx; }
+	else if( fMuCoup == fECoup ){ fCoupConf = std::string( "EqualCouplings" ); fCoupIdx = genie::HNL::enums::kEqualIdx; }
 	else{
 	    LOG( "HNLDecayer", pNOTICE ) << "Non-standard coupling configuration: |U_e4|^2 :" <<
 		" |U_mu4|^2 = " << fECoup/fMuCoup << " : 1";
-	    fCoupConf = std::string( "OtherCouplings" ); fCoupIdx = ghe::kOtherIdx; }
+	    fCoupConf = std::string( "OtherCouplings" ); fCoupIdx = genie::HNL::enums::kOtherIdx; }
     }
 }
 
 /// Every time this is called, a new instance of the HNL is created
 /// Is this ever going to be seen by GENIE??
-void HNLDecayer::InitializeParticle( gh::SimpleHNL sh ) const {
+void genie::HNL::HNLDecayer::InitializeParticle( genie::HNL::SimpleHNL sh ) const {
 
-    double shE = ghf::generateVtxE( sh.GetParentPDG( ), sh.GetHType( ) );
+    double shE = genie::HNL::FluxReader::generateVtxE( sh.GetParentPDG( ), sh.GetHType( ) );
     sh.SetEnergy( shE ); // lab frame!
 
-    std::vector< double > * sh3P = ghf::generateVtx3P( sh.GetParentPDG( ),
+    std::vector< double > * sh3P = genie::HNL::FluxReader::generateVtx3P( sh.GetParentPDG( ),
 						       sh.GetHType( ), shE );
     double sh3Px = sh3P->at( 0 ), sh3Py = sh3P->at( 1 ), sh3Pz = sh3P->at( 2 );
     sh.SetMomentumDirection( sh3Px, sh3Py, sh3Pz );
 
-    std::vector< double > * shX = ghf::generateVtx3X( sh.GetParentPDG( ),
+    std::vector< double > * shX = genie::HNL::FluxReader::generateVtx3X( sh.GetParentPDG( ),
 						      sh.GetHType( ) );
     // need to use these! For making the trajectory
     // double shXx = shX->at( 0 ), shXy = shX->at( 1 ), shXz = shX->at( 2 );
-    // double shT = ghf::generateVtxT( sh.GetParentPDG( ), sh.GetHType( ) );
+    // double shT = genie::HNL::FluxReader::generateVtxT( sh.GetParentPDG( ), sh.GetHType( ) );
     double shT = 0.0; //placeholder
     shX->insert( shX->begin( ), shT ); // make into vector of 4 elements
     sh.SetProdVtx( (*shX) );
@@ -79,21 +79,21 @@ void HNLDecayer::InitializeParticle( gh::SimpleHNL sh ) const {
     // set polarisation mag + dir
     int lPDG = 0;
     switch( sh.GetHType( ) ){
-	case ghe::kNone: 
+	case genie::HNL::enums::kNone: 
 	    LOG( "HNLDecay", pERROR ) <<
 	      "\n *** The SimpleHNL object with name & index = " <<
 	      sh.GetName( ) << ", " << sh.GetIndex( ) <<
 	      " has unspecified coupling-type `kNone`. Exiting.";
 	    exit( 3 ); break;
-	case ghe::kNumu: case ghe::kNumubar:
+	case genie::HNL::enums::kNumu: case genie::HNL::enums::kNumubar:
 	    lPDG = ( std::abs( sh.GetParentPDG( ) ) != ::genie::kPdgMuon ) ?
 		::genie::kPdgMuon : ::genie::kPdgElectron; break;
-	case ghe::kNue: case ghe::kNuebar:
+	case genie::HNL::enums::kNue: case genie::HNL::enums::kNuebar:
 	    lPDG = ::genie::kPdgElectron; break;
     }
-    double polMag = ghf::generatePolMag( sh.GetParentPDG( ), lPDG );
+    double polMag = genie::HNL::FluxReader::generatePolMag( sh.GetParentPDG( ), lPDG );
     sh.SetPolMag( polMag );
-    std::vector< double > *polDir = ghf::generatePolDir( sh.GetParentPDG( ), sh.GetHType( ) );
+    std::vector< double > *polDir = genie::HNL::FluxReader::generatePolDir( sh.GetParentPDG( ), sh.GetHType( ) );
     sh.SetPolarisationDirection( polDir->at(0), polDir->at(1), polDir->at(2) );
     
 }
@@ -101,7 +101,7 @@ void HNLDecayer::InitializeParticle( gh::SimpleHNL sh ) const {
 /// Then need to interface with UnstableParticleDecayer
 /// implement Decay( ) to ensure stuff gets written into the event record
 
-TClonesArray* HNLDecayer::Decay( const DecayerInputs_t & inp ) const {
+TClonesArray* genie::HNL::HNLDecayer::Decay( const DecayerInputs_t & inp ) const {
     if( ! this->IsHandled( inp.PdgCode ) ) return 0;
 
     //-- Find the particle in the PDG library & quit if it does not exist
@@ -116,7 +116,7 @@ TClonesArray* HNLDecayer::Decay( const DecayerInputs_t & inp ) const {
 
     LOG( "HNLDecay", pINFO ) <<
 	"Decaying a " << mother->GetName( ) <<
-	" with P4 = " << gut::print::P4AsString( inp.P4 );
+	" with P4 = " << genie::utils::print::P4AsString( inp.P4 );
 
     //reset previous weight
     fWeight = 1.0;
@@ -139,20 +139,20 @@ TClonesArray* HNLDecayer::Decay( const DecayerInputs_t & inp ) const {
     // we have all the valid channels, the CoM and lab lifetime
     
     // let's find out where this decays
-    ghs::PropagateTilDecay( fSh );
+    genie::HNL::Selector::PropagateTilDecay( fSh );
     
     // Let's pick pi \ell as the interesting thing, shall we?
 
-    std::vector< ghe::HNLDecay_t > * intChannels = new std::vector< ghe::HNLDecay_t >( ); // un-point!
-    ghe::HNLDecay_t piEll = ( fMuCoup == 0.0 ) ? ghe::kPiE : ghe::kPiMu;
+    std::vector< genie::HNL::enums::HNLDecay_t > * intChannels = new std::vector< genie::HNL::enums::HNLDecay_t >( ); // un-point!
+    genie::HNL::enums::HNLDecay_t piEll = ( fMuCoup == 0.0 ) ? genie::HNL::enums::kPiE : genie::HNL::enums::kPiMu;
     intChannels->emplace_back( piEll );
-    const std::map< ghe::HNLDecay_t, double > gammaMap = fSh.GetValidChannels( );
-    std::map< ghe::HNLDecay_t, double > intMap = ghs::SetInterestingChannels( (*intChannels), gammaMap );
+    const std::map< genie::HNL::enums::HNLDecay_t, double > gammaMap = fSh.GetValidChannels( );
+    std::map< genie::HNL::enums::HNLDecay_t, double > intMap = genie::HNL::Selector::SetInterestingChannels( (*intChannels), gammaMap );
     fSh.SetInterestingChannels( intMap );
 
     // transform intMap gammas to probabilities
     // in this case, we have P( N --> pi \ell ) = 1;
-    std::map< ghe::HNLDecay_t, double > PMap = ghs::GetProbabilities( intMap );
+    std::map< genie::HNL::enums::HNLDecay_t, double > PMap = genie::HNL::Selector::GetProbabilities( intMap );
 
     // do a random throw
     if( !fRng ) fRng = new TRandom3( );
@@ -162,20 +162,20 @@ TClonesArray* HNLDecayer::Decay( const DecayerInputs_t & inp ) const {
     /* if( exclusive ) return ... */
     
     // now select decay mode
-    ghe::HNLDecay_t selectedDecayChan = ghs::SelectChannelInclusive( PMap, ranThrow );
+    genie::HNL::enums::HNLDecay_t selectedDecayChan = genie::HNL::Selector::SelectChannelInclusive( PMap, ranThrow );
 
     const int nd = 2; // 2 daughters for now, RETHERE later
     
     TDecayChannel * ch;
     int daughterPDG[ nd ] = { };
     switch( selectedDecayChan ){
-	case ghe::kPiMu:
+	case genie::HNL::enums::kPiMu:
 	    daughterPDG[0] = ::genie::kPdgPiP;
 	    daughterPDG[1] = ::genie::kPdgMuon;
 	    ch = new TDecayChannel( 0, 0, 1.0, 2, daughterPDG ); // what does MatrixElementCode mean?
 	                                                         // also should BR = 1.0? I've chosen!
 	    break;
-	case ghe::kPiE:
+	case genie::HNL::enums::kPiE:
 	    daughterPDG[0] = ::genie::kPdgPiP;
 	    daughterPDG[1] = ::genie::kPdgElectron;
 	    ch = new TDecayChannel( 0, 0, 1.0, 2, daughterPDG );
@@ -184,15 +184,15 @@ TClonesArray* HNLDecayer::Decay( const DecayerInputs_t & inp ) const {
     }
 
     // now let's do some gosh darn kinematics.
-    const double mh = gc::kPionMass;
-    const double ml = ( selectedDecayChan == ghe::kPiE ) ? gc::kElectronMass : gc::kMuonMass;
+    const double mh = genie::constants::kPionMass;
+    const double ml = ( selectedDecayChan == genie::HNL::enums::kPiE ) ? genie::constants::kElectronMass : genie::constants::kMuonMass;
 
     double Eh = 0.0, El = 0.0, thetaPol = 0.0;
-    ghdk::TwoBodyEnergies( fMass, mh, ml, Eh, El );
-    ghdk::TwoBodyAngle( fSh, mh, ml, thetaPol ); //assume isotropic polarisation for now, theta* = thetaPol
+    genie::HNL::decayKinematics::TwoBodyEnergies( fMass, mh, ml, Eh, El );
+    genie::HNL::decayKinematics::TwoBodyAngle( fSh, mh, ml, thetaPol ); //assume isotropic polarisation for now, theta* = thetaPol
 
     // this is in HNL rest frame. Let's make some nice TLorentzVectors and boost them.
-    const double rPhi = fRng->Uniform( 0.0, 2.0 * gc::kPi );
+    const double rPhi = fRng->Uniform( 0.0, 2.0 * genie::constants::kPi );
 
     double lx = std::sin( thetaPol ) * std::cos( rPhi ), hx = -lx;
     double ly = std::sin( thetaPol ) * std::sin( rPhi ), hy = -ly;
@@ -257,29 +257,34 @@ TClonesArray* HNLDecayer::Decay( const DecayerInputs_t & inp ) const {
     return particle_list;
 }
 
-double HNLDecayer::Weight( void ) const { return fWeight; }
+double genie::HNL::HNLDecayer::Weight( void ) const { return fWeight; }
 
 /// need to decide how to implement these.
 //  for now just grab (barebones!) implementation from BaryonResonanceDecayer.cxx
 //  see PythiaDecayer.cxx and/or GENIE v3 for a more complete implementation
-void HNLDecayer::InhibitDecay( int pdgc, TDecayChannel * dc ) const {
+void genie::HNL::HNLDecayer::InhibitDecay( int pdgc, TDecayChannel * dc ) const {
     if( ! this->IsHandled( pdgc ) ) return;
 
     if( ! dc ) return;
 }
 
-void HNLDecayer::UnInhibitDecay( int pdgc, TDecayChannel * dc ) const {
+void genie::HNL::HNLDecayer::UnInhibitDecay( int pdgc, TDecayChannel * dc ) const {
     if( ! this->IsHandled( pdgc ) ) return;
 
     if( ! dc ) return;
 }
 
-void HNLDecayer::Configure( const Registry & config ) {
+void genie::HNL::HNLDecayer::Configure( const Registry & config ) {
     Algorithm::Configure( config );
     this->LoadConfig( );
 }
 
-void HNLDecayer::LoadConfig( void ){
+void genie::HNL::HNLDecayer::Configure( string config ) {
+    Algorithm::Configure( config );
+    this->LoadConfig( );
+}
+
+void genie::HNL::HNLDecayer::LoadConfig( void ){
 
     /// Loads info that uniquely defines an HNL up to species
 

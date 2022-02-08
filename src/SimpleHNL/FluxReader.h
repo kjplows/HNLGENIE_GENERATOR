@@ -54,14 +54,9 @@ namespace HNL{
 
     namespace FluxReader{
 
-	namespace gc  = ::genie::constants;
-	namespace gh  = ::genie::HNL;
-	namespace ghe = ::genie::HNL::enums;
-	namespace ghu = ::genie::HNL::utils;
-
 	extern std::string fPath; // flux file to poke
-	extern ghe::parent_t fParent; // which component of the flux to analyse
-	extern ghe::nutype_t fNuType; // which HNL kind do I want to analyse0
+	extern genie::HNL::enums::parent_t fParent; // which component of the flux to analyse
+	extern genie::HNL::enums::nutype_t fNuType; // which HNL kind do I want to analyse0
 
 	extern double fmN; // HNL mass
 	extern double fUe, fUm, fUt; // SM couplings
@@ -92,7 +87,7 @@ namespace HNL{
 
 	template< typename T >
 	T * getFluxHist( std::string fin, std::string hName,
-			 ghe::parent_t par, ghe::nutype_t HType ); // read in hist of type T
+			 genie::HNL::enums::parent_t par, genie::HNL::enums::nutype_t HType ); // read in hist of type T
 	
 	double generatePolMag( const int lPDG, const int parPDG );
 	std::vector< double > * generatePolDir( const int parPDG, const int HType );

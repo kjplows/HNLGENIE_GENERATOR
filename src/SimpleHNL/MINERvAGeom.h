@@ -29,13 +29,11 @@ namespace HNL {
 
   namespace MINERvAGeom {
 
-    namespace gu = ::genie::units;
-
     // placeholders! placeholders, placeholders
     // defines MINERvA centre (centre of tracker) in MINERvA coords
-    const double MINx = 0.0 * gu::m;
-    const double MINy = 0.0 * gu::m;
-    const double MINz = 2.5 * gu::m;
+    const double MINx = 0.0 * genie::units::m;
+    const double MINy = 0.0 * genie::units::m;
+    const double MINz = 2.5 * genie::units::m;
 
     inline std::vector< double > * GetMINERvACentre( ){
       std::vector< double > * thisVec = new std::vector< double >;

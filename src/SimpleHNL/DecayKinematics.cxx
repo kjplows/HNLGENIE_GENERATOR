@@ -15,6 +15,11 @@
 
 #include "DecayKinematics.h"
 
+// extern variables defined here
+
+TRandom3 * genie::HNL::decayKinematics::fRngD;
+bool genie::HNL::decayKinematics::fIsRngInitD;
+
 //using namespace genie::HNL::decayKinematics;
 
 void genie::HNL::decayKinematics::initRandom( ){
@@ -29,15 +34,15 @@ void genie::HNL::decayKinematics::TwoBodyEnergies( const double mN, const double
 
 void genie::HNL::decayKinematics::TwoBodyAngle( genie::HNL::SimpleHNL sh, const double mh, const double ml,
 			 double &thetaPol ){
-    if( mh == gc::kPionMass && ( ml == gc::kElectronMass || ml == gc::kMuonMass ) ){
+    if( mh == genie::constants::kPionMass && ( ml == genie::constants::kElectronMass || ml == genie::constants::kMuonMass ) ){
 	// construct differential decay width. Get pol info from sh
 	const double M = sh.GetMass( );
 	const std::vector< double > theCoups = sh.GetCouplings( );
-	const double Ua42 = ( ml == gc::kMuonMass ) ? theCoups.at(1) : theCoups.at(0);
+	const double Ua42 = ( ml == genie::constants::kMuonMass ) ? theCoups.at(1) : theCoups.at(0);
 	const double P = sh.GetPolarisationMag( ); // note this is signed! For M --> 0 P --> -1
 
 	double thePreFac = 0.0, theCnstPart = 0.0, thePropPart = 0.0;
-	ghs::Diff1Width_PiAndLepton_CosTheta( M, Ua42, ml, thePreFac, theCnstPart, thePropPart );
+	genie::HNL::Selector::Diff1Width_PiAndLepton_CosTheta( M, Ua42, ml, thePreFac, theCnstPart, thePropPart );
 	thePropPart *= P;
 	// now construct const char * and const double[] for formula & params
 	// ExtractVar will deal with this
@@ -52,7 +57,7 @@ void genie::HNL::decayKinematics::TwoBodyAngle( genie::HNL::SimpleHNL sh, const 
 	const double ctPol = ExtractVarFromDifferentialGamma( name, formChar, x1, x2, params );
 	thetaPol = std::acos( ctPol ); // rad, wrt polarisation vector
     }
-    else if( mh == gc::kPi0Mass && ml == 0.0 ){
+    else if( mh == genie::constants::kPi0Mass && ml == 0.0 ){
 	// do N --> pi0 \nu
     }
     else{
@@ -71,7 +76,7 @@ void genie::HNL::decayKinematics::TwoBodyKinematics( genie::HNL::SimpleHNL sh, c
     double thetaPolEll = 0.0, phiPolEll = 0.0; // wrt polarisation axis
     TwoBodyAngle( sh, mh, ml, thetaPolEll );
     if( !fIsRngInitD ){ initRandom( ); } // assume cylidrical symmetry for phi
-    const double phiLow = 0.0, phiHigh = 2.0 * gc::kPi;
+    const double phiLow = 0.0, phiHigh = 2.0 * genie::constants::kPi;
     phiPolEll = fRngD->Uniform( phiLow, phiHigh );
 
     // Cartesian coordinates on unit sphere, wrt polarisation axis
@@ -112,7 +117,7 @@ const TVector3* genie::HNL::decayKinematics::RestFrameAxis( genie::HNL::SimpleHN
     
     const std::vector< double > betaVec     = sh.GetBetaVec( );
     const std::vector< double > dk4V        = sh.GetDecay4VX( );
-    const std::vector< double > * minCentre = ghm::GetMINERvACentre( );
+    const std::vector< double > * minCentre = genie::HNL::MINERvAGeom::GetMINERvACentre( );
 	
     const double sx = minCentre->at(0) - dk4V.at(1);
     const double sy = minCentre->at(1) - dk4V.at(2);

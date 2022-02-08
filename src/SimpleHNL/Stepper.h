@@ -36,11 +36,6 @@
 #include "Enums.h"    
 #include "SimpleHNL.h"
 
-namespace gu  = ::genie::units;
-namespace gc  = ::genie::constants;
-namespace gh  = ::genie::HNL;
-namespace ghe = ::genie::HNL::enums;
-
 namespace genie {
 namespace HNL {
 
@@ -48,25 +43,25 @@ namespace HNL {
 
     namespace Selector {
 
-	extern TRandom3 * fRng;
+        extern TRandom3 * fRng;
 	extern bool fIsRngInit;
 	
-	extern std::map< ghe::HNLDecay_t, double > fCounterMap;
-	const double fdt = 0.01 * gu::nanosecond; // in lab frame
+	extern std::map< genie::HNL::enums::HNLDecay_t, double > fCounterMap;
+	const double fdt = 0.01 * genie::units::nanosecond; // in lab frame
 
 	inline void initRandom( ) { fRng = new TRandom3(0); fIsRngInit = true; }
 
 	// inclusive method stepper
-	void PropagateTilDecay( gh::SimpleHNL sh ); // step 1/3, see Selector.h for 2/3
+	void PropagateTilDecay( genie::HNL::SimpleHNL sh ); // step 1/3, see Selector.h for 2/3
 
 	// exclusive method stepper
-	void PropagateAndSelectChannel( gh::SimpleHNL sh );
+	void PropagateAndSelectChannel( genie::HNL::SimpleHNL sh );
 
 	// empty the vector of counters
 	void emptyCounters( );
 
 	// populate the vector of counters
-	void fillCounters( std::map< ghe::HNLDecay_t, double > gammaMap );
+	void fillCounters( std::map< genie::HNL::enums::HNLDecay_t, double > gammaMap );
 
     } // namespace Selector
     

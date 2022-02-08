@@ -39,28 +39,22 @@
 #include "ColomaTables.h"
 #include "KinUtils.h"
 
-namespace gc  = ::genie::constants;
-namespace gu  = ::genie::units;
-namespace ghu = ::genie::HNL::utils;
-
 namespace genie {
 namespace HNL {
 
     namespace Selector {
 
-      namespace ghs = ::genie::HNL::Selector;
-
 	// physical constants, PDG 2021
 	static const double s2w = 0.22767; // Weinberg mixing angle consistent with genie kMw, kMz
-	static const double GF  = gc::kGF; // GeV^{-2}
+	static const double GF  = genie::constants::kGF; // GeV^{-2}
 	static const double GF2 = GF*GF;
-	static const double pi  = gc::kPi;
-	static const double fpi = 0.130 * gu::GeV; // GeV
+	static const double pi  = genie::constants::kPi;
+	static const double fpi = 0.130 * genie::units::GeV; // GeV
 	static const double fpi2 = fpi*fpi;
     
-	static const double mPi0 = gc::kPi0Mass;
-	static const double mPi  = gc::kPionMass;
-	static const double mMu  = gc::kMuonMass;
+	static const double mPi0 = genie::constants::kPi0Mass;
+	static const double mPi  = genie::constants::kPionMass;
+	static const double mMu  = genie::constants::kMuonMass;
 
 	static const double Vud  = 0.9737; // PDG 2021
 	static const double Vud2 = Vud * Vud;
@@ -94,17 +88,17 @@ namespace HNL {
 	inline double GetColomaF1( double x ) {
 	    if( x < 0. || x > 0.5 ) { LOG( "SimpleHNL", pERROR ) << "BRFunctions::GetColomaF1:: Illegal x = " << x; exit( 3 ); }
 	    if( x == 0.5 ) return 0.;
-	    int i = x/ghs::PARTWIDTH;
-	    if( x - i*ghs::PARTWIDTH ==0 ) return ghs::ColomaF1[i];
-	    return 1./2. * ( ghs::ColomaF1[i] + ghs::ColomaF1[i+1] );
+	    int i = x/genie::HNL::Selector::PARTWIDTH;
+	    if( x - i*genie::HNL::Selector::PARTWIDTH ==0 ) return genie::HNL::Selector::ColomaF1[i];
+	    return 1./2. * ( genie::HNL::Selector::ColomaF1[i] + genie::HNL::Selector::ColomaF1[i+1] );
 	}
     
 	inline double GetColomaF2( double x ) {
 	    if( x < 0. || x > 0.5 ) { LOG( "SimpleHNL", pERROR ) << "BRFunctions::GetColomaF2:: Illegal x = " << x; exit( 3 ); }
 	    if( x == 0.5 ) return 0.;
-	    int i = x/ghs::PARTWIDTH;
-	    if( x - i*ghs::PARTWIDTH==0 ) return ghs::ColomaF2[i];
-	    return 1./2. * ( ghs::ColomaF2[i] + ghs::ColomaF2[i+1] );
+	    int i = x/genie::HNL::Selector::PARTWIDTH;
+	    if( x - i*genie::HNL::Selector::PARTWIDTH==0 ) return genie::HNL::Selector::ColomaF2[i];
+	    return 1./2. * ( genie::HNL::Selector::ColomaF2[i] + genie::HNL::Selector::ColomaF2[i+1] );
 	}
 
 	//============================================
@@ -113,7 +107,7 @@ namespace HNL {
 	
 	// N --> pi0 + nu_\alpha
 	inline double DWidth_PiZeroAndNu( const double M, const double Ue42, const double Umu42, const double Ut42 ) {
-	    const double x       = ghu::MassX( mPi0, M );
+	    const double x       = genie::HNL::utils::MassX( mPi0, M );
 	    const double preFac  = GF2 * M*M*M / ( 32. * pi );
 	    const double kinPart = ( 1. - x*x ) * ( 1. - x*x );
 	    return preFac * ( Ue42 + Umu42 + Ut42 ) * fpi2 * kinPart;
@@ -121,10 +115,10 @@ namespace HNL {
 	
 	// N --> pi^{\pm} + \ell_{\alpha}
 	inline double DWidth_PiAndLepton( const double M, const double Ua42, const double ma ) {
-	    const double xPi     = ghu::MassX( mPi, M );
-	    const double xLep    = ghu::MassX( ma, M );
+	    const double xPi     = genie::HNL::utils::MassX( mPi, M );
+	    const double xLep    = genie::HNL::utils::MassX( ma, M );
 	    const double preFac  = GF2 * M*M*M / ( 16. * pi );
-	    const double kalPart = TMath::Sqrt( ghu::Kallen( 1, xPi, xLep ) );
+	    const double kalPart = TMath::Sqrt( genie::HNL::utils::Kallen( 1, xPi, xLep ) );
 	    const double othPart = 1. - xPi*xPi - xLep*xLep * ( 2. + xPi*xPi - xLep*xLep );
 	    return preFac * fpi2 * Ua42 * Vud2 * kalPart * othPart;
 	}
@@ -138,7 +132,7 @@ namespace HNL {
 	// N --> nu + \ell_{\beta} \ell_{\beta} , \beta = e or mu
 	inline double DWidth_SameLepton( const double M, const double Ue42, const double Umu42, const double Ut42, const double mb, bool bIsMu ) {
 	    const double preFac = GF2 * TMath::Power( M, 5. ) / ( 192. * pi*pi*pi );
-	    const double x      = ghu::MassX( mb, M );
+	    const double x      = genie::HNL::utils::MassX( mb, M );
 	    const double f1     = GetColomaF1( x );
 	    const double f2     = GetColomaF2( x );
 	    const double C1Part = ( Ue42 + Umu42 + Ut42 ) * f1 * BR_C1;
@@ -152,7 +146,7 @@ namespace HNL {
 	// alpha is the "correct" lepton number sign ( Q < 0 for N, Q > 0 for Nbar)
 	inline double DWidth_DiffLepton( const double M, const double Ua42, const double Ub42, const double IsMajorana ) {
 	    const double preFac = GF2 * TMath::Power( M, 5. ) / ( 192. * pi*pi*pi );
-	    const double x = ghu::MassX( mMu, M );
+	    const double x = genie::HNL::utils::MassX( mMu, M );
 	    const double kinPol = 1. - 8. * x*x + 8. * TMath::Power( x, 6. ) - TMath::Power( x, 8. );
 	    const double kinLn  = -12. * TMath::Power( x, 4. ) * TMath::Log( x*x );
 	    const double kinPart = kinPol + kinLn;
@@ -254,10 +248,10 @@ namespace HNL {
 						     double &theCnstPart,
 						     double &thePropPart ) {
 	    const double preFac   = 1. / ( 32.0 * pi * M*M*M );
-	    const double sqrKal   = std::sqrt( ghu::Kallen( M*M, mPi*mPi, ml*ml ) );
+	    const double sqrKal   = std::sqrt( genie::HNL::utils::Kallen( M*M, mPi*mPi, ml*ml ) );
 	    const double formPart = fpi2 * Ua42 * Vud2 * GF2;
 	    const double parConst = std::pow( ( M*M - ml*ml ), 2.0 ) - mPi*mPi*( M*M + ml*ml );
-	    const double parCoeff = -1.0 * ( M*M - ml*ml ) * std::sqrt( ghu::Kallen( M*M, mPi*mPi, ml*ml ) );
+	    const double parCoeff = -1.0 * ( M*M - ml*ml ) * std::sqrt( genie::HNL::utils::Kallen( M*M, mPi*mPi, ml*ml ) );
 
 	    thePreFac   = preFac * sqrKal * formPart;
 	    theCnstPart = parConst;

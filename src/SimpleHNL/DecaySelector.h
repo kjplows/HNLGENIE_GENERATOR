@@ -39,29 +39,26 @@
 #include "BRFunctions.h"
 #include "Enums.h"
 
-namespace ghe = ::genie::HNL::enums;
-namespace gc  = ::genie::constants; 
-
 namespace genie {
 namespace HNL {
 
     namespace Selector {
 	
 	// valid channels with widths
-	std::map< ghe::HNLDecay_t, double > GetValidChannelWidths( const double M, const double Ue42, const double Umu42, const double Ut42, const bool IsMajorana = false );
+	std::map< genie::HNL::enums::HNLDecay_t, double > GetValidChannelWidths( const double M, const double Ue42, const double Umu42, const double Ut42, const bool IsMajorana = false );
 	// derived
-	double GetTotalDecayWidth( std::map< ghe::HNLDecay_t, double > gammaMap );
+	double GetTotalDecayWidth( std::map< genie::HNL::enums::HNLDecay_t, double > gammaMap );
 	double CalcCoMLifetime( const double M, const double Ue42, const double Umu42, const double Ut42, const bool IsMajorana = false );
 
 	// now choose channels you're interested in seeing
-	std::map< ghe::HNLDecay_t, double > SetInterestingChannels( std::vector< ghe::HNLDecay_t > intChannels, std::map< ghe::HNLDecay_t, double > gammaMap );
+	std::map< genie::HNL::enums::HNLDecay_t, double > SetInterestingChannels( std::vector< genie::HNL::enums::HNLDecay_t > intChannels, std::map< genie::HNL::enums::HNLDecay_t, double > gammaMap );
 
 	// transform widths to probabilities (marginalised over all interesting!)
-	std::map< ghe::HNLDecay_t, double > GetProbabilities( std::map< ghe::HNLDecay_t, double > gammaMap );
+	std::map< genie::HNL::enums::HNLDecay_t, double > GetProbabilities( std::map< genie::HNL::enums::HNLDecay_t, double > gammaMap );
 
 	// make a choice from interesting channels
 	// This is the inclusive method - see messages to Xianguo, Dec 9th 2021
-	ghe::HNLDecay_t SelectChannelInclusive( std::map< ghe::HNLDecay_t, double > Pmap, double ranThrow );
+	genie::HNL::enums::HNLDecay_t SelectChannelInclusive( std::map< genie::HNL::enums::HNLDecay_t, double > Pmap, double ranThrow );
 	    
     } // namespace Selector
 

@@ -32,6 +32,22 @@ using namespace genie::HNL::enums;
                     --ElectronOnly    --FHC_iso_mp50.root  --nuebar --(TH3D*)parent3P
  */
 
+// extern variables defined here
+
+std::string genie::HNL::FluxReader::fPath;
+genie::HNL::enums::parent_t genie::HNL::FluxReader::fParent;
+genie::HNL::enums::nutype_t genie::HNL::FluxReader::fNuType;
+
+double genie::HNL::FluxReader::fmN;
+double genie::HNL::FluxReader::fUe;
+double genie::HNL::FluxReader::fUm;
+double genie::HNL::FluxReader::fUt;
+
+int genie::HNL::FluxReader::fPDG;
+int genie::HNL::FluxReader::fParPDG;
+
+bool genie::HNL::FluxReader::fMaj;
+
 std::string genie::HNL::FluxReader::selectCoup( const double Ue42, const double Umu42, const double Ut42 ){
     // I am not sensitive to the tau coupling so only Ue42, Umu42 matter
 
@@ -164,22 +180,22 @@ double genie::HNL::FluxReader::generatePolMag( const int lPDG, const int parPDG 
 
     double mpar = 0.0, ml = 0.0;
 
-    if( std::abs( lPDG ) == ::genie::kPdgElectron ){ ml = gc::kElectronMass; }
-    else if( std::abs( lPDG ) == ::genie::kPdgMuon ){ ml = gc::kMuonMass; }
+    if( std::abs( lPDG ) == ::genie::kPdgElectron ){ ml = genie::constants::kElectronMass; }
+    else if( std::abs( lPDG ) == ::genie::kPdgMuon ){ ml = genie::constants::kMuonMass; }
     else{ std::cerr << "genie::HNL::FluxReader::generatePolMag: Unknown lepton PDG = " <<
 	    lPDG << std::endl; exit(3); }
 
-    if( std::abs( parPDG ) == ::genie::kPdgPiP ){ mpar = gc::kPionMass; }
-    else if( std::abs( parPDG ) == ::genie::kPdgKP ){ mpar = gc::kKaonMass; }
+    if( std::abs( parPDG ) == ::genie::kPdgPiP ){ mpar = genie::constants::kPionMass; }
+    else if( std::abs( parPDG ) == ::genie::kPdgKP ){ mpar = genie::constants::kKaonMass; }
     else if( std::abs( parPDG ) == ::genie::kPdgMuon ){
-	mpar = gc::kPionMass;
+	mpar = genie::constants::kPionMass;
 	std::cout << "genie::HNL::FluxReader::generatePolMag: WARNING: \n" <<
 	    "Muon parent requested, changing polarisation to pion equivalent. \n" <<
 	    "Also note that the lepton will be set to electron. \n" <<
 	    "This is very crude, unphysical behaviour, and it should be fixed." <<
 	    std::endl; } //! RETHERE
     else if( std::abs( parPDG ) == ::genie::kPdgK0L ){
-	mpar = gc::kKaonMass;
+	mpar = genie::constants::kKaonMass;
 	std::cout << "genie::HNL::FluxReader::generatePolMag: WARNING: \n" <<
 	    "Neuk parent requested, changing polarisation to kaon equivalent. \n" <<
 	    "This is very crude, unphysical behaviour, and it should be fixed." <<
@@ -188,7 +204,7 @@ double genie::HNL::FluxReader::generatePolMag( const int lPDG, const int parPDG 
 	    parPDG << std::endl; exit(3); }
 
     double num = ( ml*ml - fmN*fmN ) *
-	std::sqrt( ghu::Kallen( mpar*mpar, fmN*fmN, ml*ml ) );
+	std::sqrt( genie::HNL::utils::Kallen( mpar*mpar, fmN*fmN, ml*ml ) );
     double den = mpar*mpar * ( ml*ml + fmN*fmN ) -
 	std::pow( ml*ml - fmN*fmN , 2.0 );
 
@@ -223,7 +239,9 @@ std::vector< double > * genie::HNL::FluxReader::generatePolDir( const int parPDG
     return polDir;
 }
 
-// double generateVtxT( const int parPDG, const int HType ){}
+double genie::HNL::FluxReader::generateVtxT( const int parPDG, const int HType ){
+  LOG( "SimpleHNL", pDEBUG ) << "genie::HNL::FluxReader::generateVtxT:: Dummy method! WIP";
+}
 // need to think about this more!
 
 std::vector< double > * genie::HNL::FluxReader::generateVtx3X( const int parPDG, const int HType ){

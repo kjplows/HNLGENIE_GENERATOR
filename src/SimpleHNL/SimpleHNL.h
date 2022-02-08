@@ -47,12 +47,6 @@
 namespace genie {
     
     namespace HNL {
-
-	namespace gu     = ::genie::units;
-	namespace ghs    = ::genie::HNL::Selector;
-	namespace gc     = ::genie::constants;
-	namespace ghd    = ::genie::HNL::defaults;
-	namespace ghe    = ::genie::HNL::enums;
 	
 	class SimpleHNL
 	{
@@ -63,11 +57,11 @@ namespace genie {
 		fUe42( defUe42 ), fUmu42( defUmu42 ), fUt42( defUt42 ),
 		fIsMajorana( false ),
 		fValidChannels(
-		    ghs::GetValidChannelWidths( defMass,
+		    genie::HNL::Selector::GetValidChannelWidths( defMass,
 						defUe42, defUmu42, defUt42,
 						false ) ),
 		fCoMLifetime(
-		    ghs::CalcCoMLifetime( defMass,
+		    genie::HNL::Selector::CalcCoMLifetime( defMass,
 					  defUe42, defUmu42, defUt42,
 					  false ) )
 	    { } /// default c'tor
@@ -82,11 +76,11 @@ namespace genie {
 		    fUe42( Ue42 ), fUmu42( Umu42 ), fUt42( Ut42 ),
 		    fIsMajorana( IsMajorana ),
 		    fValidChannels(
-			ghs::GetValidChannelWidths( mass,
+			genie::HNL::Selector::GetValidChannelWidths( mass,
 						    Ue42, Umu42, Ut42,
 						    IsMajorana ) ),
 		    fCoMLifetime(
-			ghs::CalcCoMLifetime( mass,
+			genie::HNL::Selector::CalcCoMLifetime( mass,
 					      Ue42, Umu42, Ut42,
 					      IsMajorana ) )
 	    { } /// normal constructor
@@ -125,13 +119,13 @@ namespace genie {
 
 	    inline const int    GetParentPDG( ) { return fParentPDG; }
 
-	    inline const ghe::nutype_t GetHType( ) { return fHType; }
+	    inline const genie::HNL::enums::nutype_t GetHType( ) { return fHType; }
 
 	    inline const double GetDecayThrow( ) { return fDecayThrow; }
 
 	    inline const double GetSelectThrow( ) { return fSelectThrow; }
 
-	    inline const ghe::HNLDecay_t GetDecayMode( ) { return fDecayMode; }
+	    inline const genie::HNL::enums::HNLDecay_t GetDecayMode( ) { return fDecayMode; }
 
 	    inline const std::vector< double > GetDecay4VX( ) {
 		std::vector< double > decVec;
@@ -171,10 +165,10 @@ namespace genie {
 	    inline const std::vector< double > * GetPolarisationDir( ) {
 		return fPolDir; }
 
-	    inline const std::map< ghe::HNLDecay_t, double > GetValidChannels( ) {
+	    inline const std::map< genie::HNL::enums::HNLDecay_t, double > GetValidChannels( ) {
 		return fValidChannels; }
 
-	    inline const std::map< ghe::HNLDecay_t, double > GetInterestingChannels( ) {
+	    inline const std::map< genie::HNL::enums::HNLDecay_t, double > GetInterestingChannels( ) {
 		return fInterestingChannels; }
 
 	    // setters
@@ -215,16 +209,16 @@ namespace genie {
 	    inline void SetMomentumAngles( double theta, double phi ) {
 		/// does not change magnitude
 		// bring angles into [0,\pi]*[0,2\pi) 
-		if( std::abs( theta ) > gc::kPi ) {
-		    const int nabs = std::floor( std::abs( theta ) / gc::kPi );
-		    theta += ( theta < 0 ) ? nabs * gc::kPi : -nabs * gc::kPi; }
-		if( std::abs( phi ) > 2.0 * gc::kPi ) {
-		    const int nabs = std::floor( std::abs( phi ) / ( 2.0 * gc::kPi ) );
-		    phi += ( phi < 0 ) ? nabs * 2.0 * gc::kPi : -nabs * 2.0 * gc::kPi; }
-		phi += ( phi < 0 ) ? 2.0 * gc::kPi : 0.0;
+		if( std::abs( theta ) > genie::constants::kPi ) {
+		    const int nabs = std::floor( std::abs( theta ) / genie::constants::kPi );
+		    theta += ( theta < 0 ) ? nabs * genie::constants::kPi : -nabs * genie::constants::kPi; }
+		if( std::abs( phi ) > 2.0 * genie::constants::kPi ) {
+		    const int nabs = std::floor( std::abs( phi ) / ( 2.0 * genie::constants::kPi ) );
+		    phi += ( phi < 0 ) ? nabs * 2.0 * genie::constants::kPi : -nabs * 2.0 * genie::constants::kPi; }
+		phi += ( phi < 0 ) ? 2.0 * genie::constants::kPi : 0.0;
 
 		if( theta < 0 ){
-		    double ap = ( phi < gc::kPi ) ? gc::kPi : -gc::kPi;
+		    double ap = ( phi < genie::constants::kPi ) ? genie::constants::kPi : -genie::constants::kPi;
 		    theta *= -1.0; phi += ap; 
 		}
 
@@ -281,10 +275,10 @@ namespace genie {
 		fY = fourV.at(2); fZ = fourV.at(3); }
 
 	    inline void SetInterestingChannels(
-		const std::map< ghe::HNLDecay_t, double > gammaMap ){
+		const std::map< genie::HNL::enums::HNLDecay_t, double > gammaMap ){
 		fInterestingChannels = gammaMap; }
 
-	    inline void SetDecayMode( const ghe::HNLDecay_t decayMode ){
+	    inline void SetDecayMode( const genie::HNL::enums::HNLDecay_t decayMode ){
 		fDecayMode = decayMode; }
 
 	    inline void SetParentPDG( const int parPDG ){
@@ -293,17 +287,17 @@ namespace genie {
 	    inline void SetPDG( const int PDG ){
 		fPDG = PDG; }
 
-	    inline void SetHType( const ghe::nutype_t HType ){
+	    inline void SetHType( const genie::HNL::enums::nutype_t HType ){
 		fHType = HType; }
 	    
 	protected:
 	    // default c'tor values
-	    int defPDG = ghd::HNLDefaultPDG; 
-	    int defParPDG = ghd::HNLDefaultParPDG;
-	    double defMass  = ghd::HNLDefaultMass;
-	    double defUe42  = ghd::HNLDefaultECoup;
-	    double defUmu42 = ghd::HNLDefaultMuCoup;
-	    double defUt42  = ghd::HNLDefaultTauCoup;
+	    int defPDG = genie::HNL::defaults::HNLDefaultPDG; 
+	    int defParPDG = genie::HNL::defaults::HNLDefaultParPDG;
+	    double defMass  = genie::HNL::defaults::HNLDefaultMass;
+	    double defUe42  = genie::HNL::defaults::HNLDefaultECoup;
+	    double defUmu42 = genie::HNL::defaults::HNLDefaultMuCoup;
+	    double defUt42  = genie::HNL::defaults::HNLDefaultTauCoup;
 
 	    // basic calculators
 	    inline const double CalcBeta( const double E, const double P3 ) {
@@ -324,16 +318,16 @@ namespace genie {
 	    double     fMass;
 	    double     fUe42, fUmu42, fUt42;
 	    bool       fIsMajorana;
-	    std::map< ghe::HNLDecay_t, double > fValidChannels;
+	    std::map< genie::HNL::enums::HNLDecay_t, double > fValidChannels;
 	    double     fCoMLifetime;
 
-	    ghe::nutype_t    fHType;
+	    genie::HNL::enums::nutype_t    fHType;
 	    
 	    double           fDecayThrow;  // determines where decay happens
 	    double           fSelectThrow; // determines what channel to decay to
-	    ghe::HNLDecay_t  fDecayMode;
+	    genie::HNL::enums::HNLDecay_t  fDecayMode;
 	    
-	    std::map< ghe::HNLDecay_t, double > fInterestingChannels; // owned by this
+	    std::map< genie::HNL::enums::HNLDecay_t, double > fInterestingChannels; // owned by this
 	    
 	    double                  fBeta, fGamma;
 	    double                  fLifetime;

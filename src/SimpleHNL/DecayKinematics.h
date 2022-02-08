@@ -55,21 +55,12 @@
 //#include "HNLAuxiliary/MINERvAGeom.h"
 //#include "HNLAuxiliary/SimpleHNL.h"
 
-namespace gu   = ::genie::units;
-namespace gc   = ::genie::constants;
-namespace gh   = ::genie::HNL;
-namespace ghe  = ::genie::HNL::enums;
-namespace ghm  = ::genie::HNL::MINERvAGeom;
-namespace ghs  = ::genie::HNL::Selector;
-
 namespace genie {
 namespace HNL {
 
     class SimpleHNL;
 
     namespace decayKinematics {
-
-      namespace ghdk = ::genie::HNL::decayKinematics;
 
 	// generic 2-body decay N --> \pi \ell   
 	void TwoBodyEnergies( const double mN, const double mh, const double ml,
@@ -94,9 +85,9 @@ namespace HNL {
     
 	// emission angles of product wrt HNL polarisation vector
 	const double RestTheta( const double mN, const double pol,
-				const ghe::HNLDecay_t chan, const double m1 );
+				const genie::HNL::enums::HNLDecay_t chan, const double m1 );
 	const double RestPhi( const double mN, const double pol,
-			      const ghe::HNLDecay_t chan, const double m1 );
+			      const genie::HNL::enums::HNLDecay_t chan, const double m1 );
                               //assume cylindrical symmetry ?
 
 	// define characteristic axis in rest frame: r(MIN centre) - r(HNL decay)

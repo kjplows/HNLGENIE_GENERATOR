@@ -26,10 +26,7 @@ namespace HNL {
 
     namespace defaults {
 
-	namespace gu = ::genie::units;
-	namespace gc = ::genie::constants;
-
-	static const double HNLDefaultMass    = gc::kMuonMass + gc::kPionMass + 10.0 * gu::MeV;
+	static const double HNLDefaultMass    = genie::constants::kMuonMass + genie::constants::kPionMass + 10.0 * genie::units::MeV;
 	static const double HNLDefaultECoup   = 0.0;
 	static const double HNLDefaultMuCoup  = 1.0;
 	static const double HNLDefaultTauCoup = 0.0;
