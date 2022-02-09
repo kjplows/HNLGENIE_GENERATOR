@@ -34,7 +34,7 @@
    
 	 * Kinematics calculated after channel is picked. 2- or 3-body decays.
 
-	 This is a concrete implementation of DecayModelI
+	 This is a concrete implementation of HNLDecayModelI
 
 \author  John Plows <komninos-john.plows@physics.ox.ac.uk>
 
@@ -75,7 +75,6 @@
 #include "Conventions/Constants.h"
 #include "Conventions/Controls.h"
 #include "Decay/BaryonResonanceDecayer.h"
-#include "Decay/DecayModelI.h"
 //#include "HNLAuxiliary/DecayKinematics.h"
 //#include "HNLAuxiliary/Defaults.h"  
 //#include "HNLAuxiliary/Enums.h"     
@@ -90,11 +89,12 @@
 #include "Defaults.h"  
 #include "Enums.h"     
 #include "FluxReader.h"
+#include "HNLDecayModelI.h"
 
 namespace genie {
 namespace HNL {
 
-    class HNLDecayer : public DecayModelI {
+    class HNLDecayer : public HNLDecayModelI {
 
     public:
 	HNLDecayer( );

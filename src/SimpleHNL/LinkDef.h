@@ -14,7 +14,7 @@
 #pragma link C++ namespace genie::HNL::utils;
 #pragma link C++ namespace genie::HNL::MINERvAGeom;
 
-#pragma link C++ class genie::DecayModelI;
+#pragma link C++ class genie::HNLDecayModelI;
 #pragma link C++ class genie::HNL::SimpleHNL;
 #pragma link C++ class genie::HNL::HNLDecayer;
 

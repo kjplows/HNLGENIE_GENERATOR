@@ -14,10 +14,10 @@ using namespace genie::HNL;
 
 /// c'tors
 genie::HNL::HNLDecayer::HNLDecayer( ) :
-    DecayModelI( "genie::HNLDecayer" ) { }
+    HNLDecayModelI( "genie::HNLDecayer" ) { }
 
 genie::HNL::HNLDecayer::HNLDecayer( std::string config ) :
-    DecayModelI( "genie::HNLDecayer", config ) { }
+    HNLDecayModelI( "genie::HNLDecayer", config ) { }
 
 genie::HNL::HNLDecayer::~HNLDecayer( ) { }
 
