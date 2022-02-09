@@ -46,7 +46,7 @@ private:
   static PDGLibrary * fInstance;
   TDatabasePDG      * fDatabasePDG;
 
-  void AddSimpleHNL( double mass );
+  // void AddSimpleHNL( double mass );
   
   struct Cleaner {
       void DummyMethodAndSilentCompiler() { }

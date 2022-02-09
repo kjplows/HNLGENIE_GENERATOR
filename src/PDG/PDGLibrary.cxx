@@ -70,7 +70,7 @@ TParticlePDG * PDGLibrary::Find(int pdgc)
 /*
 void AddSimpleHNL( double mass )
 {
-    TParticlePDG * HNL_particle = TDatabasePDG( genie::kPdgHNL );
+    TParticlePDG * HNL_particle = TParticlePDG( genie::kPdgHNL );
     if( ! HNL_particle ){
 	fDatabasePDG->AddParticle( "HNL", "HNL", mass, false, 1.0, 0.0, "SimpleHNL", genie::kPdgHNL );
 	// the "DecayWidth==1.0" thing I've written is WAY off!! Need to integrate with HNLModules

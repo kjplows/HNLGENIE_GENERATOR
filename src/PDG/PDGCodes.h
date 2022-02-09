@@ -202,7 +202,6 @@ const int kPdgHNLEBar      = -1912;
 const int kPdgHNL          =  1911;
 const int kPdgHNLBar       = -1911;
 
-
 }      // genie namespace
 
 #endif // _PDG_CODES_H_
