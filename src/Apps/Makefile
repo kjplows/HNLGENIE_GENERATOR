@@ -65,6 +65,9 @@ endif
 ifeq ($(strip $(GOPT_ENABLE_MASTERCLASS)),YES)
 TGT_BASE += gmstcl
 endif
+ifeq ($(strip $(GOPT_ENABLE_SIMPLE_HNL)),YES)
+TGT_BASE += gevgen_hnl
+endif
 
 TGT = $(addprefix $(GENIE_BIN_PATH)/,$(TGT_BASE))
 
@@ -124,6 +127,12 @@ $(GENIE_BIN_PATH)/gevgen_hadron: gEvGenHadronNucleus.o $(call find_libs,gevgen_h
 $(GENIE_BIN_PATH)/gevgen_ndcy: gNucleonDecayEvGen.o $(call find_libs,gevgen_ndcy)
 	@echo "** Building gevgen_ndcy"
 	$(LD) $(LDFLAGS) gNucleonDecayEvGen.o $(LIBRARIES) -o $(GENIE_BIN_PATH)/gevgen_ndcy
+
+# Heavy Neutral Lepton decay event generation app
+#
+$(GENIE_BIN_PATH)/gevgen_hnl: gHNLEvGen.o $(call find_libs,gevgen_hnl)
+	@echo "** Building gevgen_hnl"
+	$(LD) $(LDFLAGS) gHNLEvGen.o $(LIBRARIES) -o $(GENIE_BIN_PATH)/gevgen_hnl
 
 # neutron-antineutron event generation app
 #
