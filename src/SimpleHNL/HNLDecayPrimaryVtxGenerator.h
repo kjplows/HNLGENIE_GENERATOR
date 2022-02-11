@@ -24,6 +24,7 @@
 #include "PDG/PDGCodeList.h"
 #include "SimpleHNL/DecayKinematics.h"
 #include "SimpleHNL/Enums.h"
+#include "SimpleHNL/FluxReader.h"
 #include "SimpleHNL/SimpleHNL.h"
 
 namespace genie {

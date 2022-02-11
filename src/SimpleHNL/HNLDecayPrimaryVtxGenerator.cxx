@@ -193,6 +193,9 @@ void HNLDecayPrimaryVtxGenerator::GenerateDecayProducts(
      throw exception;
   }
 
+  LOG("SimpleHNL", pINFO)
+    << "Decay permitted. Continuing";
+
   // Step 2: Actually do the decay. 
   // NucleonDecay's solution is the TGenPhaseSpace generator
   // For now, just add 2-body decays & use SimpleHNL kinematics
@@ -205,16 +208,22 @@ void HNLDecayPrimaryVtxGenerator::GenerateDecayProducts(
   else{ ml = genie::constants::kElectronMass; pdgl = genie::kPdgElectron; }
 
   double Eh = 0.0, El = 0.0;
-  double thetaPol = 0.0; //angle wrt HNL polarisation
+  //double thetaPol = 0.0; //angle wrt HNL polarisation
   // assume isotropic for now, //RETHERE to sample Pol from flux & enforce polarised decay
 
   genie::HNL::SimpleHNL sh = genie::HNL::SimpleHNL( "HNL", decayed_HNL_id, genie::kPdgHNL, genie::kPdgKP, mN, 1.0, 1.0, 0.0, false ); // RETHERE - find a way to propagate couplings into here!
 
   genie::HNL::decayKinematics::TwoBodyEnergies( mN, mh, ml, Eh, El );
-  genie::HNL::decayKinematics::TwoBodyAngle( sh, mh, ml, thetaPol );
+  
+  //genie::HNL::decayKinematics::TwoBodyAngle( sh, mh, ml, thetaPol ); 
+  // causes crash. Will investigate. Let's randomise for now!
+
+  LOG("SimpleHNL", pINFO)
+    << "Two body kinematics done.";
 
   // also assume isotropic phi
-  TRandom3 *rand = new TRandom3(); // gotta move to Numerical/RandomGen
+  TRandom3 *rand = new TRandom3(0); // gotta move to Numerical/RandomGen
+  double thetaPol = rand->Uniform( 0.0, genie::constants::kPi );
   double phi = rand->Uniform( 0.0, 2.0 * genie::constants::kPi );
 
   double p3h = std::sqrt( Eh*Eh - mh*mh );
@@ -224,9 +233,9 @@ void HNLDecayPrimaryVtxGenerator::GenerateDecayProducts(
 		      Eh );
 
   double p3l = std::sqrt( El*El - ml*ml );
-  TLorentzVector p4l( p3l*std::sin(thetaPol)*std::cos(phi),
-		      p3l*std::sin(thetaPol)*std::sin(phi),
-		      p3l*std::cos(thetaPol),
+  TLorentzVector p4l( -p3l*std::sin(thetaPol)*std::cos(phi),
+		      -p3l*std::sin(thetaPol)*std::sin(phi),
+		      -p3l*std::cos(thetaPol),
 		      El );
 
   std::map< int, TLorentzVector > pdgMap;
@@ -234,7 +243,30 @@ void HNLDecayPrimaryVtxGenerator::GenerateDecayProducts(
   pdgMap.insert( std::pair< int, TLorentzVector >( genie::kPdgPiP, p4h ) );
   pdgMap.insert( std::pair< int, TLorentzVector >( pdgl, p4l ) );
 
-  // Step 3: Insert final state products into a TClonesArray of TMCParticles
+  LOG("SimpleHNL", pDEBUG) 
+    << "Pion: pdg = " << genie::kPdgPiP << ", mass " << mh << ", energy " << Eh << ", mom " << p3h
+    << "\n      px = " << p4h.Px() << ", py = " << p4h.Py() << ", pz = " << p4h.Pz();
+
+  LOG("SimpleHNL", pDEBUG) 
+    << "Muon: pdg = " << genie::kPdgMuon << ", mass " << ml << ", energy " << El << ", mom " << p3l
+    << "\n      px = " << p4l.Px() << ", py = " << p4l.Py() << ", pz = " << p4l.Pz();
+
+  LOG("SimpleHNL", pDEBUG)
+    << "theta = " << thetaPol << ", phi = " << phi;
+
+  // Step 3: Boost these into the lab frame
+  // Grab energy of HNL
+  // RETHERE - Sampling from all fluxes put together, this is VERY wrong
+  double EHNL = genie::HNL::FluxReader::getEFromMaster();
+  //double EHNL = fEnergy;
+  double PHNL = std::sqrt( EHNL*EHNL - mN*mN );
+
+  LOG("SimpleHNL", pDEBUG)
+    << "EHNL = " << EHNL << ", PHNL = " << PHNL << ", beta = " << PHNL / EHNL;
+
+  TVector3 bHNL( 0.0, 0.0, PHNL / EHNL );
+
+  // Step 4: Insert final state products into a TClonesArray of TMCParticles
   TLorentzVector v4(*v4d); 
   //  int idp = 0;
   for(pdg_iter = pdgv.begin(); pdg_iter != pdgv.end(); ++pdg_iter) {
@@ -243,10 +275,22 @@ void HNLDecayPrimaryVtxGenerator::GenerateDecayProducts(
      assert( it4v != pdgMap.end() );
      TLorentzVector p4fin = it4v->second;
 
+     LOG("SimpleHNL", pDEBUG)
+       << "PDG code :" << pdgc
+       << "\n p4 (rest) = ( " << p4fin.E() << ", " << p4fin.Px() << ", " << p4fin.Py() << ", " << p4fin.Pz() << " )";
+
+     p4fin.Boost(bHNL);
+
+     LOG("SimpleHNL", pDEBUG)
+       << "\n p4 (lab) = ( " << p4fin.E() << ", " << p4fin.Px() << ", " << p4fin.Py() << ", " << p4fin.Pz() << " )";
+
      GHepStatus_t ist = kIStStableFinalState;
      event->AddParticle(pdgc, ist, decayed_HNL_id,-1,-1,-1, p4fin, v4);
      // idp++;
   }
+
+  LOG("SimpleHNL", pNOTICE)
+    << "Cleaning up";
 
   // Clean-up
   delete [] mass;

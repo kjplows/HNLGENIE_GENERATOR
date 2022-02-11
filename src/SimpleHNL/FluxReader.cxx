@@ -48,6 +48,8 @@ int genie::HNL::FluxReader::fParPDG;
 
 bool genie::HNL::FluxReader::fMaj;
 
+TH1D * genie::HNL::FluxReader::fMasterFlux;
+
 std::string genie::HNL::FluxReader::selectCoup( const double Ue42, const double Umu42, const double Ut42 ){
     // I am not sensitive to the tau coupling so only Ue42, Umu42 matter
 

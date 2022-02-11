@@ -101,6 +101,10 @@ namespace HNL{
 	std::vector< double > * generateVtx3P( const int parPDG, const int HType,
 					       const double inE = -1.0 );
 
+	extern TH1D * fMasterFlux;
+	inline void setFluxHisto( TH1D * hflux ){ fMasterFlux = hflux; }
+	inline double getEFromMaster(){ return fMasterFlux->GetRandom( ); }
+
 	/// interface to constructor
 	genie::HNL::SimpleHNL generateHNL( ); //default, uses this namespace's globals
 	genie::HNL::SimpleHNL generateHNL( const int PDG, const int parPDG,

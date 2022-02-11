@@ -183,7 +183,7 @@ GFluxI *        MonoEnergeticFluxDriver (void);
 GFluxI *        TH1FluxDriver           (void);
 #endif
 
-void AddHNLToPDGLibrary( int pdgc, double mHNL, double Ue42, double Um42 );
+void  AddHNLToPDGLibrary( int pdgc, double mHNL, double Ue42, double Um42 );
 int   SelectInitState    ( void ); // how am I gonna define this? 1 HNL?
 const EventRecordVisitorI * HNLDecayGenerator ( void );
 
@@ -248,13 +248,8 @@ int main(int argc, char ** argv)
   // Step 0: Get the HNL event generator
   // WIP!!!
   const EventRecordVisitorI * mcgen = HNLDecayGenerator();
-
-  // Event loop
-  int ievent = 0;
-
-  // Step cop-out: print a 'Hello World'
   LOG("gevgen_hnl", pNOTICE)
-    << " *** Hello world!";
+    << " *** Got event generator! Good!";
 
   // Step 1: Seek out the fluxes
   // grab '''path''' but numu + numubar + nue + nuebar
@@ -262,24 +257,23 @@ int main(int argc, char ** argv)
   GFluxI * ff = TH1FluxDriver();
   LOG("gevgen_hnl", pNOTICE)
     << " *** Flux routine executed! Good!";
-  exit(0);
 
-  // Step 2: Weight + add fluxes
+  // Step 2: The event loop
 
-  /*
+  int ievent = 0;
+  int dpdg = genie::kPdgHNL; // RETHERE make this configurable.
+
   while (1)
   {
-  // Step 3: Figure out what gets called when, in the event loop.
-  
      if(ievent == gOptNev) break;
 
      LOG("gevgen_hnl", pNOTICE)
           << " *** Generating event............ " << ievent;
 
      EventRecord * event = new EventRecord;
-     int target = SelectInitState();
-     int decay  = (int)gOptDecayMode;
-     Interaction * interaction = Interaction::NDecay(target,decay,dpdg);
+     int HNLtar = SelectInitState(); // I call it a "target". It isn't. I abuse notation.
+     int decay  = (int) genie::HNL::enums::kPiMu; // force N --> pi + mu. RETHERE
+     Interaction * interaction = Interaction::NDecay(HNLtar,decay,dpdg);
      event->AttachSummary(interaction);
 
      // Simulate decay     
@@ -295,7 +289,9 @@ int main(int argc, char ** argv)
 
      ievent++;
   } // event loop
-  */
+
+  LOG("gevgen_hnl", pDEBUG)
+    << "Event loop finished.";
 
   // Save the generated event tree & close the output file
   ntpw.Save();
@@ -403,6 +399,10 @@ GFluxI * TH1FluxDriver(void)
   
   LOG("gevgen_hnl", pNOTICE) << spectrum->GetEntries() << " entries in spectrum";
 
+  // RETHERE, VERY placeholder-y
+  // pass this flux to FluxReader to sample from
+  genie::HNL::FluxReader::setFluxHisto( spectrum );
+
   // save input flux
 
   TFile f("./input-flux.root","RECREATE");
@@ -466,6 +466,12 @@ const EventRecordVisitorI * HNLDecayGenerator(void)
     exit(1);
   }
   return mcgen;
+}
+//_________________________________________________________________________________________
+int SelectInitState(void){
+  int dpdg = genie::kPdgHNL; // RETHERE fix this!
+  
+  return dpdg; // I return one HNL. This is WAY simple.
 }
 //_________________________________________________________________________________________
 void GetCommandLineArgs(int argc, char ** argv)
