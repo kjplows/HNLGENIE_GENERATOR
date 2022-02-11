@@ -67,20 +67,16 @@ TParticlePDG * PDGLibrary::Find(int pdgc)
   return fDatabasePDG->GetParticle(pdgc);
 }
 //____________________________________________________________________________
-/*
-void AddSimpleHNL( double mass )
-{
-    TParticlePDG * HNL_particle = TParticlePDG( genie::kPdgHNL );
-    if( ! HNL_particle ){
-	fDatabasePDG->AddParticle( "HNL", "HNL", mass, false, 1.0, 0.0, "SimpleHNL", genie::kPdgHNL );
-	// the "DecayWidth==1.0" thing I've written is WAY off!! Need to integrate with HNLModules
-	// But first I've got to decide how to write coupling info!!
-    }
-    else{
-	assert( HNL_particle->Mass() == mass );
-    }
+void PDGLibrary::AddSimpleHNL( int pdgc, double mHNL, double Ue42, double Um42 )
+{ 
+  // use mass and couplings to get valid channels and add up their width
+  std::map< genie::HNL::enums::HNLDecay_t, double > validChannels = 
+    genie::HNL::Selector::GetValidChannelWidths( mHNL, Ue42, Um42, 0.0 );
+  double totGamma = genie::HNL::Selector::GetTotalDecayWidth( validChannels );
+  
+  // add generic HNL with correct mass
+  TParticlePDG * HNLParticle = fDatabasePDG->AddParticle( "HNL", "Generic Heavy Neutral Lepton", mHNL, false, totGamma, 0, "lepton", pdgc );
 }
-*/
 //____________________________________________________________________________
 bool PDGLibrary::LoadDBase(void)
 {

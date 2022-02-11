@@ -23,6 +23,7 @@
 #include <TParticlePDG.h>
 
 #include "PDG/PDGCodes.h"
+#include "SimpleHNL/SimpleHNL.h"
 
 namespace genie {
 
@@ -35,6 +36,8 @@ public:
   TDatabasePDG * DBase (void);
   TParticlePDG * Find  (int pdgc);
 
+  void AddSimpleHNL( int pdgc, double mHNL, double Ue42, double Um42 );
+
 private:
 
   PDGLibrary();
@@ -45,8 +48,6 @@ private:
 
   static PDGLibrary * fInstance;
   TDatabasePDG      * fDatabasePDG;
-
-  // void AddSimpleHNL( double mass );
   
   struct Cleaner {
       void DummyMethodAndSilentCompiler() { }
