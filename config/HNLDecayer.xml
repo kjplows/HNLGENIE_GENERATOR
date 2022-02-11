@@ -27,12 +27,26 @@
       ..........................................................................................
   -->
 
+<!--
+
   <param_set name="Default">
 
     <param type="double" name="hnl-mass">           genie::HNL::defaults/HNLDefaultMass     </param>
     <param type="double" name="hnl-e-coupling">     genie::HNL::defaults/HNLDefaultECoup    </param>
     <param type="double" name="hnl-mu-coupling">    genie::HNL::defaults/HNLDefaultMuCoup   </param>
     <param type="double" name="hnl-tau-coupling">   genie::HNL::defaults/HNLDefaultTauCoup  </param>
+    
+  </param_set>
+
+-->
+
+  <param_set name="Default">
+
+    <param type="double" name="hnl-mass">           0.255     </param>
+    <param type="double" name="hnl-e-coupling">     0.0       </param>
+    <param type="double" name="hnl-mu-coupling">    1.0       </param>
+    <param type="double" name="hnl-tau-coupling">   0.0       </param>
+    <param type="bool" name="isotropic-polarisation">     true      </param>
     
   </param_set>
 
