@@ -85,9 +85,11 @@ namespace HNL{
 	void selectParent( const int parPDG );
 	void selectNuType( const int HType );
 
-	template< typename T >
-	T * getFluxHist( std::string fin, std::string hName,
-			 genie::HNL::enums::parent_t par, genie::HNL::enums::nutype_t HType ); // read in hist of type T
+	TH1F * getFluxHist1F( std::string fin, std::string hName,
+			    genie::HNL::enums::parent_t par, genie::HNL::enums::nutype_t HType ); // need to overload for TH3
+
+	TH3D * getFluxHist3D( std::string fin, std::string hName,
+			    genie::HNL::enums::parent_t par, genie::HNL::enums::nutype_t HType ); // need to overload for TH3
 	
 	double generatePolMag( const int lPDG, const int parPDG );
 	std::vector< double > * generatePolDir( const int parPDG, const int HType );

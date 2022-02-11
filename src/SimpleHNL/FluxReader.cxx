@@ -70,7 +70,7 @@ std::string genie::HNL::FluxReader::selectCoup( const double Ue42, const double 
 int genie::HNL::FluxReader::selectMass( const double mN ){
     /// move mass to closest mass hypothesis
 
-    const massHyp_t masses[] = {
+    const massHyp_t massesHyp[] = {
 	kLight0Hyp,  kLight1Hyp,  kLight2Hyp,  kLight3Hyp,  kLight4Hyp,
 	kLight5Hyp,  kLight6Hyp,  kLight7Hyp,  kLight8Hyp,  kLight9Hyp,
 	kLightAHyp,  kLightBHyp,  kLightCHyp,  kLightDHyp,  kLightEHyp,
@@ -81,21 +81,40 @@ int genie::HNL::FluxReader::selectMass( const double mN ){
 	kHeavy5Hyp,  kHeavy6Hyp,  kHeavy7Hyp,  kHeavy8Hyp,  kHeavy9Hyp,
 	kHeavyAHyp,  kHeavyBHyp,  kHeavyCHyp,  kHeavyDHyp,  kHeavyEHyp,
 	kHeavyFHyp,  kHeavyGHyp,  kHeavyHHyp,  kHeavyIHyp,  kHeavyJHyp };
-    const int nMasses = sizeof(masses)/sizeof(masses[0]) - 1;
+    const int nMasses = sizeof(massesHyp)/sizeof(massesHyp[0]) - 1;
+
+    // because masses are kept in a *map*, gotta build array of the second elements!
+    double masses[ nMasses + 1 ];
+    for( int i = 0; i <= nMasses; i++ ){
+      massHyp_t thisHyp = massesHyp[i];
+      auto pos = massHypMap.find( thisHyp );
+      masses[i] = pos->second;
+      LOG("SimpleHNL", pNOTICE) 
+	<< "At position " << i << " the mass hypothesis is " << masses[i];
+    }
 
     if( mN < 0.0 || mN > masses[ nMasses ] ){
 	std::cerr << "genie::HNL::FluxReader::selectMass: Illegal mass mN = " <<
 	    mN << std::endl; exit(3); }
 
-    int mp = 0; fmN = 0.0;
+    int mp = -1; fmN = 0.0;
+    if( mN >= masses[ nMasses ] ){ mp = nMasses; fmN = masses[ nMasses ]; }
     while( masses[ mp + 1 ] < mN && mp < nMasses ){ mp++; } // decide interval
     
     // generally decide mass + point by closest endpoint in interval
-    const double dLeft  = mN - masses[ mp ];
+    const double dLeft  = std::abs( mN - masses[ mp ] );
     const double dRight = masses[ mp + 1 ] - mN;
 
-    fmN = ( dLeft > dRight ) ? masses[ mp ] : masses[ mp + 1 ];
-    mp  = ( dLeft > dRight ) ? mp : mp + 1;
+    LOG("SimpleHNL", pNOTICE)
+     << "Stats:"
+     << "\n Input mass: " << mN 
+     << "\n Choice interval: [ " << masses[mp] << ", " << masses[mp+1] << " ] " 
+     << "\n Left and right distance: " << dLeft << ", " << dRight
+     << "\n Chosen point: " << ( ( dLeft < dRight ) ? mp : mp + 1 ) << " ( "
+     << ( ( dLeft < dRight ) ? "LEFT )" : "RIGHT )" );
+
+    fmN = ( dLeft < dRight ) ? masses[ mp ] : masses[ mp + 1 ];
+    mp  = ( dLeft < dRight ) ? mp : mp + 1;
 
     return mp;
     
@@ -109,6 +128,7 @@ void genie::HNL::FluxReader::selectFile( const std::string strconf,
     filePath.append( selectCoup( Ue42, Umu42, Ut42 ) + "/" );
     const int mp = selectMass( mN );
     filePath.append( Form( "mp%02d", mp ) );
+    filePath.append( ".root" );
     fPath = filePath;
 }
 
@@ -132,9 +152,8 @@ void genie::HNL::FluxReader::selectNuType( const int hType ){
     else if( hType == 4 ){ fNuType == kNuebar; }
 }
 
-template< typename T >
-T * genie::HNL::FluxReader::getFluxHist( std::string fin, std::string hName,
-					 parent_t par, nutype_t HType ){
+TH1F * genie::HNL::FluxReader::getFluxHist1F( std::string fin, std::string hName,
+					      parent_t par, nutype_t HType ){
     // flux file contains 4 dirs: numu, numubar, nue, nuebar. Each has flux + helper hists
     TFile *f = TFile::Open( fin.c_str() );
 
@@ -167,7 +186,46 @@ T * genie::HNL::FluxReader::getFluxHist( std::string fin, std::string hName,
 	    " with name \"" << strHist.c_str() << "\" in path\n" <<
 	    deepDir->GetPath() << " . Exiting" << std::endl; exit(3); }
     
-    T * histPtr = dynamic_cast< T* >( deepDir->Get( strHist.c_str() ) );
+    TH1F * histPtr = dynamic_cast< TH1F* >( deepDir->Get( strHist.c_str() ) );
+    return histPtr;
+}
+
+// overloaded method, linker likes it better this way
+TH3D * genie::HNL::FluxReader::getFluxHist3D( std::string fin, std::string hName,
+					      parent_t par, nutype_t HType ){
+    // flux file contains 4 dirs: numu, numubar, nue, nuebar. Each has flux + helper hists
+    TFile *f = TFile::Open( fin.c_str() );
+
+    // descend into dir first!
+    TDirectory *baseDir = f->GetDirectory( "" );
+    std::string strType;
+    switch( HType ){
+	case kNumu:    strType = std::string( "numu" ); break;
+	case kNumubar: strType = std::string( "numubar" ); break;
+	case kNue:     strType = std::string( "nue" ); break;
+	case kNuebar:  strType = std::string( "nuebar" ); break;
+    }
+    TDirectory *deepDir = baseDir->GetDirectory( strType.c_str( ) );
+    if( deepDir == NULL ){ std::cerr << "genie::HNL::FluxReader::getFluxHist:" <<
+	    " Could not find " << "directory with name \"" << strType.c_str() <<
+	    "\". Exiting" << std::endl;
+	exit(3); }
+
+    // construct standardised name
+    std::string strHist = std::string( hName.c_str( ) );
+    switch( par ){
+	case kAll:  strHist.append("_all"); break;
+	case kPion: strHist.append("_pion"); break;
+	case kKaon: strHist.append("_kaon"); break;
+	case kMuon: strHist.append("_muon"); break;
+	case kNeuk: strHist.append("_neuk"); break;
+    }
+    if( !( deepDir->GetListOfKeys()->Contains( strHist.c_str() ) ) ){
+	std::cerr << "genie::HNL::FluxReader::getFluxHist: Could not find histogram " <<
+	    " with name \"" << strHist.c_str() << "\" in path\n" <<
+	    deepDir->GetPath() << " . Exiting" << std::endl; exit(3); }
+    
+    TH3D * histPtr = dynamic_cast< TH3D* >( deepDir->Get( strHist.c_str() ) );
     return histPtr;
 }
 
@@ -224,7 +282,7 @@ std::vector< double > * genie::HNL::FluxReader::generatePolDir( const int parPDG
     std::string polHistName = std::string("polHist");
     selectParent( parPDG );
     selectNuType( HType );
-    TH3D * polHist = getFluxHist< TH3D >( fPath, polHistName, fParent, fNuType );
+    TH3D * polHist = getFluxHist3D( fPath, polHistName, fParent, fNuType );
 
     // now get random.
     // polHist will be unit vector components, i.e. on the unit sphere
@@ -249,7 +307,7 @@ std::vector< double > * genie::HNL::FluxReader::generateVtx3X( const int parPDG,
     std::string vtxHistName = std::string("vtxHist");
     selectParent( parPDG );
     selectNuType( HType );
-    TH3D * vtxHist = getFluxHist< TH3D >( fPath, vtxHistName, fParent, fNuType );
+    TH3D * vtxHist = getFluxHist3D( fPath, vtxHistName, fParent, fNuType );
 
     // now get random.
     double ux = 0.0, uy = 0.0, uz = 0.0;
@@ -268,7 +326,7 @@ double genie::HNL::FluxReader::generateVtxE( const int parPDG, const int HType )
     std::string eneHistName = std::string("eneHist");
     selectParent( parPDG );
     selectNuType( HType );
-    TH1F * eneHist = getFluxHist< TH1F >( fPath, eneHistName, fParent, fNuType );
+    TH1F * eneHist = getFluxHist1F( fPath, eneHistName, fParent, fNuType );
 
     // now get random.
     double E = eneHist->GetRandom( );
@@ -282,7 +340,7 @@ std::vector< double > * genie::HNL::FluxReader::generateVtx3P( const int parPDG,
     std::string momHistName = std::string("momHist");
     selectParent( parPDG );
     selectNuType( HType );
-    TH3D * momHist = getFluxHist< TH3D >( fPath, momHistName, fParent, fNuType );
+    TH3D * momHist = getFluxHist3D( fPath, momHistName, fParent, fNuType );
 
     // now get random.
     // momHist will be unit vector components, i.e. on the unit sphere
