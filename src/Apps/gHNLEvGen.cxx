@@ -18,6 +18,7 @@
 		     [-e eCoupling]  Currently under pseudounitarity
 		     [-m muCoupling] Defaults to 1:1
 		     [-f path/to/flux/file] Programme searches for this if not given
+		      -E energy_range. Same syntax as gevgen's '-e' option.
 	              -g geometry
                      [-L geometry_length_units] 
                      [-D geometry_density_units]
@@ -59,6 +60,9 @@
 	      Path to (non-standard) input flux file
 	      If user does not give this input, search from suite of standard fluxes
 	      to be included with this application
+
+	   -E
+	      Energy range for flux. Can be a comma-separated list of values. See gevgen -e syntax.
 
            -g 
               Input 'geometry'.
@@ -141,6 +145,7 @@
 #include "PDG/PDGUtils.h"
 #include "PDG/PDGLibrary.h"
 #include "SimpleHNL/DummyHNLInteractionListGenerator.h"
+#include "SimpleHNL/FluxReader.h"
 #include "SimpleHNL/HNLDecayer.h"
 #include "SimpleHNL/SimpleHNL.h"
 #include "Utils/StringUtils.h"
@@ -149,6 +154,15 @@
 #include "Utils/AppInit.h"
 #include "Utils/RunOpt.h"
 #include "Utils/CmdLnArgParser.h"
+
+#ifdef __GENIE_FLUX_DRIVERS_ENABLED__
+#ifdef __GENIE_GEOM_DRIVERS_ENABLED__
+#define __CAN_GENERATE_EVENTS_USING_A_FLUX_OR_TGTMIX__
+#include "FluxDrivers/GCylindTH1Flux.h"
+#include "FluxDrivers/GMonoEnergeticFlux.h"
+#include "Geo/PointGeomAnalyzer.h"
+#endif
+#endif
 
 using std::string;
 using std::vector;
@@ -159,34 +173,48 @@ using namespace genie;
 // function prototypes
 void  GetCommandLineArgs ( int argc, char ** argv );
 void  PrintSyntax        ( void );
+
+#ifdef __CAN_GENERATE_EVENTS_USING_A_FLUX_OR_TGTMIX__
+void            GenerateEventsUsingFluxOrTgtMix();
+GeomAnalyzerI * GeomDriver              (void);
+GFluxI *        FluxDriver              (void);
+GFluxI *        MonoEnergeticFluxDriver (void);
+GFluxI *        TH1FluxDriver           (void);
+#endif
+
 int   SelectInitState    ( void ); // how am I gonna define this? 1 HNL?
 const EventRecordVisitorI * HNLDecayGenerator ( void );
 
 //
-string          kDefOptGeomLUnits   = "mm";    // default geometry length units
-string          kDefOptGeomDUnits   = "g_cm3"; // default geometry density units
-NtpMCFormat_t   kDefOptNtpFormat    = kNFGHEP; // default event tree format   
-string          kDefOptEvFilePrefix = "gntp";
-string          kDefOptFluxFilePath = "${GENIE}/data/flux/HNL/";
+string          kDefOptGeomLUnits    = "mm";    // default geometry length units
+string          kDefOptGeomDUnits    = "g_cm3"; // default geometry density units
+NtpMCFormat_t   kDefOptNtpFormat     = kNFGHEP; // default event tree format   
+string          kDefOptEvFilePrefix  = "gntp";
+string          kDefGENIELocation    = std::getenv("GENIE"); // GENIE location
+string          kDefOptFluxSpecPath  = "/data/flux/HNL/FHC"; // where in ${GENIE} to look for HNL fluxes
+string          kDefOptFluxFilePath  = kDefGENIELocation + kDefOptFluxSpecPath;
 
 //
-Long_t             gOptRunNu        = 1000;                // run number
-int                gOptNev          = 10;                  // number of events to generate
-int                gOptCpL          = 14;                  // co-produced lepton PDG
-double             gOptHNLMass      = 0.255;               // HNL mass
-int                gOptHNLKind      = 2;                   // HNL kind. 0 = nu, 1 = nubar, 2 = mix
-bool               gOptIsMajorana   = false;               // Is Majorana? True ==> HNL kind set to 0
-double             gOptECoupling    = 1.0;                 // |U_e4|^2
-double             gOptMuCoupling   = 1.0;                 // |U_mu4|^2
-string             gOptFluxFilePath = kDefOptFluxFilePath; // path to flux files
-string             gOptEvFilePrefix = kDefOptEvFilePrefix; // event file prefix
-bool               gOptUsingRootGeom = false;              // using root geom or target mix?
-map<int,double>    gOptTgtMix;                             // target mix  (tgt pdg -> wght frac) / if not using detailed root geom
-string             gOptRootGeom;                           // input ROOT file with realistic detector geometry
-string             gOptRootGeomTopVol = "";                // input geometry top event generation volume 
-double             gOptGeomLUnits = 0;                     // input geometry length units 
-double             gOptGeomDUnits = 0;                     // input geometry density units 
-long int           gOptRanSeed = -1;                       // random number seed
+Long_t             gOptRunNu         = 1000;                // run number
+int                gOptNev           = 10;                  // number of events to generate
+int                gOptCpL           = 14;                  // co-produced lepton PDG
+double             gOptHNLMass       = 0.255;               // HNL mass
+int                gOptHNLKind       = 2;                   // HNL kind. 0 = nu, 1 = nubar, 2 = mix
+bool               gOptIsMajorana    = false;               // Is Majorana? True ==> HNL kind set to 0
+double             gOptECoupling     = 1.0;                 // |U_e4|^2
+double             gOptMuCoupling    = 1.0;                 // |U_mu4|^2
+string             gOptFluxSpecPath  = kDefOptFluxSpecPath;
+string             gOptFluxFilePath  = kDefOptFluxFilePath; // path to flux files
+string             gOptEvFilePrefix  = kDefOptEvFilePrefix; // event file prefix
+double             gOptNuEnergy      = 0.0;                 // low-edge of energy range  
+double             gOptNuEnergyRange = -1.0;                // width of energy range
+bool               gOptUsingRootGeom = false;               // using root geom or target mix?
+map<int,double>    gOptTgtMix;                              // target mix  (tgt pdg -> wght frac) / if not using detailed root geom
+string             gOptRootGeom;                         // input ROOT file with realistic detector geometry
+string             gOptRootGeomTopVol = "";              // input geometry top event generation volume 
+double             gOptGeomLUnits = 0;                   // input geometry length units 
+double             gOptGeomDUnits = 0;                   // input geometry density units 
+long int           gOptRanSeed = -1;                     // random number seed
 
 //_________________________________________________________________________________________
 int main(int argc, char ** argv)
@@ -220,10 +248,14 @@ int main(int argc, char ** argv)
   // Step cop-out: print a 'Hello World'
   LOG("gevgen_hnl", pNOTICE)
     << " *** Hello world!";
-  exit(0);
 
   // Step 1: Seek out the fluxes
   // grab '''path''' but numu + numubar + nue + nuebar
+
+  GFluxI * ff = TH1FluxDriver();
+  LOG("gevgen_hnl", pNOTICE)
+    << " *** Flux routine executed! Good!";
+  exit(0);
 
   // Step 2: Weight + add fluxes
 
@@ -264,6 +296,98 @@ int main(int argc, char ** argv)
   LOG("gevgen_hnl", pNOTICE) << "Done!";
 
   return 0;
+}
+//_________________________________________________________________________________________
+// This is supposed to resolve the correct flux file
+// Open question: Do I want to invoke gevgen from within here? I'd argue not.
+GFluxI * TH1FluxDriver(void)
+{
+  //
+  //
+  flux::GCylindTH1Flux * flux = new flux::GCylindTH1Flux;
+  TH1F * spectrum = 0;
+
+  int flux_entries = 100000;
+
+  double emin = gOptNuEnergy;
+  double emax = gOptNuEnergy+gOptNuEnergyRange;
+  double de   = gOptNuEnergyRange;
+
+  // read in mass of HNL and decide which fluxes to use
+  
+  assert(gOptHNLMass >= 0.0);
+  assert(gOptHNLMass < 0.5); // mass is in GeV! Less than m_K0 ~= 0.497 GeV
+
+  if(gOptHNLMass == 0.0){
+    LOG("gevgen_hnl", pERROR) 
+      << "You have picked a mass-0 HNL. You really should be using the standard GENIE executables that deal with SM nu."
+      << "\nFunctionality currently not supported, exiting.";
+    exit(0);
+  }
+
+  // select coupling configuration & mass point
+  string coup = genie::HNL::FluxReader::selectCoup( gOptECoupling, gOptMuCoupling, 0.0 );
+
+  LOG("gevgen_hnl", pDEBUG)
+    << "Couplings inserted: e: " << gOptECoupling << ", mu: " << gOptMuCoupling
+    << " ==> coupling configuration = " << coup.c_str();
+
+  int closest_masspoint = genie::HNL::FluxReader::selectMass( gOptHNLMass );
+
+  LOG("gevgen_hnl", pDEBUG)
+    << "Mass inserted: " << gOptHNLMass << " GeV ==> mass point " << closest_masspoint;
+  LOG("gevgen_hnl", pDEBUG)
+    << "Using fluxes in base path " << gOptFluxFilePath.c_str();
+  
+  genie::HNL::FluxReader::selectFile( gOptFluxFilePath, gOptECoupling, gOptMuCoupling, 0., gOptHNLMass );
+  string finPath = genie::HNL::FluxReader::fPath;
+  LOG("gevgen_hnl", pDEBUG)
+    << "Looking for fluxes in " << finPath.c_str();
+  assert( !gSystem->AccessPathName( finPath.c_str()) );
+
+  // extract specified flux histogram from input root file
+
+
+  string hFluxName = Form( "hHNLFluxCenterAcc_%d", closest_masspoint );
+
+  TH1F *hfluxAllMu    = genie::HNL::FluxReader::getFluxHist1F( finPath, hFluxName, genie::HNL::enums::kAll, genie::HNL::enums::kNumu );
+  TH1F *hfluxAllMubar = genie::HNL::FluxReader::getFluxHist1F( finPath, hFluxName, genie::HNL::enums::kAll, genie::HNL::enums::kNumubar );
+  TH1F *hfluxAllE     = genie::HNL::FluxReader::getFluxHist1F( finPath, hFluxName, genie::HNL::enums::kAll, genie::HNL::enums::kNue );
+  TH1F *hfluxAllEbar  = genie::HNL::FluxReader::getFluxHist1F( finPath, hFluxName, genie::HNL::enums::kAll, genie::HNL::enums::kNuebar );
+
+  assert(hfluxAllMu);
+  assert(hfluxAllMubar);
+  assert(hfluxAllE);
+  assert(hfluxAllEbar);
+
+  LOG("gevgen_hnl", pDEBUG)
+    << "The histos have entries and max: "
+    << "\nNumu:    " << hfluxAllMu->GetEntries() << " entries with max = " << hfluxAllMu->GetMaximum()
+    << "\nNumubar: " << hfluxAllMubar->GetEntries() << " entries with max = " << hfluxAllMubar->GetMaximum()
+    << "\nNue:     " << hfluxAllE->GetEntries() << " entries with max = " << hfluxAllE->GetMaximum()
+    << "\nNuebar:  " << hfluxAllEbar->GetEntries() << " entries with max = " << hfluxAllEbar->GetMaximum();
+
+  // let's build the mixed flux.
+  // RETHERE - allow for graceful selection! Need an option for mix
+  
+  spectrum = (TH1F*) hfluxAllMu->Clone();
+  spectrum->Add( hfluxAllMubar, 1.0 );
+  spectrum->Add( hfluxAllE, 1.0 );
+  spectrum->Add( hfluxAllEbar, 1.0 );
+  
+  spectrum->SetNameTitle("spectrum","HNL_flux");
+  spectrum->SetDirectory(0);
+  for(int ibin = 1; ibin <= hfluxAllMu->GetNbinsX(); ibin++) {
+    if(hfluxAllMu->GetBinLowEdge(ibin) + hfluxAllMu->GetBinWidth(ibin) > emax ||
+       hfluxAllMu->GetBinLowEdge(ibin) < emin) {
+      spectrum->SetBinContent(ibin, 0);
+    }
+  }
+  
+  LOG("gevgen_hnl", pNOTICE) << spectrum->GetEntries() << " entries in spectrum";
+
+  // just return this for now to see how well this works
+  return flux;
 }
 //_________________________________________________________________________________________
 void GetCommandLineArgs(int argc, char ** argv)
@@ -385,12 +509,42 @@ void GetCommandLineArgs(int argc, char ** argv)
     LOG("gevgen_hnl", pDEBUG)
       << "Reading path to flux files";
     // TODO: check that flux files exist, throw exception if not!
-    gOptFluxFilePath = parser.ArgAsString('f');
+    gOptFluxSpecPath = parser.ArgAsString('f');
+    gOptFluxFilePath = kDefGENIELocation + '/' + gOptFluxSpecPath;
   } else {
     LOG("gevgen_hnl", pDEBUG)
       << "Unspecified path to flux files - using default";
     gOptFluxFilePath = kDefOptFluxFilePath;
   } //-f
+
+  //
+  // energy range
+  //
+
+  // neutrino energy
+  if( parser.OptionExists('E') ) {
+    LOG("gevgen_hnl", pINFO) << "Reading neutrino energy";
+    string nue = parser.ArgAsString('E');
+
+    // is it just a value or a range (comma separated set of values)
+    if(nue.find(",") != string::npos) {
+       // split the comma separated list
+       vector<string> nurange = utils::str::Split(nue, ",");
+       assert(nurange.size() == 2);   
+       double emin = atof(nurange[0].c_str());
+       double emax = atof(nurange[1].c_str());
+       assert(emax>emin && emin>=0);
+       gOptNuEnergy      = emin;
+       gOptNuEnergyRange = emax-emin;
+    } else {
+       gOptNuEnergy       = atof(nue.c_str());
+       gOptNuEnergyRange = -1;
+    }
+  } else {
+    LOG("gevgen_hnl", pFATAL) << "Unspecified neutrino energy - Exiting";
+    PrintSyntax();
+    exit(1);
+  } //-E
 
   //
   // geometry
@@ -575,6 +729,7 @@ void PrintSyntax(void)
    << "\n            [-e eCoupling]"
    << "\n            [-m muCoupling]"
    << "\n            [-f path/to/flux/file]"
+   << "\n             -E energy_range"
    << "\n             -g geometry"
    << "\n            [-t top_volume_name_at_geom]"
    << "\n            [-L length_units_at_geom]"
@@ -588,5 +743,3 @@ void PrintSyntax(void)
    << " Please also look at the source code: $GENIE/src/Apps/gHNLEvGen.cxx"
    << "\n";
 }
-//_________________________________________________________________________________________
-
