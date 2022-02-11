@@ -18,4 +18,8 @@
 #pragma link C++ class genie::HNL::SimpleHNL;
 #pragma link C++ class genie::HNL::HNLDecayer;
 
+#pragma link C++ class genie::DummyHNLInteractionListGenerator;
+#pragma link C++ class genie::HNLDummyPXSec;
+#pragma link C++ class genie::HNLDecayPrimaryVtxGenerator;
+
 #endif

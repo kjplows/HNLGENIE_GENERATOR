@@ -49,6 +49,7 @@
    <config alg="genie::GLRESGenerator">              GLRESGenerator.xml              </config>
    <config alg="genie::NucleonDecayPrimaryVtxGenerator"> NucleonDecayPrimaryVtxGenerator.xml </config>
    <config alg="genie::NeutronOscPrimaryVtxGenerator"> NeutronOscPrimaryVtxGenerator.xml </config>
+   <config alg="genie::HNLDecayPrimaryVtxGenerator"> HNLDecayPrimaryVtxGenerator.xml </config>
 
    <!-- ****** CONFIGURATION FOR LIST-GENERATORS ****** -->
    <config alg="genie::QELInteractionListGenerator">           QELInteractionListGenerator.xml       </config>
@@ -156,6 +157,7 @@
    <config alg="genie::StrumiaVissaniIBDPXSec">             StrumiaVissaniIBDPXSec.xml             </config>
    <config alg="genie::DummyPXSec">                         Default.xml                            </config>
    <config alg="genie::NOscDummyPXSec">                     Default.xml                            </config>
+   <config alg="genie::HNLDummyPXSec">                      Default.xml                            </config>
 
    <!--  ****** CONFIGURATION FOR NUCLEAR ENV. ALGORITHMS ****** -->
    <config alg="genie::NuclearModelMap">             NuclearModelMap.xml             </config>

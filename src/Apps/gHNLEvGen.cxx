@@ -247,7 +247,7 @@ int main(int argc, char ** argv)
 
   // Step 0: Get the HNL event generator
   // WIP!!!
-  // const EventRecordVisitorI * mcgen = HNLDecayGenerator();
+  const EventRecordVisitorI * mcgen = HNLDecayGenerator();
 
   // Event loop
   int ievent = 0;
@@ -452,6 +452,20 @@ void AddHNLToPDGLibrary( int pdgc, double mHNL, double Ue42, double Um42 )
 {
   PDGLibrary *pdglib = PDGLibrary::Instance();
   pdglib->AddSimpleHNL( pdgc, mHNL, Ue42, Um42 );
+}
+//_________________________________________________________________________________________
+const EventRecordVisitorI * HNLDecayGenerator(void)
+{
+  string sname   = "genie::EventGenerator";
+  string sconfig = "HNLDecay";
+  AlgFactory *algf = AlgFactory::Instance();
+  const EventRecordVisitorI * mcgen = 
+    dynamic_cast<const EventRecordVisitorI *> (algf->GetAlgorithm(sname,sconfig));
+  if(!mcgen) {
+    LOG("gevgen_hnl", pFATAL) << "Couldn't instantiate the HNL decay generator";
+    exit(1);
+  }
+  return mcgen;
 }
 //_________________________________________________________________________________________
 void GetCommandLineArgs(int argc, char ** argv)
