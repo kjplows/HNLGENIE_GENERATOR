@@ -141,6 +141,7 @@
 #include "Messenger/Messenger.h"
 #include "Ntuple/NtpWriter.h"
 #include "Numerical/RandomGen.h"
+#include "PDG/PDGCodeList.h"
 #include "PDG/PDGCodes.h"
 #include "PDG/PDGUtils.h"
 #include "PDG/PDGLibrary.h"
@@ -182,6 +183,7 @@ GFluxI *        MonoEnergeticFluxDriver (void);
 GFluxI *        TH1FluxDriver           (void);
 #endif
 
+void AddHNLToPDGLibrary( int pdgc, double mHNL, double Ue42, double Um42 );
 int   SelectInitState    ( void ); // how am I gonna define this? 1 HNL?
 const EventRecordVisitorI * HNLDecayGenerator ( void );
 
@@ -197,23 +199,28 @@ string          kDefOptFluxFilePath  = kDefGENIELocation + kDefOptFluxSpecPath;
 //
 Long_t             gOptRunNu         = 1000;                // run number
 int                gOptNev           = 10;                  // number of events to generate
+
 int                gOptCpL           = 14;                  // co-produced lepton PDG
+int                gOptHNLPdgCode    = 2000020000;          // pdg code. Set for now.
 double             gOptHNLMass       = 0.255;               // HNL mass
 int                gOptHNLKind       = 2;                   // HNL kind. 0 = nu, 1 = nubar, 2 = mix
 bool               gOptIsMajorana    = false;               // Is Majorana? True ==> HNL kind set to 0
 double             gOptECoupling     = 1.0;                 // |U_e4|^2
 double             gOptMuCoupling    = 1.0;                 // |U_mu4|^2
+
 string             gOptFluxSpecPath  = kDefOptFluxSpecPath;
 string             gOptFluxFilePath  = kDefOptFluxFilePath; // path to flux files
 string             gOptEvFilePrefix  = kDefOptEvFilePrefix; // event file prefix
 double             gOptNuEnergy      = 0.0;                 // low-edge of energy range  
 double             gOptNuEnergyRange = -1.0;                // width of energy range
+
 bool               gOptUsingRootGeom = false;               // using root geom or target mix?
 map<int,double>    gOptTgtMix;                              // target mix  (tgt pdg -> wght frac) / if not using detailed root geom
 string             gOptRootGeom;                         // input ROOT file with realistic detector geometry
 string             gOptRootGeomTopVol = "";              // input geometry top event generation volume 
 double             gOptGeomLUnits = 0;                   // input geometry length units 
 double             gOptGeomDUnits = 0;                   // input geometry density units 
+
 long int           gOptRanSeed = -1;                     // random number seed
 
 //_________________________________________________________________________________________
@@ -300,12 +307,14 @@ int main(int argc, char ** argv)
 //_________________________________________________________________________________________
 // This is supposed to resolve the correct flux file
 // Open question: Do I want to invoke gevgen from within here? I'd argue not.
+//............................................................................
+#ifdef __CAN_GENERATE_EVENTS_USING_A_FLUX_OR_TGTMIX__
 GFluxI * TH1FluxDriver(void)
 {
   //
   //
   flux::GCylindTH1Flux * flux = new flux::GCylindTH1Flux;
-  TH1F * spectrum = 0;
+  TH1D * spectrum = 0;
 
   int flux_entries = 100000;
 
@@ -370,10 +379,18 @@ GFluxI * TH1FluxDriver(void)
   // let's build the mixed flux.
   // RETHERE - allow for graceful selection! Need an option for mix
   
-  spectrum = (TH1F*) hfluxAllMu->Clone();
-  spectrum->Add( hfluxAllMubar, 1.0 );
-  spectrum->Add( hfluxAllE, 1.0 );
-  spectrum->Add( hfluxAllEbar, 1.0 );
+  TH1F * spectrumF = (TH1F*) hfluxAllMu->Clone();
+  spectrumF->Add( hfluxAllMubar, 1.0 );
+  spectrumF->Add( hfluxAllE, 1.0 );
+  spectrumF->Add( hfluxAllEbar, 1.0 );
+
+  // copy into TH1D, *do not use the Copy() function!*
+  const int nbins = spectrumF->GetNbinsX();
+  spectrum = new TH1D( "s", "s", nbins, spectrumF->GetBinLowEdge(1), 
+		       spectrumF->GetBinLowEdge(nbins) + spectrumF->GetBinWidth(nbins) );
+  for( Int_t ib = 0; ib <= nbins; ib++ ){
+    spectrum->SetBinContent( ib, spectrumF->GetBinContent(ib) );
+  }
   
   spectrum->SetNameTitle("spectrum","HNL_flux");
   spectrum->SetDirectory(0);
@@ -386,8 +403,55 @@ GFluxI * TH1FluxDriver(void)
   
   LOG("gevgen_hnl", pNOTICE) << spectrum->GetEntries() << " entries in spectrum";
 
-  // just return this for now to see how well this works
-  return flux;
+  // save input flux
+
+  TFile f("./input-flux.root","RECREATE");
+  spectrum->Write();
+  f.Close();
+  LOG("gevgen_hnl", pDEBUG) 
+    << "Written spectrum to ./input-flux.root";
+
+  // before doing anything else, add HNL pdg code to PDGLibrary
+  // otherwise the FluxDriver won't play ball
+  AddHNLToPDGLibrary( gOptHNLPdgCode, gOptHNLMass, gOptECoupling, gOptMuCoupling);
+  LOG("gevgen_hnl", pDEBUG) 
+    << "Added HNL with PDG code " << gOptHNLPdgCode << " to PDGLibrary.";
+  /*
+  PDGCodeList * pcl( false );
+  bool HNLExists = pcl->ExistsInPDGLibrary( gOptHNLPdgCode );
+  if( !HNLExists ){
+    AddHNLToPDGLibrary( gOptHNLPdgCode, gOptHNLMass, gOptECoupling, gOptMuCoupling);
+    LOG("gevgen_hnl", pDEBUG) 
+      << "Added HNL with PDG code " << gOptHNLPdgCode << " to PDGLibrary.";
+  }
+  else{
+    LOG("gevgen_hnl", pDEBUG) 
+      << "HNL with PDG code " << gOptHNLPdgCode << " exists in PDGLibrary.";
+  }
+  */
+
+  // gevgen has these firing exactly on "z" (==beam?) direction at centre
+  // let's keep this code for now before tinkering - FluxReader has capability to generate momenta
+  // given input sample from fluxes
+
+  TVector3 bdir (0.0,0.0,1.0);
+  TVector3 bspot(0.0,0.0,1.0);
+
+  flux->SetNuDirection      (bdir);
+  flux->SetBeamSpot         (bspot);
+  flux->SetTransverseRadius (-1);
+  flux->AddEnergySpectrum   (gOptHNLPdgCode, spectrum);
+
+  GFluxI * flux_driver = dynamic_cast<GFluxI *>(flux);
+  return flux_driver;
+}
+//............................................................................
+#endif // #ifdef __CAN_GENERATE_EVENTS_USING_A_FLUX_OR_TGTMIX__
+//_________________________________________________________________________________________
+void AddHNLToPDGLibrary( int pdgc, double mHNL, double Ue42, double Um42 )
+{
+  PDGLibrary *pdglib = PDGLibrary::Instance();
+  pdglib->AddSimpleHNL( pdgc, mHNL, Ue42, Um42 );
 }
 //_________________________________________________________________________________________
 void GetCommandLineArgs(int argc, char ** argv)
