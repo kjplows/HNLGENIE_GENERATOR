@@ -271,9 +271,18 @@ int main(int argc, char ** argv)
           << " *** Generating event............ " << ievent;
 
      EventRecord * event = new EventRecord;
-     int HNLtar = SelectInitState(); // I call it a "target". It isn't. I abuse notation.
+     int HNLprobe = SelectInitState();
      int decay  = (int) genie::HNL::enums::kPiMu; // force N --> pi + mu. RETHERE
-     Interaction * interaction = Interaction::NDecay(HNLtar,decay,dpdg);
+
+     // select energy and build 4-momentum
+     // RETHERE - Sampling from all fluxes put together, this is VERY wrong
+     double EHNL = genie::HNL::FluxReader::getEFromMaster();
+     double PHNL = std::sqrt( EHNL*EHNL - gOptHNLMass * gOptHNLMass );
+
+     TLorentzVector p4HNL( 0.0, 0.0, PHNL, EHNL );
+
+     // RETHERE this should not be NDecay (that tells app that we actually have NucleonDecay. We don't. RETHERE)
+     Interaction * interaction = Interaction::HNLDecay(HNLprobe,decay,p4HNL);
      event->AttachSummary(interaction);
 
      // Simulate decay     
