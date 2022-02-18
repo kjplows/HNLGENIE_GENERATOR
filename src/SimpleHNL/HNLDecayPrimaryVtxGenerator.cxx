@@ -51,19 +51,20 @@ void HNLDecayPrimaryVtxGenerator::ProcessEventRecord(
 		     GHepRecord * event ) const
 {
   Interaction * interaction = event->Summary();
-  fCurrInitStatePdg = interaction->InitState().Tgt().Pdg();
+  //fCurrInitStatePdg = interaction->InitState().Tgt().Pdg();
+  fCurrInitStatePdg = interaction->InitState().ProbePdg();
   fCurrDecayMode = (genie::HNL::enums::HNLDecay_t) interaction->ExclTag().DecayMode();
-  fCurrDecayedHNL = interaction->InitState().Tgt().HitNucPdg();
+  //fCurrDecayedHNL = interaction->InitState().Tgt().HitNucPdg();
 
   LOG("SimpleHNL", pNOTICE)
     << "Simulating decay with fCurrDecayMode = " << fCurrDecayMode 
-    << " and fCurrDecayedHNL = " << fCurrDecayedHNL 
     << " for an initial state with code: " << fCurrInitStatePdg;
 
   //fNucleonIsBound = (pdg::IonPdgCodeToA(fCurrInitStatePdg) > 1);
 
   // RETHERE - Sampling from all fluxes put together, this is VERY wrong
-  double EHNL = genie::HNL::FluxReader::getEFromMaster();
+  // double EHNL = genie::HNL::FluxReader::getEFromMaster();
+  double EHNL = interaction->InitState().ProbeE(kRfLab);
 
   this->AddInitialState(event, EHNL);
   this->GenerateDecayedHNLPosition(event);
@@ -111,6 +112,7 @@ void HNLDecayPrimaryVtxGenerator::AddInitialState(
   int ipdg = fCurrInitStatePdg;
 
   // Decayed HNL
+  /*
   int dpdg = fCurrDecayedHNL;
 
   if(dpdg != ipdg) {
@@ -123,6 +125,7 @@ void HNLDecayPrimaryVtxGenerator::AddInitialState(
     exception.SwitchOnFastForward();
     throw exception;
   }
+  */
   // add initial HNL
   double mn  = PDGLibrary::Instance()->Find(ipdg)->Mass();
   TLorentzVector p4i(0,0,0,mn);
@@ -131,6 +134,7 @@ void HNLDecayPrimaryVtxGenerator::AddInitialState(
   //GetEnergyFromFlux(); // sets fEnergy
   //double phnl = std::sqrt( fEnergy * fEnergy - mn * mn );
   //double bhnl = phnl / fEnergy;
+ 
   double phnl = std::sqrt( EHNL * EHNL - mn * mn );
   double bhnl = phnl / EHNL;
 
@@ -138,7 +142,7 @@ void HNLDecayPrimaryVtxGenerator::AddInitialState(
   TLorentzVector p4iLAB = p4i; p4iLAB.Boost(p3i);
 
   // RETHERE TODO: maybe want a v4LAB?
-  event->AddParticle(dpdg,stis,-1,-1,-1,-1, p4iLAB, v4);
+  event->AddParticle(ipdg,stis,-1,-1,-1,-1, p4iLAB, v4);
   // add decayed HNL
   // event->AddParticle(dpdg,stdc,0,-1,-1,-1, p4iLAB, v4);
 

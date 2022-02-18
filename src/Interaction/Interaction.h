@@ -150,6 +150,7 @@ public:
   static Interaction * NOsc      (int tgt, int annihilation_mode=-1);
   static Interaction * ASK       (int tgt, int probe, double E=0);
   static Interaction * ASK       (int tgt, int probe, const TLorentzVector & p4probe);
+  static Interaction * HNLDecay  (int probe, int decay_mode, const TLorentzVector & p4probe);
 
 private:
 

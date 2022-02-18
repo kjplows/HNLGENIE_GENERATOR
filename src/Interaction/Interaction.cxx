@@ -980,4 +980,15 @@ Interaction * Interaction::ASK(
 
   return interaction;
 }
+//___________________________________________________________________________
+Interaction * Interaction::HNLDecay(int probe, int decay_mode, const TLorentzVector & p4probe)
+{
+  Interaction * interaction = 
+     Interaction::Create(0, probe, kScNull, kIntHNLDecay);
+  interaction->ExclTagPtr()->SetDecayMode(decay_mode);
 
+  InitialState * init_state = interaction->InitStatePtr();
+  init_state->TgtPtr()->SetHitNucPdg(0); // this does not have any meaning for HNL
+
+  return interaction;
+}
