@@ -48,7 +48,7 @@ HNLDecayPrimaryVtxGenerator::~HNLDecayPrimaryVtxGenerator()
 }
 //____________________________________________________________________________
 void HNLDecayPrimaryVtxGenerator::ProcessEventRecord(
-  GHepRecord * event) const
+		     GHepRecord * event ) const
 {
   Interaction * interaction = event->Summary();
   fCurrInitStatePdg = interaction->InitState().Tgt().Pdg();
@@ -62,10 +62,13 @@ void HNLDecayPrimaryVtxGenerator::ProcessEventRecord(
 
   //fNucleonIsBound = (pdg::IonPdgCodeToA(fCurrInitStatePdg) > 1);
 
-  this->AddInitialState(event);
+  // RETHERE - Sampling from all fluxes put together, this is VERY wrong
+  double EHNL = genie::HNL::FluxReader::getEFromMaster();
+
+  this->AddInitialState(event, EHNL);
   this->GenerateDecayedHNLPosition(event);
   //this->GenerateFermiMomentum(event);
-  this->GenerateDecayProducts(event);
+  this->GenerateDecayProducts(event, EHNL);
 }
 //____________________________________________________________________________
 void HNLDecayPrimaryVtxGenerator::GetEnergyFromFlux() const
@@ -83,7 +86,7 @@ void HNLDecayPrimaryVtxGenerator::GetEnergyFromFlux() const
 }
 //____________________________________________________________________________
 void HNLDecayPrimaryVtxGenerator::AddInitialState(
-  GHepRecord * event) const
+	          GHepRecord * event, double EHNL ) const
 {
 //
 // Add initial state in the event record.
@@ -128,24 +131,34 @@ void HNLDecayPrimaryVtxGenerator::AddInitialState(
   //GetEnergyFromFlux(); // sets fEnergy
   //double phnl = std::sqrt( fEnergy * fEnergy - mn * mn );
   //double bhnl = phnl / fEnergy;
+  double phnl = std::sqrt( EHNL * EHNL - mn * mn );
+  double bhnl = phnl / EHNL;
 
-  //TVector3 p3i(0.0,0.0,bhnl);
-  //p4i.Boost(p3i);
+  TVector3 p3i(0.0,0.0,bhnl);
+  TLorentzVector p4iLAB = p4i; p4iLAB.Boost(p3i);
 
-  event->AddParticle(dpdg,stis,-1,-1,-1,-1, p4i, v4);
+  // RETHERE TODO: maybe want a v4LAB?
+  event->AddParticle(dpdg,stis,-1,-1,-1,-1, p4iLAB, v4);
   // add decayed HNL
-  event->AddParticle(dpdg,stdc,0,-1,-1,-1, p4i, v4);
+  // event->AddParticle(dpdg,stdc,0,-1,-1,-1, p4iLAB, v4);
+
+  LOG( "SimpleHNL", pNOTICE )
+    << "Added initial state.";
 }
 //____________________________________________________________________________
 void HNLDecayPrimaryVtxGenerator::GenerateDecayedHNLPosition(
   GHepRecord * event) const
 {
   // HNL are point particles, so no trouble here.
+
+  LOG( "SimpleHNL", pNOTICE ) 
+    << "Generated HNL decay vertex position.";
+
   return;
 }
 //____________________________________________________________________________
 void HNLDecayPrimaryVtxGenerator::GenerateDecayProducts(
-  GHepRecord * event) const
+			GHepRecord * event, double EHNL ) const
 {
   LOG("SimpleHNL", pINFO) << "Generating decay...";
 
@@ -189,7 +202,7 @@ void HNLDecayPrimaryVtxGenerator::GenerateDecayProducts(
   LOG("SimpleHNL", pINFO)  
     << "Decaying N = " << pdgv.size() << " particles / total mass = " << sum;
 
-  int decayed_HNL_id = 1;
+  int decayed_HNL_id = 0;
   GHepParticle * decayed_HNL = event->Particle(decayed_HNL_id);
   assert(decayed_HNL);
   TLorentzVector * p4d = decayed_HNL->GetP4(); // should be (M,\vec{0})...
@@ -224,7 +237,7 @@ void HNLDecayPrimaryVtxGenerator::GenerateDecayProducts(
   // For now, just add 2-body decays & use SimpleHNL kinematics
   // from the genie::HNL::decayKinematics namespace
 
-  double mN = p4d->E();
+  double mN = p4d->M();
   double ml = -1.0, mh = genie::constants::kPionMass;
   int pdgl = -1;
   if( fCurrDecayMode == genie::HNL::enums::kPiMu ){ ml = genie::constants::kMuonMass; pdgl = genie::kPdgMuon; }
@@ -280,7 +293,7 @@ void HNLDecayPrimaryVtxGenerator::GenerateDecayProducts(
   // Step 3: Boost these into the lab frame
   // Grab energy of HNL
   // RETHERE - Sampling from all fluxes put together, this is VERY wrong
-  double EHNL = genie::HNL::FluxReader::getEFromMaster();
+  // double EHNL = genie::HNL::FluxReader::getEFromMaster();
   //double EHNL = fEnergy;
   double PHNL = std::sqrt( EHNL*EHNL - mN*mN );
 

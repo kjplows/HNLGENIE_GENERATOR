@@ -39,7 +39,7 @@ public:
  ~HNLDecayPrimaryVtxGenerator();
 
   // implement the EventRecordVisitorI interface
-  void ProcessEventRecord (GHepRecord * event) const;
+ void ProcessEventRecord (GHepRecord * event) const;
 
   // overload the Algorithm::Configure() methods to load private data
   // members from configuration options
@@ -49,10 +49,10 @@ public:
 private:
 
    void LoadConfig                     (void);
-   void AddInitialState                (GHepRecord * event) const;
+   void AddInitialState                (GHepRecord * event, double EHNL) const;
    void GenerateDecayedHNLPosition     (GHepRecord * event) const;
    //void GenerateFermiMomentum          (GHepRecord * event) const;
-   void GenerateDecayProducts          (GHepRecord * event) const;
+   void GenerateDecayProducts          (GHepRecord * event, double EHNL) const;
    void GetEnergyFromFlux              (void) const;
 
    mutable int                           fCurrInitStatePdg;
