@@ -53,12 +53,15 @@ private:
    void GenerateDecayedHNLPosition     (GHepRecord * event) const;
    //void GenerateFermiMomentum          (GHepRecord * event) const;
    void GenerateDecayProducts          (GHepRecord * event) const;
+   void GetEnergyFromFlux              (void) const;
 
    mutable int                           fCurrInitStatePdg;
    mutable genie::HNL::enums::HNLDecay_t fCurrDecayMode;
    mutable int                           fCurrDecayedHNL;
 //mutable bool                          fNucleonIsBound;
    mutable TGenPhaseSpace                fPhaseSpaceGenerator;
+
+   mutable double                        fEnergy;
 
    const NuclearModelI * fNuclModel;
 };

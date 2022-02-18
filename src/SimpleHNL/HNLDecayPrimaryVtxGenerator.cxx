@@ -68,6 +68,20 @@ void HNLDecayPrimaryVtxGenerator::ProcessEventRecord(
   this->GenerateDecayProducts(event);
 }
 //____________________________________________________________________________
+void HNLDecayPrimaryVtxGenerator::GetEnergyFromFlux() const
+{
+  if( fEnergy != 0.0 ) return;
+  if( genie::HNL::FluxReader::fMasterFlux ){
+    fEnergy = genie::HNL::FluxReader::getEFromMaster();
+    return;
+  }
+  
+  LOG("SimpleHNL", pERROR)
+    << "No master flux set in FluxReader. Things would go wrong. Exiting!";
+  exit(1);
+  
+}
+//____________________________________________________________________________
 void HNLDecayPrimaryVtxGenerator::AddInitialState(
   GHepRecord * event) const
 {
@@ -109,6 +123,15 @@ void HNLDecayPrimaryVtxGenerator::AddInitialState(
   // add initial HNL
   double mn  = PDGLibrary::Instance()->Find(ipdg)->Mass();
   TLorentzVector p4i(0,0,0,mn);
+
+  // boost it to lab frame
+  //GetEnergyFromFlux(); // sets fEnergy
+  //double phnl = std::sqrt( fEnergy * fEnergy - mn * mn );
+  //double bhnl = phnl / fEnergy;
+
+  //TVector3 p3i(0.0,0.0,bhnl);
+  //p4i.Boost(p3i);
+
   event->AddParticle(dpdg,stis,-1,-1,-1,-1, p4i, v4);
   // add decayed HNL
   event->AddParticle(dpdg,stdc,0,-1,-1,-1, p4i, v4);
