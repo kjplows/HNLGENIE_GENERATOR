@@ -51,6 +51,8 @@
 	      HNL kind: nu vs nubar
 	   -j
 	      Is Majorana? Overrides -k flag
+	   -q
+	      Use all HNL flavours at same time? Equivalent to -j 1 -e 1 -m 1
 	   -e
 	      Electron-like coupling |U_e4|^2. Assumes \sum_{\ell} |U_\ell 4|^2 = 1.
 	   -m
@@ -213,6 +215,7 @@ string             gOptFluxFilePath  = kDefOptFluxFilePath; // path to flux file
 string             gOptEvFilePrefix  = kDefOptEvFilePrefix; // event file prefix
 double             gOptNuEnergy      = 0.0;                 // low-edge of energy range  
 double             gOptNuEnergyRange = -1.0;                // width of energy range
+bool               gOptDoMasterMixing = false;              // ignore HNL type discrimination
 
 bool               gOptUsingRootGeom = false;               // using root geom or target mix?
 map<int,double>    gOptTgtMix;                              // target mix  (tgt pdg -> wght frac) / if not using detailed root geom
@@ -276,7 +279,18 @@ int main(int argc, char ** argv)
 
      // select energy and build 4-momentum
      // RETHERE - Sampling from all fluxes put together, this is VERY wrong
-     double EHNL = genie::HNL::FluxReader::getEFromMaster();
+     //double EHNL = genie::HNL::FluxReader::getEFromMaster();
+
+     // ask the TH1FluxDriver which flux it used
+     TFile f("./input-flux.root", "READ");
+     //TH1D * spectrum = (TH1D *) f.Get("input_flux");
+     TDirectory *baseDir = f.GetDirectory("");
+     std::string fluxName = std::string( "spectrum" );
+     assert( baseDir->GetListOfKeys()->Contains( fluxName.c_str() ) );
+     TH1D * spectrum = ( TH1D * ) baseDir->Get( fluxName.c_str() );
+     assert( spectrum );
+     double EHNL = spectrum->GetRandom();
+     
      double PHNL = std::sqrt( EHNL*EHNL - gOptHNLMass * gOptHNLMass );
 
      TLorentzVector p4HNL( 0.0, 0.0, PHNL, EHNL );
@@ -361,7 +375,6 @@ GFluxI * TH1FluxDriver(void)
 
   // extract specified flux histogram from input root file
 
-
   string hFluxName = Form( "hHNLFluxCenterAcc_%d", closest_masspoint );
 
   TH1F *hfluxAllMu    = genie::HNL::FluxReader::getFluxHist1F( finPath, hFluxName, genie::HNL::enums::kAll, genie::HNL::enums::kNumu );
@@ -384,10 +397,67 @@ GFluxI * TH1FluxDriver(void)
   // let's build the mixed flux.
   // RETHERE - allow for graceful selection! Need an option for mix
   
-  TH1F * spectrumF = (TH1F*) hfluxAllMu->Clone();
-  spectrumF->Add( hfluxAllMubar, 1.0 );
-  spectrumF->Add( hfluxAllE, 1.0 );
-  spectrumF->Add( hfluxAllEbar, 1.0 );
+  TH1F * spectrumF = (TH1F*) hfluxAllMu->Clone(0);
+
+  if( gOptDoMasterMixing ){ // build master flux element from all flavours & all parents
+    spectrumF->Add( hfluxAllMu, 1.0 );
+    spectrumF->Add( hfluxAllMubar, 1.0 );
+    spectrumF->Add( hfluxAllE, 1.0 );
+    spectrumF->Add( hfluxAllEbar, 1.0 );
+  }
+  else{
+    if( gOptECoupling == 0.0 ){ // no e coupling
+      if( gOptIsMajorana || gOptHNLKind == 2 ){
+	spectrumF->Add( hfluxAllMu, 1.0 );
+	spectrumF->Add( hfluxAllMubar, 1.0 );
+      }
+      else if( gOptHNLKind == 0 ){
+	spectrumF->Add( hfluxAllMu, 1.0 );
+      }
+      else{
+	spectrumF->Add( hfluxAllMubar, 1.0 );
+      }
+    }
+    else if( gOptMuCoupling == 0.0 ){ // no mu coupling
+      if( gOptIsMajorana || gOptHNLKind == 2 ){
+	spectrumF->Add( hfluxAllE, 1.0 );
+	spectrumF->Add( hfluxAllEbar, 1.0 );
+      }
+      else if( gOptHNLKind == 0 ){
+	spectrumF->Add( hfluxAllE, 1.0 );
+      }
+      else{
+	spectrumF->Add( hfluxAllEbar, 1.0 );
+      }
+    }
+    else{ // assumed equal coupling
+      if( gOptIsMajorana || gOptHNLKind == 2 ){
+	spectrumF->Add( hfluxAllMu, 1.0 );
+	spectrumF->Add( hfluxAllMubar, 1.0 );
+	spectrumF->Add( hfluxAllE, 1.0 );
+	spectrumF->Add( hfluxAllEbar, 1.0 );
+      }
+      else if( gOptHNLKind == 0 ){
+	spectrumF->Add( hfluxAllMu, 1.0 );
+	spectrumF->Add( hfluxAllE, 1.0 );
+      }
+      else{
+	spectrumF->Add( hfluxAllMubar, 1.0 );
+	spectrumF->Add( hfluxAllEbar, 1.0 );
+      }
+    }
+  }
+
+  LOG( "gevgen_hnl", pDEBUG )
+    << "\n\n !!! ------------------------------------------------"
+    << "\n !!! Testing flux selection. Options are: "
+    << "\n !!! gOptECoupling, gOptMuCoupling = " << gOptECoupling << ", " << gOptMuCoupling
+    << "\n !!! gOptHNLKind = " << gOptHNLKind
+    << "\n !!! gOptIsMajorana = " << gOptIsMajorana
+    << "\n !!! ------------------------------------------------"
+    << "\n !!! Flux spectrum has ** " << spectrumF->GetEntries() << " ** entries"
+    << "\n !!! Flux spectrum has ** " << spectrumF->GetMaximum() << " ** maximum"
+    << "\n !!! ------------------------------------------------ \n";
 
   // copy into TH1D, *do not use the Copy() function!*
   const int nbins = spectrumF->GetNbinsX();
@@ -574,6 +644,20 @@ void GetCommandLineArgs(int argc, char ** argv)
       << "Unspecified isMajorana - using default";
     gOptIsMajorana = false;
   } //-j
+
+  // do master mixing?
+  if( parser.OptionExists('q') ) {
+    LOG("gevgen_hnl", pDEBUG)
+      << "Reading doMasterMixing";
+    gOptDoMasterMixing = parser.ArgAsInt('q');
+    if( gOptDoMasterMixing == true ) {
+      LOG("gevgen_hnl", pDEBUG)
+	<< "Using master mixing. All flavours together will be sampled.";
+    } else {
+      LOG("gevgen_hnl", pDEBUG)
+	<< "Not doing master mixing.";
+    }
+  } //-q
 
   // |U_e4|^2
   if( parser.OptionExists('e') ) {
@@ -819,6 +903,7 @@ void PrintSyntax(void)
    << "\n             -M HNL_mass"
    << "\n            [-k HNL_kind]"
    << "\n            [-j isMajorana]"
+   << "\n            [-q doMasterMixing]"
    << "\n            [-e eCoupling]"
    << "\n            [-m muCoupling]"
    << "\n            [-f path/to/flux/file]"

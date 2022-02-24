@@ -62,8 +62,6 @@ void HNLDecayPrimaryVtxGenerator::ProcessEventRecord(
 
   //fNucleonIsBound = (pdg::IonPdgCodeToA(fCurrInitStatePdg) > 1);
 
-  // RETHERE - Sampling from all fluxes put together, this is VERY wrong
-  // double EHNL = genie::HNL::FluxReader::getEFromMaster();
   double EHNL = interaction->InitState().ProbeE(kRfLab);
 
   this->AddInitialState(event, EHNL);
@@ -111,30 +109,11 @@ void HNLDecayPrimaryVtxGenerator::AddInitialState(
   // Initial state knows about an HNL
   int ipdg = fCurrInitStatePdg;
 
-  // Decayed HNL
-  /*
-  int dpdg = fCurrDecayedHNL;
-
-  if(dpdg != ipdg) {
-    LOG("SimpleHNL", pWARN)
-      << "Couldn't generate given decay (" 
-      << fCurrDecayMode << ", " << fCurrDecayedHNL << ")"
-      << " for given initial state (PDG = " << ipdg << ")";
-    genie::exceptions::EVGThreadException exception;
-    exception.SetReason("Decay-mode / Initial-state mismatch!");
-    exception.SwitchOnFastForward();
-    throw exception;
-  }
-  */
   // add initial HNL
   double mn  = PDGLibrary::Instance()->Find(ipdg)->Mass();
   TLorentzVector p4i(0,0,0,mn);
 
   // boost it to lab frame
-  //GetEnergyFromFlux(); // sets fEnergy
-  //double phnl = std::sqrt( fEnergy * fEnergy - mn * mn );
-  //double bhnl = phnl / fEnergy;
- 
   double phnl = std::sqrt( EHNL * EHNL - mn * mn );
   double bhnl = phnl / EHNL;
 
@@ -143,8 +122,6 @@ void HNLDecayPrimaryVtxGenerator::AddInitialState(
 
   // RETHERE TODO: maybe want a v4LAB?
   event->AddParticle(ipdg,stis,-1,-1,-1,-1, p4iLAB, v4);
-  // add decayed HNL
-  // event->AddParticle(dpdg,stdc,0,-1,-1,-1, p4iLAB, v4);
 
   LOG( "SimpleHNL", pNOTICE )
     << "Added initial state.";
@@ -295,10 +272,6 @@ void HNLDecayPrimaryVtxGenerator::GenerateDecayProducts(
     << "theta = " << thetaPol << ", phi = " << phi;
 
   // Step 3: Boost these into the lab frame
-  // Grab energy of HNL
-  // RETHERE - Sampling from all fluxes put together, this is VERY wrong
-  // double EHNL = genie::HNL::FluxReader::getEFromMaster();
-  //double EHNL = fEnergy;
   double PHNL = std::sqrt( EHNL*EHNL - mN*mN );
 
   LOG("SimpleHNL", pDEBUG)
@@ -308,6 +281,9 @@ void HNLDecayPrimaryVtxGenerator::GenerateDecayProducts(
 
   // Step 4: Insert final state products into a TClonesArray of TMCParticles
   TLorentzVector v4(*v4d); 
+
+  Interaction * interaction = event->Summary();
+
   //  int idp = 0;
   for(pdg_iter = pdgv.begin(); pdg_iter != pdgv.end(); ++pdg_iter) {
      int pdgc = *pdg_iter;
@@ -321,13 +297,31 @@ void HNLDecayPrimaryVtxGenerator::GenerateDecayProducts(
 
      p4fin.Boost(bHNL);
 
+     if( std::abs( pdgc ) == genie::kPdgMuon || std::abs( pdgc ) == genie::kPdgElectron ){
+       interaction->KinePtr()->SetFSLeptonP4( p4fin );
+     }
+     else{
+       interaction->KinePtr()->SetHadSystP4( p4fin ); //RETHERE look at this!
+     }
+
      LOG("SimpleHNL", pDEBUG)
        << "\n p4 (lab) = ( " << p4fin.E() << ", " << p4fin.Px() << ", " << p4fin.Py() << ", " << p4fin.Pz() << " )";
+
+     // update FS particle count
+     interaction->ExclTagPtr()->Reset();
+
+     interaction->ExclTagPtr()->SetNPions( 1, 0, 0 ); //RETHERE make this realistic
+     interaction->ExclTagPtr()->SetNNucleons( 0, 0 );
 
      GHepStatus_t ist = kIStStableFinalState;
      event->AddParticle(pdgc, ist, decayed_HNL_id,-1,-1,-1, p4fin, v4);
      // idp++;
+
+     // Sett( p4nu - p4lep - p4pi );
+     
   }
+
+  // Step 6: Update number of particles in Interaction/XclsTag.{h,cxx} ==> NPiPlus etc!
 
   LOG("SimpleHNL", pNOTICE)
     << "Cleaning up";
@@ -336,6 +330,9 @@ void HNLDecayPrimaryVtxGenerator::GenerateDecayProducts(
   delete [] mass;
   delete p4d;
   delete v4d;
+  //delete p4lep;
+  //delete p4pi;
+  //delete p4nu;
 }
 //____________________________________________________________________________
 void HNLDecayPrimaryVtxGenerator::Configure(const Registry & config)

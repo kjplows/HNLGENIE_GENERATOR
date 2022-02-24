@@ -21,6 +21,7 @@
 
 #include "EVGCore/EventRecordVisitorI.h"
 //#include "NucleonDecay/NucleonDecayMode.h"
+#include "Interaction/Kinematics.h"
 #include "PDG/PDGCodeList.h"
 #include "SimpleHNL/DecayKinematics.h"
 #include "SimpleHNL/Enums.h"
