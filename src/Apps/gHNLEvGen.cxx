@@ -275,12 +275,97 @@ int main(int argc, char ** argv)
 
      EventRecord * event = new EventRecord;
      int HNLprobe = SelectInitState();
-     int decay  = (int) genie::HNL::enums::kPiMu; // force N --> pi + mu. RETHERE
+
+     // select decay mode
+     // RETHERE force N --> pi + \ell
+     int decay = -1;
+
+     // RETHERE assuming all these HNL have K+ parent. This is wrong
+     LOG("gevgen_hnl", pDEBUG)
+       << " Building SimpleHNL object ";
+     genie::HNL::SimpleHNL sh( "HNL", ievent, genie::kPdgHNL, genie::kPdgKP, 
+			       gOptHNLMass, gOptECoupling, gOptMuCoupling, 0.0, false );
+     
+     LOG("gevgen_hnl", pDEBUG)
+       << " Creating interesting channels vector ";
+     std::vector< genie::HNL::enums::HNLDecay_t > * intChannels = new std::vector< genie::HNL::enums::HNLDecay_t >();
+     intChannels->emplace_back( genie::HNL::enums::kPiE );
+     intChannels->emplace_back( genie::HNL::enums::kPiMu );
+
+     LOG("gevgen_hnl", pDEBUG)
+       << " Getting valid channels ";
+     const std::map< genie::HNL::enums::HNLDecay_t, double > gammaMap = sh.GetValidChannels();
+
+     genie::HNL::enums::HNLDecay_t pimuDecay = genie::HNL::enums::kPiMu;
+     auto pimuMapG  = gammaMap.find( pimuDecay );
+     double pimuPG  = pimuMapG->second;
+
+     genie::HNL::enums::HNLDecay_t pieDecay =  genie::HNL::enums::kPiE;
+     auto pieMapG  = gammaMap.find( pieDecay );
+     double piePG  = pieMapG->second;
+
+     LOG("gevgen_hnl", pDEBUG)
+       << "\n\n !!! ------------------------------------------- "
+       << "\n !!! Here are the gammas of the interesting channels: "
+       << "\n !!! Channel: pi mu . Gamma = " << pimuPG
+       << "\n !!! Channel: pi e  . Gamma = " << piePG
+       << "\n !!! ------------------------------------------- \n";
+
+     LOG("gevgen_hnl", pDEBUG)
+       << " Setting interesting channels map ";
+     std::map< genie::HNL::enums::HNLDecay_t, double > intMap =
+       genie::HNL::Selector::SetInterestingChannels( (*intChannels), gammaMap );
+     
+     LOG("gevgen_hnl", pDEBUG)
+       << " Telling SimpleHNL about interesting channels ";
+     sh.SetInterestingChannels( intMap );
+
+     // get probability that channels in intChannels will be selected
+     LOG("gevgen_hnl", pDEBUG)
+       << " Building probablilities of interesting channels ";
+     std::map< genie::HNL::enums::HNLDecay_t, double > PMap = 
+       genie::HNL::Selector::GetProbabilities( intMap );
+
+     // I want to see what these probabilities are.
+     
+     //genie::HNL::enums::HNLDecay_t pimuDecay = genie::HNL::enums::kPiMu;
+     auto pimuMap  = PMap.find( pimuDecay );
+     double pimuP  = pimuMap->second;
+
+     //genie::HNL::enums::HNLDecay_t pieDecay =  genie::HNL::enums::kPiE;
+     auto pieMap  = PMap.find( pieDecay );
+     double pieP  = pieMap->second;
+
+     LOG("gevgen_hnl", pDEBUG)
+       << "\n\n !!! ------------------------------------------- "
+       << "\n !!! Here are the probabilities of the interesting channels: "
+       << "\n !!! Channel: pi mu . Prob = " << pimuP
+       << "\n !!! Channel: pi e  . Prob = " << pieP
+       << "\n !!! ------------------------------------------- \n";
+
+     LOG("gevgen_hnl", pDEBUG)
+       << "Doing random throw";
+     
+     // now do a random throw
+     TRandom3 * rng3 = new TRandom3(0);
+     double ranThrow = rng3->Uniform( 0., 1. ); // HNL's fate is sealed.
+
+     LOG("gevgen_hnl", pDEBUG)
+       << "Random throw = " << ranThrow;
+
+     genie::HNL::enums::HNLDecay_t selectedDecayChan =
+       genie::HNL::Selector::SelectChannelInclusive( PMap, ranThrow );
+
+     decay = ( int ) selectedDecayChan;
+
+     LOG("gevgen_hnl", pDEBUG)
+       << "Selected decay = " << decay;
+
+     assert( decay == 0 || decay == 1 ); //RETHERE
+
+     //int decay  = (int) genie::HNL::enums::kPiMu; // force N --> pi + mu.
 
      // select energy and build 4-momentum
-     // RETHERE - Sampling from all fluxes put together, this is VERY wrong
-     //double EHNL = genie::HNL::FluxReader::getEFromMaster();
-
      // ask the TH1FluxDriver which flux it used
      TFile f("./input-flux.root", "READ");
      //TH1D * spectrum = (TH1D *) f.Get("input_flux");
