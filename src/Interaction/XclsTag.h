@@ -45,6 +45,7 @@ public:
  ~XclsTag();
 
   // Getting exclusive intermediate and/or final state information
+  bool IsHNLEvent         (void) const { return fIsHNLEvent;       }
   bool IsCharmEvent       (void) const { return fIsCharmEvent;     }
   bool IsInclusiveCharm   (void) const;
   int  CharmHadronPdg     (void) const { return fCharmedHadronPdg; }
@@ -63,12 +64,14 @@ public:
   int  DecayMode          (void) const { return fDecayMode; }
 
   // Ssetting exclusive final state information
+  void SetHNL         (void); //RETHERE - can change!
   void SetCharm       (int charm_pdgc = 0);
   void SetStrange     (int strange_pdgc = 0);
   void SetNPions      (int npi_plus, int npi_0, int npi_minus);
   void SetNNucleons   (int np, int nn);
   void SetNProtons    (int np) { fNProtons  = np; }
   void SetNNeutrons   (int nn) { fNNeutrons = nn; }
+  void UnsetHNL       (void);
   void UnsetCharm     (void);
   void UnsetStrange   (void);
   void ResetNPions    (void);
@@ -88,6 +91,7 @@ public:
 private:
 
   // Private data members
+  bool        fIsHNLEvent;       ///< true if we have HNL decay
   bool        fIsCharmEvent;     ///< true if we have charm production
   int         fCharmedHadronPdg; ///< charmed hadron pdg-code
   bool        fIsStrangeEvent;   ///< true if we have strange production

@@ -203,7 +203,7 @@ Long_t             gOptRunNu         = 1000;                // run number
 int                gOptNev           = 10;                  // number of events to generate
 
 int                gOptCpL           = 14;                  // co-produced lepton PDG
-int                gOptHNLPdgCode    = 2000020000;          // pdg code. Set for now.
+int                gOptHNLPdgCode    = 1900;                // pdg code. Set for now.
 double             gOptHNLMass       = 0.255;               // HNL mass
 int                gOptHNLKind       = 2;                   // HNL kind. 0 = nu, 1 = nubar, 2 = mix
 bool               gOptIsMajorana    = false;               // Is Majorana? True ==> HNL kind set to 0

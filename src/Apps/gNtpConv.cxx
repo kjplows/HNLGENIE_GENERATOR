@@ -321,6 +321,12 @@ void ConvertToGST(void)
   bool   brIsCC        = false;  // Is Weak CC process?
   bool   brIsNC        = false;  // Is Weak NC process?
   bool   brIsCharmPro  = false;  // Produces charm?
+  bool   brIsHNLDecay  = false;  // Is HNL decay?
+  double brHNLMass     = 0;      // HNL mass
+  double brHNLECoup    = 0;      // |U_e4|^2
+  double brHNLMuCoup   = 0;      // |U_mu4|^2
+  bool   brHNLIsMajorana = false; // Is Majorana HNL?
+  int    brHNLType     = 0;      // Nu (0) vs nubar (1) vs both (2)
   int    brCodeNeut    = 0;      // The equivalent NEUT reaction code (if any)
   int    brCodeNuance  = 0;      // The equivalent NUANCE reaction code (if any)
   double brWeight      = 0;      // Event weight
@@ -429,6 +435,12 @@ void ConvertToGST(void)
   s_tree->Branch("cc",	          &brIsCC,	    "cc/O"	    );
   s_tree->Branch("nc",	          &brIsNC,	    "nc/O"	    );
   s_tree->Branch("charm",         &brIsCharmPro,    "charm/O"	    );
+  s_tree->Branch("hnl",           &brIsHNLDecay,    "hnl/O"         );
+  s_tree->Branch("hnl_mass",      &brHNLMass,       "hnl_mass/D"    );
+  s_tree->Branch("hnl_ecoup",     &brHNLECoup,      "hnl_ecoup/D"   );
+  s_tree->Branch("hnl_mucoup",    &brHNLMuCoup,     "hnl_mucoup/D"  );
+  s_tree->Branch("hnl_ismaj",     &brHNLIsMajorana, "hnl_ismaj/O"   );
+  s_tree->Branch("hnl_type",      &brHNLType,       "hnl_type/I"    );
   s_tree->Branch("neut_code",     &brCodeNeut,      "neut_code/I"   );
   s_tree->Branch("nuance_code",   &brCodeNuance,    "nuance_code/I" );
   s_tree->Branch("wght",          &brWeight,        "wght/D"	    );
@@ -531,6 +543,14 @@ void ConvertToGST(void)
 
   TLorentzVector pdummy(0,0,0,0);
 
+  // if HNL, pick up branches about mass + couplings + nature
+  double locHNLMass, locHNLECoup, locHNLMuCoup; bool locHNLIsMajorana; int locHNLType;
+  TBranch * BRHNLMass = er_tree->GetBranch( "hnl_mass" ); BRHNLMass->SetAddress( &locHNLMass );
+  TBranch * BRHNLECoup = er_tree->GetBranch( "hnl_coup_e" ); BRHNLECoup->SetAddress( &locHNLECoup );
+  TBranch * BRHNLMuCoup = er_tree->GetBranch( "hnl_coup_mu" ); BRHNLMuCoup->SetAddress( &locHNLMuCoup );
+  TBranch * BRHNLIsMajorana = er_tree->GetBranch( "hnl_ismaj" ); BRHNLIsMajorana->SetAddress( &locHNLIsMajorana );
+  TBranch * BRHNLType = er_tree->GetBranch( "hnl_type" ); BRHNLType->SetAddress( &locHNLType );
+
   // Event loop
   for(Long64_t iev = 0; iev < nmax; iev++) {
     er_tree->GetEntry(iev);
@@ -627,6 +647,10 @@ void ConvertToGST(void)
     // (qel or dis) charm production?
     bool charm = xcls.IsCharmEvent();
 
+    // is this an HNL decay?
+    bool hnl = xcls.IsHNLEvent();
+    bool is_hnl = hnl;
+
     // Get NEUT and NUANCE equivalent reaction codes (if any)
     brCodeNeut    = utils::ghep::NeutReactionCode(&event);
     brCodeNuance  = utils::ghep::NuanceReactionCode(&event);
@@ -653,9 +677,20 @@ void ConvertToGST(void)
     // measure them by neglecting the fermi momentum and off-shellness of bound nucleons
     //
 
-    const TLorentzVector & k1 = (neutrino) ? *(neutrino->P4()) : pdummy;  // v 4-p (k1)
-    const TLorentzVector & k2 = (fsl)      ? *(fsl->P4())      : pdummy;  // l 4-p (k2)
-    const TLorentzVector & p1 = (hitnucl)  ? *(hitnucl->P4())  : pdummy;  // N 4-p (p1)      
+    const TLorentzVector & kk1 = (neutrino) ? *(neutrino->P4()) : pdummy;  // v 4-p (k1)
+    const TLorentzVector & kk2 = (fsl)      ? *(fsl->P4())      : pdummy;  // l 4-p (k2)
+    const TLorentzVector & pp1 = (hitnucl)  ? *(hitnucl->P4())  : pdummy;  // N 4-p (p1)
+
+    // need to do some shenanigans to get FS lepton information into HNL event record.
+    // There has to be a better way to do this, RETHERE
+
+    GHepParticle * hnlParticle = (hnl) ? event.Particle(0) : 0;
+    GHepParticle * hadParticle = (hnl) ? event.Particle(1) : 0;
+    GHepParticle * lepParticle = (hnl) ? event.Particle(2) : 0;
+
+    const TLorentzVector & k1 = (hnl) ? *(hnlParticle->P4()) : kk1;
+    const TLorentzVector & k2 = (hnl) ? *(lepParticle->P4()) : kk2;
+    const TLorentzVector & p1 = (hnl) ? *(hadParticle->P4()) : pp1;
 
     double M  = kNucleonMass; 
     TLorentzVector q  = k1-k2;                     // q=k1-k2, 4-p transfer
@@ -704,7 +739,7 @@ void ConvertToGST(void)
     // Extract more info on the hadronic system
     // Only for QEL/RES/DIS/COH/MEC events
     //
-    bool study_hadsyst = (is_qel || is_res || is_dis || is_coh || is_dfr || is_mec || is_singlek);
+    bool study_hadsyst = (is_qel || is_res || is_dis || is_coh || is_dfr || is_mec || is_singlek || is_hnl);
     
     //
     TObjArrayIter piter(&event);
@@ -724,11 +759,16 @@ void ConvertToGST(void)
       ip++;
       // don't count final state lepton as part hadronic system 
       //if(!is_coh && event.Particle(ip)->FirstMother()==0) continue;
-      if(event.Particle(ip)->FirstMother()==0) continue;
+      //keep HNL events whose mother is 0!
+      LOG( "gntpc", pDEBUG )
+	<< " *** Particle " << ip << " has first mother = " << event.Particle(ip)->FirstMother() << " and hnl = " << hnl;
+      if(event.Particle(ip)->FirstMother()==0 && !is_hnl) continue;
       if(pdg::IsPseudoParticle(p->Pdg())) continue;
       int pdgc = p->Pdg();
       int ist  = p->Status();
       if(ist==kIStStableFinalState) {
+	 if ( (std::abs(pdgc) == kPdgElectron || std::abs(pdgc) == kPdgMuon) && is_hnl ) continue; //exclude HNL primary lepton
+
          if (pdgc == kPdgGamma || pdgc == kPdgElectron || pdgc == kPdgPositron)  {
             int igmom = p->FirstMother();
             if(igmom!=-1) {
@@ -770,8 +810,8 @@ void ConvertToGST(void)
 
     vector<int> prim_had_syst;
     if(study_hadsyst) {
-      // if coherent or free nucleon target set primary states equal to final states
-      if(!pdg::IsIon(target->Pdg()) || (is_coh)) {
+      // if coherent or free nucleon target or HNL set primary states equal to final states
+      if(!pdg::IsIon(target->Pdg()) || (is_coh) || (is_hnl)) {
          vector<int>::const_iterator hiter = final_had_syst.begin();
          for( ; hiter != final_had_syst.end(); ++hiter) {
            prim_had_syst.push_back(*hiter);
@@ -887,6 +927,12 @@ void ConvertToGST(void)
     brIsCC       = is_weakcc;  
     brIsNC       = is_weaknc;  
     brIsCharmPro = charm;
+    brIsHNLDecay = hnl;
+    brHNLMass    = (hnl) ? locHNLMass : -999.9;
+    brHNLECoup   = (hnl) ? locHNLECoup : -999.9;
+    brHNLMuCoup  = (hnl) ? locHNLMuCoup : -999.9;
+    brHNLIsMajorana = (hnl) ? locHNLIsMajorana : 0;
+    brHNLType    = (hnl) ? locHNLType : -999;
     brWeight     = weight;      
     brKineXs     = xs;      
     brKineYs     = ys;      
@@ -974,10 +1020,17 @@ void ConvertToGST(void)
     brNfEM       = 0;  
     brNfOther    = 0;  
 
-    brSumKEf     = (fsl) ? fsl->KinE() : 0;
+    // shenanigans to make HNL behave. RETHERE
+    double locbrSumKEf = (fsl) ? fsl->KinE() : 0.0;
+    //brSumKEf     = (fsl) ? fsl->KinE() : 0;
+    double lochnlSumKEf = (hnl) ? lepParticle->KinE() : 0.0;
+    lochnlSumKEf += (hnl) ? hadParticle->KinE() : 0.0;
+    brSumKEf     = (hnl) ? lochnlSumKEf : locbrSumKEf;
     brCalResp0   = 0;
 
     brNf = final_had_syst.size();
+    LOG( "gntpc", pINFO )
+      << "final_had_syst_size = " << brNf;
     for(int j=0; j<brNf; j++) {
       p = event.Particle(final_had_syst[j]);
       assert(p);

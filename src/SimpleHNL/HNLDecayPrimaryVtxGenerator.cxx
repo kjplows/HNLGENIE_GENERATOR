@@ -54,6 +54,9 @@ void HNLDecayPrimaryVtxGenerator::ProcessEventRecord(
   //fCurrInitStatePdg = interaction->InitState().Tgt().Pdg();
   fCurrInitStatePdg = interaction->InitState().ProbePdg();
   fCurrDecayMode = (genie::HNL::enums::HNLDecay_t) interaction->ExclTag().DecayMode();
+  XclsTag exclTag = interaction->ExclTag();
+  exclTag.SetHNL();
+  interaction->SetExclTag(exclTag);
   //fCurrDecayedHNL = interaction->InitState().Tgt().HitNucPdg();
 
   LOG("SimpleHNL", pNOTICE)

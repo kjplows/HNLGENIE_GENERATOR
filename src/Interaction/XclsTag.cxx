@@ -60,6 +60,16 @@ XclsTag::~XclsTag()
 
 }
 //___________________________________________________________________________
+void XclsTag::SetHNL(void)
+{
+  fIsHNLEvent = true;
+}
+//___________________________________________________________________________
+void XclsTag::UnsetHNL(void)
+{
+  fIsHNLEvent = false;
+}
+//___________________________________________________________________________
 bool XclsTag::IsInclusiveCharm(void) const
 {
   return ( this->IsCharmEvent() && (this->CharmHadronPdg() == 0) );
