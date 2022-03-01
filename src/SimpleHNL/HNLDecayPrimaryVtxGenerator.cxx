@@ -268,7 +268,7 @@ void HNLDecayPrimaryVtxGenerator::GenerateDecayProducts(
     << "\n      px = " << p4h.Px() << ", py = " << p4h.Py() << ", pz = " << p4h.Pz();
 
   LOG("SimpleHNL", pDEBUG) 
-    << "Muon: pdg = " << genie::kPdgMuon << ", mass " << ml << ", energy " << El << ", mom " << p3l
+    << "Lepton: pdg = " << pdgl << ", mass " << ml << ", energy " << El << ", mom " << p3l
     << "\n      px = " << p4l.Px() << ", py = " << p4l.Py() << ", pz = " << p4l.Pz();
 
   LOG("SimpleHNL", pDEBUG)
@@ -329,7 +329,7 @@ void HNLDecayPrimaryVtxGenerator::GenerateDecayProducts(
   p4kM.Boost( bHNL );
 
   TLorentzVector p4kD = p4kH - p4kM;
-  double gQ2 = p4kD.M2();
+  double gQ2 = p4kD.M2(); // just M_pion^2 for 2-body case
   interaction->KinePtr()->SetQ2( gQ2, true );
   double gy = p4kM.E() / p4kH.E();
   interaction->KinePtr()->Sety( gy, true );
