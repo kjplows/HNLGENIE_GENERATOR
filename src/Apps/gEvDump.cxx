@@ -147,6 +147,9 @@ int main(int argc, char ** argv)
   TBranch * brHNLType = ghep_tree->GetBranch("hnl_type");
   if( brHNLMass != 0 && brHNLECoup != 0 && brHNLMuCoup != 0
       && brHNLIsMajorana != 0 && brHNLType != 0 ){
+    LOG( "gevdump", pDEBUG )
+      << "HNL event tree detected. Adding HNL-specific branches";
+
     have_hnl_branches = true;
     brHNLMass->SetAddress( &hnlMass );
     brHNLECoup->SetAddress( &hnlECoup );
@@ -190,9 +193,9 @@ int main(int argc, char ** argv)
 
   Long64_t n1,n2;
   GetEventRange(nev,n1,n2);
+
   for(Long64_t i = n1; i <= n2; i++) {
     ghep_tree->GetEntry(i);
-
     // retrieve GHEP event record abd print it out.
     NtpMCRecHeader rec_header = mcrec->hdr;
     EventRecord &  event = *(mcrec->event);
@@ -224,6 +227,20 @@ int main(int argc, char ** argv)
         << *gnumi_flux_info;
     }
 #endif
+
+    // print info from additional tree branches that might be present
+    // if the event file was created by the gevgen_hnl app.
+    if( have_hnl_branches ) {
+      std::string kindString = ( hnlIsMajorana ) ? std::string( "Majorana" ) : std::string( "Dirac" );
+
+      LOG( "gevdump", pNOTICE )
+	<< "\n Extra info for HNL of this event:"
+	<< "\n Mass = " << hnlMass << " GeV/c^{2}"
+	<< "\n E-coupling = " << hnlECoup
+	<< "\n Mu-coupling = " << hnlMuCoup
+	<< "\n Kind : " << kindString.c_str()
+	<< "\n Type : " << hnlType << "\n\n";
+    }
 
     mcrec->Clear();
   }
