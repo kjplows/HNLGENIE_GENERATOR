@@ -316,10 +316,42 @@ void HNLDecayPrimaryVtxGenerator::GenerateDecayProducts(
      GHepStatus_t ist = kIStStableFinalState;
      event->AddParticle(pdgc, ist, decayed_HNL_id,-1,-1,-1, p4fin, v4);
      // idp++;
-
-     // Sett( p4nu - p4lep - p4pi );
      
   }
+  
+  // kinematics here
+  // build 4-vectors of HNL, muon
+  TLorentzVector p4kH( 0.0, 0.0, PHNL, EHNL );
+  TLorentzVector p4kM( p4l.Px(), p4l.Py(), p4l.Pz(), p4l.E() ); // unboosted
+  p4kM.Boost( bHNL );
+
+  TLorentzVector p4kD = p4kH - p4kM;
+  double gQ2 = p4kD.M2();
+  interaction->KinePtr()->SetQ2( gQ2, true );
+  double gy = p4kM.E() / p4kH.E();
+  interaction->KinePtr()->Sety( gy, true );
+  double gx = interaction->KinePtr()->x(); // RETHERE do I actually want this?
+  interaction->KinePtr()->Setx( gx, true );
+  double gt = 0.0; // no interaction ==> no transfer to a nuclear system
+  interaction->KinePtr()->Sett( gt, true );
+  double gW = genie::constants::kPionMass;
+  interaction->KinePtr()->SetW( gW, true ); // should be exactly the pion mass!
+
+  LOG( "SimpleHNL", pDEBUG )
+    << "\n\n *******************************************"
+    <<   "\n             Kinematics stats: "
+    <<   "\n HNL 4-vector = ( " << p4kH.Px() << ", " << p4kH.Py() << ", " << p4kH.Pz() << ", " << p4kH.E() << " )"
+    <<   "\n Lep 4-vector = ( " << p4kM.Px() << ", " << p4kM.Py() << ", " << p4kM.Pz() << ", " << p4kM.E() << " )"
+    <<   "\n Dif 4-vector = ( " << p4kD.Px() << ", " << p4kD.Py() << ", " << p4kD.Pz() << ", " << p4kD.E() << " )"
+    <<   "\n Q2 = " << gQ2
+    <<   "\n y  = " << gy
+    <<   "\n x  = " << gx
+    <<   "\n t  = " << gt
+    <<   "\n W  = " << gW
+    <<   "\n *******************************************\n\n";
+
+  // also set this cross section to 0
+  event->SetDiffXSec( 0.0, kPSfE ); // see src/Conventions/KinePhaseSpace.h for the enum
 
   // Step 6: Update number of particles in Interaction/XclsTag.{h,cxx} ==> NPiPlus etc!
 
@@ -330,9 +362,6 @@ void HNLDecayPrimaryVtxGenerator::GenerateDecayProducts(
   delete [] mass;
   delete p4d;
   delete v4d;
-  //delete p4lep;
-  //delete p4pi;
-  //delete p4nu;
 }
 //____________________________________________________________________________
 void HNLDecayPrimaryVtxGenerator::Configure(const Registry & config)
