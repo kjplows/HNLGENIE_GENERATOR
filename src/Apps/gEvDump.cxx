@@ -129,6 +129,32 @@ int main(int argc, char ** argv)
     brOrigEvtNum  ->SetAddress(&orig_evtnum);
   }
 
+  // if the event file was created by the HNL generation app gevgen_hnl
+  // (see $GENIE/src/Apps/gHNLEvGen.cxx) then there will be additional branches
+  // holding the HNL mass, couplings, Majorana nature and nu vs nubar
+  bool have_hnl_branches = false;
+
+  double hnlMass = -1.0;
+  double hnlECoup = -1.0;
+  double hnlMuCoup = -1.0;
+  bool   hnlIsMajorana = false;
+  int    hnlType = -1;
+
+  TBranch * brHNLMass = ghep_tree->GetBranch("hnl_mass");
+  TBranch * brHNLECoup = ghep_tree->GetBranch("hnl_coup_e");
+  TBranch * brHNLMuCoup = ghep_tree->GetBranch("hnl_coup_mu");
+  TBranch * brHNLIsMajorana = ghep_tree->GetBranch("hnl_ismaj");
+  TBranch * brHNLType = ghep_tree->GetBranch("hnl_type");
+  if( brHNLMass != 0 && brHNLECoup != 0 && brHNLMuCoup != 0
+      && brHNLIsMajorana != 0 && brHNLType != 0 ){
+    have_hnl_branches = true;
+    brHNLMass->SetAddress( &hnlMass );
+    brHNLECoup->SetAddress( &hnlECoup );
+    brHNLMuCoup->SetAddress( &hnlMuCoup );
+    brHNLIsMajorana->SetAddress( &hnlIsMajorana );
+    brHNLType->SetAddress( &hnlType );
+  }
+
   // if the event file was created by one of GENIE's specialized event generation 
   // then there may be additional branches holding flux pass-through 
   // info (flux neutrino parent info for each generated event).

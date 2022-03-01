@@ -241,6 +241,13 @@ int main(int argc, char ** argv)
   ntpw.CustomizeFilenamePrefix(gOptEvFilePrefix);
   ntpw.Initialize();
 
+  // add another few branches. Mass, couplings, Majorana, type!
+  ntpw.EventTree()->Branch("hnl_mass", &gOptHNLMass, "gOptHNLMass/D");
+  ntpw.EventTree()->Branch("hnl_coup_e", &gOptECoupling, "gOptECoupling/D");
+  ntpw.EventTree()->Branch("hnl_coup_mu", &gOptMuCoupling, "gOptMuCoupling/D");
+  ntpw.EventTree()->Branch("hnl_ismaj", &gOptIsMajorana, "gOptIsMajorana/I");
+  ntpw.EventTree()->Branch("hnl_type", &gOptHNLKind, "gOptHNLKind/I");
+
   // Create a MC job monitor for a periodically updated status file
   GMCJMonitor mcjmonitor(gOptRunNu);
   mcjmonitor.SetRefreshRate(RunOpt::Instance()->MCJobStatusRefreshRate());
