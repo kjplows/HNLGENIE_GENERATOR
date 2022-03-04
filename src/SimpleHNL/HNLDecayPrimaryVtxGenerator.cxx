@@ -158,11 +158,12 @@ void HNLDecayPrimaryVtxGenerator::GenerateDecayProducts(
 	  fCurrDecayMode == genie::HNL::enums::kPiE ); // force 2-body decay
 
   PDGCodeList pdgv( false );
+  int typeMod = ( fCurrInitStatePdg > 0 ) ? 1 : -1;
   
-  pdgv.push_back( genie::kPdgPiP ); // all 2 decay modes do this
+  pdgv.push_back( typeMod * genie::kPdgPiP ); // all 2 decay modes do this
   
-  if( fCurrDecayMode == genie::HNL::enums::kPiMu ) pdgv.push_back( genie::kPdgMuon );
-  else pdgv.push_back( genie::kPdgElectron );
+  if( fCurrDecayMode == genie::HNL::enums::kPiMu ) pdgv.push_back( typeMod * genie::kPdgMuon );
+  else pdgv.push_back( typeMod * genie::kPdgElectron );
 
   //I *could* do this, or I could actually implement the custom 3-body decays
   //inside SimpleHNL.
@@ -223,15 +224,15 @@ void HNLDecayPrimaryVtxGenerator::GenerateDecayProducts(
 
   double mN = p4d->M();
   double ml = -1.0, mh = genie::constants::kPionMass;
-  int pdgl = -1;
-  if( fCurrDecayMode == genie::HNL::enums::kPiMu ){ ml = genie::constants::kMuonMass; pdgl = genie::kPdgMuon; }
-  else{ ml = genie::constants::kElectronMass; pdgl = genie::kPdgElectron; }
+  int pdgh = typeMod * genie::kPdgPiP, pdgl = -1;
+  if( fCurrDecayMode == genie::HNL::enums::kPiMu ){ ml = genie::constants::kMuonMass; pdgl = typeMod * genie::kPdgMuon; }
+  else{ ml = genie::constants::kElectronMass; pdgl = typeMod * genie::kPdgElectron; }
 
   double Eh = 0.0, El = 0.0;
   //double thetaPol = 0.0; //angle wrt HNL polarisation
   // assume isotropic for now, //RETHERE to sample Pol from flux & enforce polarised decay
 
-  genie::HNL::SimpleHNL sh = genie::HNL::SimpleHNL( "HNL", decayed_HNL_id, genie::kPdgHNL, genie::kPdgKP, mN, 1.0, 1.0, 0.0, false ); // RETHERE - find a way to propagate couplings into here!
+  genie::HNL::SimpleHNL sh = genie::HNL::SimpleHNL( "HNL", decayed_HNL_id, typeMod * genie::kPdgHNL, typeMod * genie::kPdgKP, mN, 1.0, 1.0, 0.0, false ); // RETHERE - find a way to propagate couplings into here!
 
   genie::HNL::decayKinematics::TwoBodyEnergies( mN, mh, ml, Eh, El );
   
@@ -260,11 +261,11 @@ void HNLDecayPrimaryVtxGenerator::GenerateDecayProducts(
 
   std::map< int, TLorentzVector > pdgMap;
 
-  pdgMap.insert( std::pair< int, TLorentzVector >( genie::kPdgPiP, p4h ) );
+  pdgMap.insert( std::pair< int, TLorentzVector >( pdgh, p4h ) );
   pdgMap.insert( std::pair< int, TLorentzVector >( pdgl, p4l ) );
 
   LOG("SimpleHNL", pDEBUG) 
-    << "Pion: pdg = " << genie::kPdgPiP << ", mass " << mh << ", energy " << Eh << ", mom " << p3h
+    << "Pion: pdg = " << pdgh << ", mass " << mh << ", energy " << Eh << ", mom " << p3h
     << "\n      px = " << p4h.Px() << ", py = " << p4h.Py() << ", pz = " << p4h.Pz();
 
   LOG("SimpleHNL", pDEBUG) 

@@ -76,6 +76,7 @@ void PDGLibrary::AddSimpleHNL( int pdgc, double mHNL, double Ue42, double Um42 )
   
   // add generic HNL with correct mass
   TParticlePDG * HNLParticle = fDatabasePDG->AddParticle( "HNL", "Generic Heavy Neutral Lepton", mHNL, false, totGamma, 0, "lepton", pdgc );
+  TParticlePDG * HNLAntiParticle = fDatabasePDG->AddAntiParticle( "HNLBar", pdgc );
 }
 //____________________________________________________________________________
 bool PDGLibrary::LoadDBase(void)

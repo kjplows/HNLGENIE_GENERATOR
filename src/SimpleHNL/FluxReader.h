@@ -21,10 +21,7 @@
 
  */
 //----------------------------------------------------------------------------
-// TODO: Decide naming convention for flux file names
-//       Calculate polarisation vector magnitude in 3-body HNL production
-//       Decide a PDG numbering scheme
-//       Decide a fluxRoot string
+// TODO: Calculate polarisation vector magnitude in 3-body HNL production
 //----------------------------------------------------------------------------
 
 #ifndef JFLUXREADER_H
@@ -35,6 +32,7 @@
 #include "TH1.h"
 #include "TH2.h"
 #include "TH3.h"
+//#include "TParameter.h"
 
 // -- GENIE includes
 

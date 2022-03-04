@@ -235,6 +235,7 @@ int main(int argc, char ** argv)
   // Init messenger and random number seed
   utils::app_init::MesgThresholds(RunOpt::Instance()->MesgThresholdFiles());
   utils::app_init::RandGen(gOptRanSeed);
+  TRandom3 * rng3 = new TRandom3(0); // RETHERE change to GENIE rng!!
 
   // Initialize an Ntuple Writer to save GHEP records into a TTree
   NtpWriter ntpw(kDefOptNtpFormat, gOptRunNu);
@@ -264,15 +265,25 @@ int main(int argc, char ** argv)
   // Step 1: Seek out the fluxes
   // grab '''path''' but numu + numubar + nue + nuebar
 
-  GFluxI * ff = TH1FluxDriver();
+  GFluxI * ff = TH1FluxDriver(); // creates an "input_flux.root" file with flux inside
+
+  // ask the TH1FluxDriver which flux it used
+  TFile f("./input-flux.root", "READ");
+  //TH1D * spectrum = (TH1D *) f.Get("input_flux");
+  TDirectory *baseDir = f.GetDirectory("");
+  std::string fluxName = std::string( "spectrum" );
+  assert( baseDir->GetListOfKeys()->Contains( fluxName.c_str() ) );
+  TH1D * spectrum = ( TH1D * ) baseDir->Get( fluxName.c_str() );
+  assert( spectrum );
+  
   LOG("gevgen_hnl", pNOTICE)
     << " *** Flux routine executed! Good!";
 
   // Step 2: The event loop
 
   int ievent = 0;
-  int dpdg = genie::kPdgHNL; // RETHERE make this configurable.
-
+  int dpdg = genie::kPdgHNL; int typeMod = 1;
+  
   while (1)
   {
      if(ievent == gOptNev) break;
@@ -280,17 +291,40 @@ int main(int argc, char ** argv)
      LOG("gevgen_hnl", pNOTICE)
           << " *** Generating event............ " << ievent;
 
+     // decide if this is nu / nubar. Does not matter if Majorana.
+     if( !gOptIsMajorana ){
+       if( gOptHNLKind == 0 ) typeMod = 1;
+       else if( gOptHNLKind == 1 ) typeMod = -1;
+       else{ // decide dynamically based on integrated fluxes
+	 double athrow = rng3->Uniform( 0.0, 1.0 );
+	 std::string integralsName = std::string( "hIntegrals" );
+	 TH1D * hIntegrals = ( TH1D * ) baseDir->Get( integralsName.c_str() );
+	 double posint = hIntegrals->GetBinContent(1) + hIntegrals->GetBinContent(3);
+	 double negint = hIntegrals->GetBinContent(2) + hIntegrals->GetBinContent(4);
+	 typeMod = ( athrow < posint / ( posint + negint ) ) ? 1 : -1;
+	 
+	 LOG( "gevgen_hnl", pDEBUG )
+	   << "posint, negint, throw, typeMod = " << posint << ", " << negint << ", " << athrow << ", " << typeMod;
+       }
+     }
+
+     dpdg *= typeMod;
+
      EventRecord * event = new EventRecord;
-     int HNLprobe = SelectInitState();
+     int HNLprobe = SelectInitState() * typeMod;
+
+     LOG( "gevgen_hnl", pDEBUG )
+       << "HNLprobe = " << HNLprobe;
 
      // select decay mode
      // RETHERE force N --> pi + \ell
      int decay = -1;
 
-     // RETHERE assuming all these HNL have K+ parent. This is wrong
+     // RETHERE assuming all these HNL have K+- parent. This is wrong 
+     // (but not very wrong for interesting masses)
      LOG("gevgen_hnl", pDEBUG)
        << " Building SimpleHNL object ";
-     genie::HNL::SimpleHNL sh( "HNL", ievent, genie::kPdgHNL, genie::kPdgKP, 
+     genie::HNL::SimpleHNL sh( "HNL", ievent, dpdg, genie::kPdgKP, 
 			       gOptHNLMass, gOptECoupling, gOptMuCoupling, 0.0, false );
      
      LOG("gevgen_hnl", pDEBUG)
@@ -354,7 +388,6 @@ int main(int argc, char ** argv)
        << "Doing random throw";
      
      // now do a random throw
-     TRandom3 * rng3 = new TRandom3(0);
      double ranThrow = rng3->Uniform( 0., 1. ); // HNL's fate is sealed.
 
      LOG("gevgen_hnl", pDEBUG)
@@ -373,14 +406,6 @@ int main(int argc, char ** argv)
      //int decay  = (int) genie::HNL::enums::kPiMu; // force N --> pi + mu.
 
      // select energy and build 4-momentum
-     // ask the TH1FluxDriver which flux it used
-     TFile f("./input-flux.root", "READ");
-     //TH1D * spectrum = (TH1D *) f.Get("input_flux");
-     TDirectory *baseDir = f.GetDirectory("");
-     std::string fluxName = std::string( "spectrum" );
-     assert( baseDir->GetListOfKeys()->Contains( fluxName.c_str() ) );
-     TH1D * spectrum = ( TH1D * ) baseDir->Get( fluxName.c_str() );
-     assert( spectrum );
      double EHNL = spectrum->GetRandom();
      
      double PHNL = std::sqrt( EHNL*EHNL - gOptHNLMass * gOptHNLMass );
@@ -566,7 +591,7 @@ GFluxI * TH1FluxDriver(void)
        hfluxAllMu->GetBinLowEdge(ibin) < emin) {
       spectrum->SetBinContent(ibin, 0);
     }
-  }
+  } // do I want to kill the overflow / underflow bins? Why?
   
   LOG("gevgen_hnl", pNOTICE) << spectrum->GetEntries() << " entries in spectrum";
 
@@ -578,6 +603,27 @@ GFluxI * TH1FluxDriver(void)
 
   TFile f("./input-flux.root","RECREATE");
   spectrum->Write();
+
+  // store integrals in histo if not Majorana and mixed flux
+  // usual convention: bin 0+1 ==> numu etc
+  if( !gOptIsMajorana && gOptHNLKind == 2 ){
+    TH1D * hIntegrals = new TH1D( "hIntegrals", "hIntegrals", 4, 0.0, 1.0 );
+    hIntegrals->SetBinContent( 1, hfluxAllMu->Integral() );
+    hIntegrals->SetBinContent( 2, hfluxAllMubar->Integral() );
+    hIntegrals->SetBinContent( 3, hfluxAllE->Integral() );
+    hIntegrals->SetBinContent( 4, hfluxAllEbar->Integral() );
+
+    hIntegrals->SetDirectory(0);
+    hIntegrals->Write();
+
+    LOG( "gevgen_hnl", pDEBUG )
+      << "\n\nIntegrals asked for and stored. Here are their values by type:"
+      << "\nNumu: " << hfluxAllMu->Integral()
+      << "\nNumubar: " << hfluxAllMubar->Integral()
+      << "\nNue: " << hfluxAllE->Integral()
+      << "\nNuebar: " << hfluxAllEbar->Integral() << "\n\n";
+  }
+
   f.Close();
   LOG("gevgen_hnl", pDEBUG) 
     << "Written spectrum to ./input-flux.root";
@@ -585,8 +631,10 @@ GFluxI * TH1FluxDriver(void)
   // before doing anything else, add HNL pdg code to PDGLibrary
   // otherwise the FluxDriver won't play ball
   AddHNLToPDGLibrary( gOptHNLPdgCode, gOptHNLMass, gOptECoupling, gOptMuCoupling);
+  
   LOG("gevgen_hnl", pDEBUG) 
-    << "Added HNL with PDG code " << gOptHNLPdgCode << " to PDGLibrary.";
+    << "Added HNL with |PDG code| " << gOptHNLPdgCode
+    << " and mass " << gOptHNLMass << " GeV/c^{2} to PDGLibrary.";
   /*
   PDGCodeList * pcl( false );
   bool HNLExists = pcl->ExistsInPDGLibrary( gOptHNLPdgCode );
