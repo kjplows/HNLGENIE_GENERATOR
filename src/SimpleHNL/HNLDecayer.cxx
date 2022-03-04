@@ -23,9 +23,10 @@ genie::HNL::HNLDecayer::~HNLDecayer( ) { }
 
 /// isHandled asks if this alg can decay this particle
 bool genie::HNL::HNLDecayer::IsHandled( int pdgc ) const {
-    if( genie::pdg::IsGenericHNL( pdgc ) || genie::pdg::IsGenericHNLBar( pdgc ) ||
-	genie::pdg::IsMuHNL( pdgc ) || genie::pdg::IsMuHNLBar( pdgc ) ||
-	genie::pdg::IsEHNL( pdgc ) || genie::pdg::IsEHNLBar( pdgc ) ) { return true; }
+    if( genie::pdg::IsGenericHNL( pdgc ) || genie::pdg::IsGenericHNLBar( pdgc ) //||
+	//genie::pdg::IsMuHNL( pdgc ) || genie::pdg::IsMuHNLBar( pdgc ) ||
+	//genie::pdg::IsEHNL( pdgc ) || genie::pdg::IsEHNLBar( pdgc ) ) 
+	){ return true; }
 
     LOG( "Decay", pINFO ) <<
 	"This algorithm can only decay HNL. Particle with code " << pdgc <<

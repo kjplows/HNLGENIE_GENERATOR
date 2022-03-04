@@ -203,7 +203,7 @@ Long_t             gOptRunNu         = 1000;                // run number
 int                gOptNev           = 10;                  // number of events to generate
 
 int                gOptCpL           = 14;                  // co-produced lepton PDG
-int                gOptHNLPdgCode    = 1900;                // pdg code. Set for now.
+int                gOptHNLPdgCode    = 1900;                // pdg code. Set based on mass hypothesis
 double             gOptHNLMass       = 0.255;               // HNL mass
 int                gOptHNLKind       = 2;                   // HNL kind. 0 = nu, 1 = nubar, 2 = mix
 bool               gOptIsMajorana    = false;               // Is Majorana? True ==> HNL kind set to 0
@@ -241,6 +241,23 @@ int main(int argc, char ** argv)
   NtpWriter ntpw(kDefOptNtpFormat, gOptRunNu);
   ntpw.CustomizeFilenamePrefix(gOptEvFilePrefix);
   ntpw.Initialize();
+
+  // need to find the closest mass point to ensure gst consistency. RETHERE
+  const int iMassPoint = genie::HNL::FluxReader::selectMass( gOptHNLMass );
+  // assert the "heavy" HNL that can decay to pimu
+  const double massLow2  = ( ( genie::HNL::enums::massHypMap ).find( genie::HNL::enums::kMedium9Hyp ) )->second;
+  const double massLow   = ( ( genie::HNL::enums::massHypMap ).find( genie::HNL::enums::kHeavy0Hyp ) )->second;
+  const double massHigh  = ( ( genie::HNL::enums::massHypMap ).find( genie::HNL::enums::kHeavyJHyp ) )->second;
+  // slightly smaller masses get bumped up to the first heavy point. Include them.
+  assert( gOptHNLMass >= massLow2 + 1.0 / 2.0 * ( massLow - massLow2 ) );
+  int iMass = iMassPoint - 30; // 30 light+medium, 20 heavy
+  // now also have to set pdg code to make sense!
+  gOptHNLPdgCode = 1900 + 1 + iMass; // lightest non-generic = 1901
+
+  double useThisMass = genie::HNL::FluxReader::getSelectedMass();
+  LOG( "gevgen_hnl", pINFO )
+    << "Modifying HNL mass to closest mass point, " << useThisMass << " GeV.";
+  gOptHNLMass = useThisMass;
 
   // add another few branches. Mass, couplings, Majorana, type!
   ntpw.EventTree()->Branch("hnl_mass", &gOptHNLMass, "gOptHNLMass/D");
@@ -282,7 +299,7 @@ int main(int argc, char ** argv)
   // Step 2: The event loop
 
   int ievent = 0;
-  int dpdg = genie::kPdgHNL; int typeMod = 1;
+  int dpdg = gOptHNLPdgCode; int typeMod = 1;
   
   while (1)
   {
@@ -685,7 +702,8 @@ const EventRecordVisitorI * HNLDecayGenerator(void)
 }
 //_________________________________________________________________________________________
 int SelectInitState(void){
-  int dpdg = genie::kPdgHNL; // RETHERE fix this!
+  //int dpdg = genie::kPdgHNL; // RETHERE fix this!
+  int dpdg = gOptHNLPdgCode;
   
   return dpdg; // I return one HNL. This is WAY simple.
 }

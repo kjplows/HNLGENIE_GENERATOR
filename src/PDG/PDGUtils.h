@@ -44,10 +44,8 @@ namespace pdg
 
   bool IsGenericHNL       (int pdgc);
   bool IsGenericHNLBar    (int pdgc);
-  bool IsMuHNL            (int pdgc);
-  bool IsMuHNLBar         (int pdgc);
-  bool IsEHNL             (int pdgc);
-  bool IsEHNLBar          (int pdgc);
+  bool IsSpecificHNL      (int pdgc);
+  bool IsSpecificHNLBar   (int pdgc);
 
   bool IsNuE              (int pdgc);
   bool IsNuMu             (int pdgc);

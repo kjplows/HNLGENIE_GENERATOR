@@ -192,15 +192,16 @@ const int kPdgCluster      = 91;
 const int kPdgString       = 92; 
 const int kPdgIndep        = 93;
 
-// PDG codes for HNL co-produced with specific lepton
-const int kPdgHNLMu        =  1914;
-const int kPdgHNLMuBar     = -1914;
-const int kPdgHNLE         =  1912;
-const int kPdgHNLEBar      = -1912;
-
 // generic HNL code
 const int kPdgHNL          =  1900;
 const int kPdgHNLBar       = -1900;
+// HNL with various masses
+const int kPdgHNLHeavy0    =  1901;
+const int kPdgHNLBarHeavy0 = -1901;
+const int kPdgHNLHeavy1    =  1902;
+const int kPdgHNLBarHeavy1 = -1902;
+const int kPdgHNLHeavyJ    =  1903;
+const int kPdgHNLBarHeavyJ = -1903;
 
 }      // genie namespace
 

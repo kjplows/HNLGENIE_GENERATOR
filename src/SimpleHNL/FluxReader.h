@@ -112,6 +112,8 @@ namespace HNL{
 	/// set all other stuff from flux prediction
 	void setFluxInfo( genie::HNL::SimpleHNL sh );
 
+	inline double getSelectedMass(){ return fmN; }
+
     } // namespace FluxReader
 
 } // namespace HNL

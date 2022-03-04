@@ -107,7 +107,7 @@ int genie::HNL::FluxReader::selectMass( const double mN ){
     const double dLeft  = std::abs( mN - masses[ mp ] );
     const double dRight = masses[ mp + 1 ] - mN;
 
-    LOG("SimpleHNL", pNOTICE)
+    LOG("SimpleHNL", pDEBUG)
      << "Stats:"
      << "\n Input mass: " << mN 
      << "\n Choice interval: [ " << masses[mp] << ", " << masses[mp+1] << " ] " 

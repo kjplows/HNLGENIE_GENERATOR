@@ -120,11 +120,10 @@ bool genie::pdg::IsChargedLepton(int pdgc)
 //____________________________________________________________________________
 bool genie::pdg::IsHeavyNeutralLepton(int pdgc)
 {
-  bool isGeneric = genie::pdg::IsGenericHNL(pdgc) || genie::pdg::IsGenericHNLBar(pdgc);
-  bool isMuCoup  = genie::pdg::IsMuHNL(pdgc) || genie::pdg::IsMuHNLBar(pdgc);
-  bool isECoup   = genie::pdg::IsEHNL(pdgc) || genie::pdg::IsEHNLBar(pdgc);
+  bool isGeneric  = genie::pdg::IsGenericHNL(pdgc) || genie::pdg::IsGenericHNLBar(pdgc);
+  bool isSpecific = genie::pdg::IsSpecificHNL(pdgc) || genie::pdg::IsSpecificHNLBar(pdgc);
 
-  return ( isGeneric || isMuCoup || isECoup );
+  return ( isGeneric || isSpecific );
 }
 //____________________________________________________________________________
 bool genie::pdg::IsNeutrino(int pdgc)
@@ -161,7 +160,7 @@ bool genie::pdg::IsPosChargedLepton(int pdgc)
 
   return is_pos_lepton;
 }
-
+//____________________________________________________________________________
 bool genie::pdg::IsGenericHNL(int pdgc){
   return (pdgc == kPdgHNL);
 }
@@ -170,23 +169,14 @@ bool genie::pdg::IsGenericHNLBar(int pdgc){
   return (pdgc == kPdgHNLBar);
 }
 //____________________________________________________________________________
-bool genie::pdg::IsMuHNL(int pdgc){
-  return (pdgc == kPdgHNLMu);
+bool genie::pdg::IsSpecificHNL(int pdgc){
+  return (pdgc >= kPdgHNLHeavy0 && pdgc <= kPdgHNLHeavyJ);
 }
 //____________________________________________________________________________
-bool genie::pdg::IsMuHNLBar(int pdgc){
-  return (pdgc == kPdgHNLMuBar);
+bool genie::pdg::IsSpecificHNLBar(int pdgc){
+  return (pdgc <= kPdgHNLBarHeavy0 && pdgc >= kPdgHNLBarHeavyJ);
 }
 //____________________________________________________________________________
-bool genie::pdg::IsEHNL(int pdgc){
-  return (pdgc == kPdgHNLE);
-}
-//____________________________________________________________________________
-bool genie::pdg::IsEHNLBar(int pdgc){
-  return (pdgc == kPdgHNLEBar);
-}
-//____________________________________________________________________________
-
 bool genie::pdg::IsNuE(int pdgc)
 {
   return (pdgc == kPdgNuE);
