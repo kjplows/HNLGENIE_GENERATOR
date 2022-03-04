@@ -75,8 +75,8 @@ void PDGLibrary::AddSimpleHNL( int pdgc, double mHNL, double Ue42, double Um42 )
   double totGamma = genie::HNL::Selector::GetTotalDecayWidth( validChannels );
   
   // add generic HNL with correct mass
-  TParticlePDG * HNLParticle = fDatabasePDG->AddParticle( "HNL", "Generic Heavy Neutral Lepton", mHNL, false, totGamma, 0, "lepton", pdgc );
-  TParticlePDG * HNLAntiParticle = fDatabasePDG->AddAntiParticle( "HNLBar", pdgc );
+  TParticlePDG * HNLParticle = fDatabasePDG->AddParticle( "HNL", "Generic Heavy Neutral Lepton", mHNL, false, totGamma, 0, "lepton", std::abs(pdgc) );
+  TParticlePDG * HNLAntiParticle = fDatabasePDG->AddParticle( "HNLBar", "Generic Heavy Neutral Lepton", mHNL, false, totGamma, 0, "lepton", -std::abs(pdgc) );
 }
 //____________________________________________________________________________
 bool PDGLibrary::LoadDBase(void)

@@ -406,13 +406,10 @@ int main(int argc, char ** argv)
      //int decay  = (int) genie::HNL::enums::kPiMu; // force N --> pi + mu.
 
      // select energy and build 4-momentum
-     double EHNL = spectrum->GetRandom();
-     
+     double EHNL = spectrum->GetRandom();     
      double PHNL = std::sqrt( EHNL*EHNL - gOptHNLMass * gOptHNLMass );
-
      TLorentzVector p4HNL( 0.0, 0.0, PHNL, EHNL );
 
-     // RETHERE this should not be NDecay (that tells app that we actually have NucleonDecay. We don't. RETHERE)
      Interaction * interaction = Interaction::HNLDecay(HNLprobe,decay,p4HNL);
      event->AttachSummary(interaction);
 
