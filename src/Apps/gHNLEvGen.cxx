@@ -34,7 +34,7 @@
            [] Denotes an optional argument
 
            -h 
-              Prints out the gevgen_ndcy syntax and exits.
+              Prints out the gevgen_hnl syntax and exits.
            -r 
               Specifies the MC run number [default: 1000].
            -n  
@@ -276,7 +276,7 @@ int main(int argc, char ** argv)
   // Step 0: Get the HNL event generator
   // WIP!!!
   const EventRecordVisitorI * mcgen = HNLDecayGenerator();
-  LOG("gevgen_hnl", pNOTICE)
+  LOG("gevgen_hnl", pINFO)
     << " *** Got event generator! Good!";
 
   // Step 1: Seek out the fluxes
@@ -293,7 +293,7 @@ int main(int argc, char ** argv)
   TH1D * spectrum = ( TH1D * ) baseDir->Get( fluxName.c_str() );
   assert( spectrum );
   
-  LOG("gevgen_hnl", pNOTICE)
+  LOG("gevgen_hnl", pINFO)
     << " *** Flux routine executed! Good!";
 
   // Step 2: The event loop
@@ -424,6 +424,7 @@ int main(int argc, char ** argv)
 
      // select energy and build 4-momentum
      double EHNL = spectrum->GetRandom();     
+     if( EHNL < gOptHNLMass ) EHNL = gOptHNLMass; // binning allows masses below HNL mass, kill these
      double PHNL = std::sqrt( EHNL*EHNL - gOptHNLMass * gOptHNLMass );
      TLorentzVector p4HNL( 0.0, 0.0, PHNL, EHNL );
 
@@ -607,7 +608,7 @@ GFluxI * TH1FluxDriver(void)
     }
   } // do I want to kill the overflow / underflow bins? Why?
   
-  LOG("gevgen_hnl", pNOTICE) << spectrum->GetEntries() << " entries in spectrum";
+  LOG("gevgen_hnl", pINFO) << spectrum->GetEntries() << " entries in spectrum";
 
   // RETHERE, VERY placeholder-y
   // pass this flux to FluxReader to sample from

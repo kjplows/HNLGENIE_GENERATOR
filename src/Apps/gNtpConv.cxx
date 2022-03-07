@@ -593,6 +593,7 @@ void ConvertToGST(void)
     //input particles
     GHepParticle * neutrino = event.Probe();
     GHepParticle * target = event.Particle(1);
+    if( !target ) continue; // bail on events that have no target. RETHERE FIX?
     assert(target);
     GHepParticle * fsl = event.FinalStatePrimaryLepton();
     GHepParticle * hitnucl = event.HitNucleon();

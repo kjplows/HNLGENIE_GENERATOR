@@ -223,6 +223,7 @@ void HNLDecayPrimaryVtxGenerator::GenerateDecayProducts(
   // from the genie::HNL::decayKinematics namespace
 
   double mN = p4d->M();
+  assert( mN >= 0.0 );
   double ml = -1.0, mh = genie::constants::kPionMass;
   int pdgh = typeMod * genie::kPdgPiP, pdgl = -1;
   if( fCurrDecayMode == genie::HNL::enums::kPiMu ){ ml = genie::constants::kMuonMass; pdgl = typeMod * genie::kPdgMuon; }

@@ -91,7 +91,7 @@ int genie::HNL::FluxReader::selectMass( const double mN ){
       massHyp_t thisHyp = massesHyp[i];
       auto pos = massHypMap.find( thisHyp );
       masses[i] = pos->second;
-      LOG("SimpleHNL", pNOTICE) 
+      LOG("SimpleHNL", pINFO) 
 	<< "At position " << i << " the mass hypothesis is " << masses[i];
     }
 
