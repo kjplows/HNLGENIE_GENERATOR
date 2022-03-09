@@ -154,16 +154,36 @@ void HNLDecayPrimaryVtxGenerator::GenerateDecayProducts(
 
   // Step 0: Manually put the decay products into a PDGCodeList based on decay mode
 
-  assert( fCurrDecayMode == genie::HNL::enums::kPiMu ||
-	  fCurrDecayMode == genie::HNL::enums::kPiE ); // force 2-body decay
-
   PDGCodeList pdgv( false );
   int typeMod = ( fCurrInitStatePdg > 0 ) ? 1 : -1;
+
+  // vector of known (i.e. implemented) decays
+  std::vector< genie::HNL::enums::HNLDecay_t > knownDecays;
+  knownDecays.emplace_back( genie::HNL::enums::kPiMu );
+  knownDecays.emplace_back( genie::HNL::enums::kPiE );
+  knownDecays.emplace_back( genie::HNL::enums::kPi0Nu );
+
+  bool decayIsKnown = ( std::find( std::begin( knownDecays ), std::end( knownDecays ), fCurrDecayMode )
+			!= std::end( knownDecays ) ) ;
+  if( !decayIsKnown ){
+    LOG( "SimpleHNL", pFATAL )
+      << "Unknown decay! I will crash now, and you should either implement this decay or switch it off.";
+  }
+  assert( decayIsKnown );
   
-  pdgv.push_back( typeMod * genie::kPdgPiP ); // all 2 decay modes do this
+  if( fCurrDecayMode == genie::HNL::enums::kPiMu || fCurrDecayMode == genie::HNL::enums::kPiE ){
+    pdgv.push_back( typeMod * genie::kPdgPiP ); // all 2 decay modes do this
+  }
+  else if( fCurrDecayMode == genie::HNL::enums::kPi0Nu ){
+    pdgv.push_back( genie::kPdgPi0 ); // pi0 is its own antiparticle
+  }
   
   if( fCurrDecayMode == genie::HNL::enums::kPiMu ) pdgv.push_back( typeMod * genie::kPdgMuon );
-  else pdgv.push_back( typeMod * genie::kPdgElectron );
+  else if( fCurrDecayMode == genie::HNL::enums::kPiE ) pdgv.push_back( typeMod * genie::kPdgElectron );
+  else if( fCurrDecayMode == genie::HNL::enums::kPi0Nu ) pdgv.push_back( typeMod * genie::kPdgNuMu );
+
+  //assert( fCurrDecayMode == genie::HNL::enums::kPiMu ||
+  //	  fCurrDecayMode == genie::HNL::enums::kPiE ); // force 2-body decay
 
   //I *could* do this, or I could actually implement the custom 3-body decays
   //inside SimpleHNL.
@@ -224,10 +244,25 @@ void HNLDecayPrimaryVtxGenerator::GenerateDecayProducts(
 
   double mN = p4d->M();
   assert( mN >= 0.0 );
-  double ml = -1.0, mh = genie::constants::kPionMass;
-  int pdgh = typeMod * genie::kPdgPiP, pdgl = -1;
-  if( fCurrDecayMode == genie::HNL::enums::kPiMu ){ ml = genie::constants::kMuonMass; pdgl = typeMod * genie::kPdgMuon; }
-  else{ ml = genie::constants::kElectronMass; pdgl = typeMod * genie::kPdgElectron; }
+  double ml = -1.0, mh = -1.0;
+  int pdgh = -1, pdgl = -1;
+  
+  if( fCurrDecayMode == genie::HNL::enums::kPiMu || fCurrDecayMode == genie::HNL::enums::kPiE ){
+    mh = genie::constants::kPionMass; pdgh = typeMod * genie::kPdgPiP;
+  }
+  else if( fCurrDecayMode == genie::HNL::enums::kPi0Nu ){
+    mh = genie::constants::kPi0Mass; pdgh = genie::kPdgPi0;
+  }
+
+  if( fCurrDecayMode == genie::HNL::enums::kPiMu ){ 
+    ml = genie::constants::kMuonMass; pdgl = typeMod * genie::kPdgMuon;
+  }
+  else if( fCurrDecayMode == genie::HNL::enums::kPiE ){ 
+    ml = genie::constants::kElectronMass; pdgl = typeMod * genie::kPdgElectron; 
+  }
+  else if( fCurrDecayMode == genie::HNL::enums::kPi0Nu ){
+    ml = 0.0; pdgl = typeMod * genie::kPdgNuMu;
+  }
 
   double Eh = 0.0, El = 0.0;
   //double thetaPol = 0.0; //angle wrt HNL polarisation
@@ -315,7 +350,15 @@ void HNLDecayPrimaryVtxGenerator::GenerateDecayProducts(
      // update FS particle count
      interaction->ExclTagPtr()->Reset();
 
-     interaction->ExclTagPtr()->SetNPions( 1, 0, 0 ); //RETHERE make this realistic
+     int nPiP = 0, nPi0 = 0, nPiM = 0;
+     if( fCurrDecayMode == genie::HNL::enums::kPiMu || fCurrDecayMode == genie::HNL::enums::kPiE ){
+       nPiP = ( typeMod > 0 ) ? 1 : 0;
+       nPiM = 1 - nPiP; // either 1/0 or 0/1
+     }
+     else if( fCurrDecayMode == genie::HNL::enums::kPi0Nu ){
+       nPi0 = 1;
+     }       
+     interaction->ExclTagPtr()->SetNPions( nPiP, nPi0, nPiM );
      interaction->ExclTagPtr()->SetNNucleons( 0, 0 );
 
      GHepStatus_t ist = kIStStableFinalState;
@@ -339,7 +382,7 @@ void HNLDecayPrimaryVtxGenerator::GenerateDecayProducts(
   interaction->KinePtr()->Setx( gx, true );
   double gt = 0.0; // no interaction ==> no transfer to a nuclear system
   interaction->KinePtr()->Sett( gt, true );
-  double gW = genie::constants::kPionMass;
+  double gW = mh;
   interaction->KinePtr()->SetW( gW, true ); // should be exactly the pion mass!
 
   LOG( "SimpleHNL", pDEBUG )

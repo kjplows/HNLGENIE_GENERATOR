@@ -334,7 +334,6 @@ int main(int argc, char ** argv)
        << "HNLprobe = " << HNLprobe;
 
      // select decay mode
-     // RETHERE force N --> pi + \ell
      int decay = -1;
 
      // RETHERE assuming all these HNL have K+- parent. This is wrong 
@@ -349,6 +348,7 @@ int main(int argc, char ** argv)
      std::vector< genie::HNL::enums::HNLDecay_t > * intChannels = new std::vector< genie::HNL::enums::HNLDecay_t >();
      intChannels->emplace_back( genie::HNL::enums::kPiE );
      intChannels->emplace_back( genie::HNL::enums::kPiMu );
+     intChannels->emplace_back( genie::HNL::enums::kPi0Nu ); // TESTING: What happens if we allow these decays?
 
      LOG("gevgen_hnl", pDEBUG)
        << " Getting valid channels ";
@@ -362,11 +362,16 @@ int main(int argc, char ** argv)
      auto pieMapG  = gammaMap.find( pieDecay );
      double piePG  = pieMapG->second;
 
+     genie::HNL::enums::HNLDecay_t pi0nuDecay =  genie::HNL::enums::kPi0Nu;
+     auto pi0nuMapG  = gammaMap.find( pi0nuDecay );
+     double pi0nuPG  = pi0nuMapG->second;
+
      LOG("gevgen_hnl", pDEBUG)
        << "\n\n !!! ------------------------------------------- "
        << "\n !!! Here are the gammas of the interesting channels: "
-       << "\n !!! Channel: pi mu . Gamma = " << pimuPG
-       << "\n !!! Channel: pi e  . Gamma = " << piePG
+       << "\n !!! Channel: pi  mu . Gamma = " << pimuPG
+       << "\n !!! Channel: pi  e  . Gamma = " << piePG
+       << "\n !!! Channel: pi0 nu . Gamma = " << pi0nuPG
        << "\n !!! ------------------------------------------- \n";
 
      LOG("gevgen_hnl", pDEBUG)
@@ -386,19 +391,21 @@ int main(int argc, char ** argv)
 
      // I want to see what these probabilities are.
      
-     //genie::HNL::enums::HNLDecay_t pimuDecay = genie::HNL::enums::kPiMu;
      auto pimuMap  = PMap.find( pimuDecay );
      double pimuP  = pimuMap->second;
 
-     //genie::HNL::enums::HNLDecay_t pieDecay =  genie::HNL::enums::kPiE;
-     auto pieMap  = PMap.find( pieDecay );
-     double pieP  = pieMap->second;
+     auto pieMap   = PMap.find( pieDecay );
+     double pieP   = pieMap->second;
+
+     auto pi0nuMap = PMap.find( pi0nuDecay );
+     double pi0nuP = pi0nuMap->second;
 
      LOG("gevgen_hnl", pDEBUG)
        << "\n\n !!! ------------------------------------------- "
        << "\n !!! Here are the probabilities of the interesting channels: "
-       << "\n !!! Channel: pi mu . Prob = " << pimuP
-       << "\n !!! Channel: pi e  . Prob = " << pieP
+       << "\n !!! Channel: pi  mu . Prob = " << pimuP
+       << "\n !!! Channel: pi  e  . Prob = " << pieP
+       << "\n !!! Channel: pi0 nu . Prob = " << pi0nuP
        << "\n !!! ------------------------------------------- \n";
 
      LOG("gevgen_hnl", pDEBUG)
@@ -418,13 +425,11 @@ int main(int argc, char ** argv)
      LOG("gevgen_hnl", pDEBUG)
        << "Selected decay = " << decay;
 
-     assert( decay == 0 || decay == 1 ); //RETHERE
-
-     //int decay  = (int) genie::HNL::enums::kPiMu; // force N --> pi + mu.
+     //assert( decay == 0 || decay == 1 ); //RETHERE
 
      // select energy and build 4-momentum
      double EHNL = spectrum->GetRandom();     
-     if( EHNL < gOptHNLMass ) EHNL = gOptHNLMass; // binning allows masses below HNL mass, kill these
+     while( EHNL < gOptHNLMass ) EHNL = spectrum->GetRandom(); // binning allows masses below HNL mass, throw again
      double PHNL = std::sqrt( EHNL*EHNL - gOptHNLMass * gOptHNLMass );
      TLorentzVector p4HNL( 0.0, 0.0, PHNL, EHNL );
 
