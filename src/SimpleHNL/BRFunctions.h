@@ -79,12 +79,6 @@ namespace HNL {
 	extern double PiPi0EllForm( double *x, double *par );
 
 	// kinematic functions
-
-	// placeholder
-	static const double Ue4 = 1.0e-2;
-	static const double Um4 = 1.0e-2;
-	static const double Ut4 = 0.0;
-
 	double GetColomaF1( double x );
 	double GetColomaF2( double x );
 

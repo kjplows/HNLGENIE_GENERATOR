@@ -32,17 +32,6 @@ double genie::HNL::Selector::DWidth_PiAndLepton( const double M, const double Ua
   const double kalPart = TMath::Sqrt( genie::HNL::utils::Kallen( 1, xPi*xPi, xLep*xLep ) );
   const double othPart = 1. - xPi*xPi - xLep*xLep * ( 2. + xPi*xPi - xLep*xLep );
 
-  /*
-    LOG("SimpleHNL", pDEBUG)
-    << "\n\n!!! Pi and lepton stats: "
-    << "\n!!! M, Ua42, ma = " << M << ", " << Ua42 << ", " << ma
-    << "\n!!! xPi = " << xPi
-    << "\n!!! xLep = " << xLep
-    << "\n!!! preFac = " << preFac
-    << "\n!!! kalPart = " << kalPart
-    << "\n!!! othPart = " << othPart << "\n\n";
-  */
-
   return preFac * fpi2 * Ua42 * Vud2 * kalPart * othPart;
 }
 
@@ -73,10 +62,11 @@ double genie::HNL::Selector::DWidth_DiffLepton( const double M, const double Ua4
   return preFac * kinPart * coupPart;
 }
 
+// note that these BR are very very tiny.
 double genie::HNL::Selector::DWidth_PiPi0Ell( const double M, const double ml,
 					      const double Ue42, const double Umu42, const double Ut42,
-					      const bool isElectron){ return 0.0; }
-/*{
+					      const bool isElectron)
+{
   // because the actual decay width is very hard to integrate onto a full DWidth,
   // build 2Differential and then integrate numerically
   // using Simpson's method for 2D.
@@ -86,6 +76,10 @@ double genie::HNL::Selector::DWidth_PiPi0Ell( const double M, const double ml,
   const double Ua2 = isElectron ? Ue2 : Um2;
   const double Ua3 = isElectron ? Ue3 : Um3;
   const double Ua4 = isElectron ? std::sqrt( Ue42 ) : std::sqrt( Umu42 );
+
+  const double Ue4 = std::sqrt( Ue42 );
+  const double Um4 = std::sqrt( Umu42 );
+  const double Ut4 = std::sqrt( Ut42 );
   // assume all these to be real
   const double bigMats =
     Ua1 * ( Ue4 * Ue1 + Um4 * Um1 + Ut4 * Ut1 ) +
@@ -94,21 +88,24 @@ double genie::HNL::Selector::DWidth_PiPi0Ell( const double M, const double ml,
 
   // now limits
   const double maxMu =
-    ( ( M - mPi0 ) * ( M - mPi0 ) - mPi*mPi + mMu*mMu ) / ( 2.0 * ( M - mPi0 ) );
+    ( ( M - mPi0 ) * ( M - mPi0 ) - mPi*mPi + ml*ml ) / ( 2.0 * ( M - mPi0 ) );
   const double maxPi =
-    ( ( M - mPi0 ) * ( M - mPi0 ) + mPi*mPi - mMu*mMu ) / ( 2.0 * ( M - mPi0 ) );
+    ( ( M - mPi0 ) * ( M - mPi0 ) + mPi*mPi - ml*ml ) / ( 2.0 * ( M - mPi0 ) );
 
   // gotta put in the formula
-  TF2 * f = new TF2( "f", PiPi0EllForm, mMu, maxMu, mPi, maxPi, 4 );
-  f->SetParameters( 0, M, 1, mMu, 2, mPi, 3, mPi0 );
+  TF2 * f = new TF2( "f", PiPi0EllForm, ml, maxMu, mPi, maxPi, 4 );
+  f->SetParameter( 0, M );
+  f->SetParameter( 1, ml );
+  f->SetParameter( 2, mPi );
+  f->SetParameter( 3, mPi0 );
 
   // now we can use composite Simpson, iterating on both axes simultaneously
   // This is like using Fubini over and over again for sampled Emu ==> integrate
   // out Epi ==> Simpson again for Emu. Can see more at
   // https://math.stackexchange.com/questions/1319892/simpsons-rule-for-double-integrals.
 
-  const int nSteps = 1000 + 1; // more than fine enough, 1k intervals
-  const double hEMu = ( maxMu - mMu ) / ( nSteps - 1 );
+  const int nSteps = 10000 + 1;
+  const double hEMu = ( maxMu - ml ) / ( nSteps - 1 );
   const double hEPi = ( maxPi - mPi ) / ( nSteps - 1 );
   const double preSimp = hEMu * hEPi / ( 9.0 * ( nSteps - 1 ) * ( nSteps - 1 ) );
 
@@ -122,7 +119,7 @@ double genie::HNL::Selector::DWidth_PiPi0Ell( const double M, const double ml,
 	else if( j % 2 == 0 ){ midW = 2.0; } // even j
 	else{ midW = 4.0; } // odd j
       }
-      else if( i % (nSteps - 1) == 0 ){ // even i
+      else if( i % 2 == 0 ){ // even i
 	if( j % (nSteps - 1) == 0 ){ midW = 2.0; } // edge case j
 	else if( j % 2 == 0 ){ midW = 4.0; } // even j
 	else{ midW = 8.0; } // odd j
@@ -134,19 +131,19 @@ double genie::HNL::Selector::DWidth_PiPi0Ell( const double M, const double ml,
       }
       // finally, evaluate f at this point
       const double xev  = mPi + i * hEPi;
-      const double yev  = mMu + j * hEMu;
+      const double yev  = ml + j * hEMu;
       const double fev  = f->Eval( xev, yev );
 
       // and add to integral
-      intNow += preSimp * midW * fev;
+      intNow += std::abs( preSimp * midW * fev );
     }
   }
-
+    
   intNow *= preFac * bigMats;
 
   return intNow;
 	    
-  } */ //RETHERE must validate this!
+}
 
 double genie::HNL::Selector::DWidth_Pi0Pi0Nu( const double dummyArg ){ return 0.0; } //dummy!
 
@@ -175,13 +172,16 @@ double genie::HNL::Selector::PiPi0EllForm( double *x, double *par ){
     double MPi = par[2];
     double MPi0 = par[3];
     
-    double Emu = x[0];
-    double Epi = x[1];
+    double Epi = x[0];
+    double Emu = x[1];
+
+    double pi0Term = ( MN - Emu - Epi > MPi0 ) ? 
+      std::sqrt( std::pow( ( MN - Emu - Epi ), 2.0 ) - MPi0 * MPi0 ) : 0.0;
     
     double ETerm =
       std::sqrt( Emu*Emu - MMu*MMu ) *
       std::sqrt( Epi*Epi - MPi*MPi ) *
-      std::sqrt( std::pow( ( MN - Emu - Epi ), 2.0 ) - MPi0*MPi0 ) / ( MN - Emu - Epi );
+      pi0Term / ( MN - Emu - Epi );
     
     double FracNum1 = MN*MN - 2.0*( MN-Emu-Epi )*MN + MPi0*MPi0;
     double FracNum2 = MN*MN - 2.0*Emu*MN + 2.0*MMu*MMu;
