@@ -50,7 +50,7 @@ public:
 private:
 
    void LoadConfig                     (void);
-   void AddInitialState                (GHepRecord * event, double EHNL) const;
+   void AddInitialState                (GHepRecord * event) const;
    void GenerateDecayedHNLPosition     (GHepRecord * event) const;
    //void GenerateFermiMomentum          (GHepRecord * event) const;
    void GenerateDecayProducts          (GHepRecord * event, double EHNL) const;

@@ -67,7 +67,7 @@ void HNLDecayPrimaryVtxGenerator::ProcessEventRecord(
 
   double EHNL = interaction->InitState().ProbeE(kRfLab);
 
-  this->AddInitialState(event, EHNL);
+  this->AddInitialState(event);
   this->GenerateDecayedHNLPosition(event);
   //this->GenerateFermiMomentum(event);
   this->GenerateDecayProducts(event, EHNL);
@@ -88,7 +88,7 @@ void HNLDecayPrimaryVtxGenerator::GetEnergyFromFlux() const
 }
 //____________________________________________________________________________
 void HNLDecayPrimaryVtxGenerator::AddInitialState(
-	          GHepRecord * event, double EHNL ) const
+	          GHepRecord * event) const
 {
 //
 // Add initial state in the event record.
@@ -115,16 +115,11 @@ void HNLDecayPrimaryVtxGenerator::AddInitialState(
   // add initial HNL
   double mn  = PDGLibrary::Instance()->Find(ipdg)->Mass();
   TLorentzVector p4i(0,0,0,mn);
-
-  // boost it to lab frame
-  double phnl = std::sqrt( EHNL * EHNL - mn * mn );
-  double bhnl = phnl / EHNL;
-
-  TVector3 p3i(0.0,0.0,bhnl);
-  TLorentzVector p4iLAB = p4i; p4iLAB.Boost(p3i);
+  Interaction * interaction = event->Summary();
+  TLorentzVector * p4HNL = interaction->InitState().GetProbeP4( kRfLab );
 
   // RETHERE TODO: maybe want a v4LAB?
-  event->AddParticle(ipdg,stis,-1,-1,-1,-1, p4iLAB, v4);
+  event->AddParticle(ipdg,stis,-1,-1,-1,-1, *p4HNL, v4);
 
   LOG( "SimpleHNL", pNOTICE )
     << "Added initial state.";
