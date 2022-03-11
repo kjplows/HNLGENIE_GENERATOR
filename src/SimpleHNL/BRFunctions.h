@@ -77,6 +77,7 @@ namespace HNL {
 
 	// declaration of PiPi0EllForm as extern?
 	extern double PiPi0EllForm( double *x, double *par );
+	extern double Pi0Pi0NuForm( double *x, double *par );
 
 	// kinematic functions
 	double GetColomaF1( double x );
@@ -107,7 +108,9 @@ namespace HNL {
 				const double Ue42, const double Umu42, const double Ut42,
 				const bool isElectron = false );
 
-	double DWidth_Pi0Pi0Nu( const double dummyArg );
+	// N --> pi^0 + pi^0 + \nu (all flavours summed up)
+	double DWidth_Pi0Pi0Nu( const double M,
+				const double Ue42, const double Umu42, const double Ut42 );
 
 	//============================================
 	// differential decay widths for HNL channels

@@ -123,7 +123,7 @@ std::map< genie::HNL::enums::HNLDecay_t, double > genie::HNL::Selector::GetValid
 
     double GP02 = 0.0;
     if( fDecayGammas[7] < 0.0 ){
-      GP02 = genie::HNL::Selector::DWidth_Pi0Pi0Nu( 1.0 );
+      GP02 = genie::HNL::Selector::DWidth_Pi0Pi0Nu( M, Ue42, Umu42, Ut42 );
       fDecayGammas[7] = GP02;
       LOG("SimpleHNL", pDEBUG)
 	<< " Pi0-pi0-nu gamma = " << GP02;

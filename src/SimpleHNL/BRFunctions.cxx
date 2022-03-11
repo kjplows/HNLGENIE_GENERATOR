@@ -93,7 +93,7 @@ double genie::HNL::Selector::DWidth_PiPi0Ell( const double M, const double ml,
     ( ( M - mPi0 ) * ( M - mPi0 ) + mPi*mPi - ml*ml ) / ( 2.0 * ( M - mPi0 ) );
 
   // gotta put in the formula
-  TF2 * f = new TF2( "f", PiPi0EllForm, ml, maxMu, mPi, maxPi, 4 );
+  TF2 * f = new TF2( "fPiPi0Ell", PiPi0EllForm, mPi, maxPi, ml, maxMu, 4 );
   f->SetParameter( 0, M );
   f->SetParameter( 1, ml );
   f->SetParameter( 2, mPi );
@@ -145,7 +145,75 @@ double genie::HNL::Selector::DWidth_PiPi0Ell( const double M, const double ml,
 	    
 }
 
-double genie::HNL::Selector::DWidth_Pi0Pi0Nu( const double dummyArg ){ return 0.0; } //dummy!
+// *especially* this channel, there's N4 in the propagator so it emits *both* the pi-zeros!!!
+// It is subleading in |U_\ell 4|^2, therefore not important to get this exactly right
+double genie::HNL::Selector::DWidth_Pi0Pi0Nu( const double M,
+					      const double Ue42, const double Umu42, const double Ut42 )
+{ 
+  const double preFac = fpi2 * fpi2 * GF2 * GF2 * std::pow( M, 5.0 ) / ( 64.0 * pi*pi*pi );
+
+  const double Ue4 = std::sqrt( Ue42 );
+  const double Um4 = std::sqrt( Umu42 );
+  const double Ut4 = std::sqrt( Ut42 );
+
+  // once again, assume all PMNS matrix elements real
+  const double bigMats = std::pow( Ue4 * ( Ue1 + Ue2 + Ue3 ) +
+				   Um4 * ( Um1 + Um2 + Um3 ) +
+				   Ut4 * ( Ut1 + Ut2 + Ut3 ), 2.0 );
+  const double smallMats = std::pow( Ue42 + Umu42 + Ut42 , 2.0 );
+
+  // let's make the limits
+  const double maxNu = 
+    ( ( M - mPi0 ) * ( M - mPi0 ) - mPi0*mPi0 ) / ( 2.0 * ( M - mPi0 ) );
+  const double maxPi = 
+    ( ( M - mPi0 ) * ( M - mPi0 ) + mPi0*mPi0 ) / ( 2.0 * ( M - mPi0 ) );
+
+  // gotta put in the formula
+  TF2 * f = new TF2( "fPi0Pi0Nu", Pi0Pi0NuForm, mPi0, maxPi, 0.0, maxNu, 2 );
+  f->SetParameter( 0, M );
+  f->SetParameter( 1, mPi0 );
+
+  // using composite Simpson to evaluate
+  
+  const int nSteps = 10000 + 1;
+  const double hENu = ( maxNu - 0.0 ) / ( nSteps - 1 );
+  const double hEPi = ( maxPi - mPi0 ) / ( nSteps - 1 );
+  const double preSimp = hENu * hEPi / ( 9.0 * ( nSteps - 1 ) * ( nSteps - 1 ) );
+
+  double intNow = 0.0;
+  for( int i = 0; i < nSteps; i++ ){
+    for( int j = 0; j < nSteps; j++ ){
+      double midW = 0.0;
+      //determine midpoint coefficient for this step
+      if( i % (nSteps - 1) == 0 ){ // edge case i
+	if( j % (nSteps - 1) == 0 ){ midW = 1.0; } // edge case j
+	else if( j % 2 == 0 ){ midW = 2.0; } // even j
+	else{ midW = 4.0; } // odd j
+      }
+      else if( i % 2 == 0 ){ // even i
+	if( j % (nSteps - 1) == 0 ){ midW = 2.0; } // edge case j
+	else if( j % 2 == 0 ){ midW = 4.0; } // even j
+	else{ midW = 8.0; } // odd j
+      }
+      else{ // odd i
+	if( j % (nSteps - 1) == 0 ){ midW = 4.0; } // edge case j
+	else if( j % 2 == 0 ){ midW = 8.0; } // even j
+	else{ midW = 16.0; } // odd j
+      }
+      // finally, evaluate f at this point
+      const double xev  = mPi0 + i * hEPi;
+      const double yev  = 0.0 + j * hENu;
+      const double fev  = f->Eval( xev, yev );
+
+      // and add to integral
+      intNow += std::abs( preSimp * midW * fev );
+    }
+  }
+
+  intNow *= preFac * bigMats * smallMats;
+
+  return intNow;
+}
 
 // differential decay width for HNL channels!
 
@@ -191,4 +259,23 @@ double genie::HNL::Selector::PiPi0EllForm( double *x, double *par ){
     double FracDen = std::pow( MN*MN - 2.0*( MN - Emu - Epi ) * MN + MPi0*MPi0 , 2.0 );
     
     return ETerm * FracNum / FracDen;
+}
+
+// formula for N --> pi0 pi0 nu decay rate
+double genie::HNL::Selector::Pi0Pi0NuForm( double *x, double *par ){
+    double MN = par[0];
+    double MPi0 = par[1];
+    
+    double Epi = x[0]; // leading pi-zero energy
+    double Enu = x[1];
+
+    double ETerm = 
+      std::sqrt( Epi*Epi - MPi0*MPi0 ) *
+      (Enu + MN) * Enu * Enu *
+      (MN - Enu - Epi);
+
+    double Frac1 = 1.0 / ( Enu * ( MN - Enu - Epi ) + MPi0 * MPi0 - MN * MN );
+    double Frac2 = 1.0 / ( Enu * Epi + MPi0 * MPi0 - MN * MN );
+
+    return ETerm * std::pow( ( Frac1 + Frac2 ), 2.0 );
 }
