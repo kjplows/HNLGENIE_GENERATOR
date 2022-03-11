@@ -314,15 +314,21 @@ void HNLDecayPrimaryVtxGenerator::GenerateDecayProducts(
   // Step 3: Boost these into the lab frame
   double PHNL = std::sqrt( EHNL*EHNL - mN*mN );
 
-  LOG("SimpleHNL", pDEBUG)
-    << "EHNL = " << EHNL << ", PHNL = " << PHNL << ", beta = " << PHNL / EHNL;
+  Interaction * interaction = event->Summary();
+  TLorentzVector * p4HNL = interaction->InitState().GetProbeP4( kRfLab );
 
-  TVector3 bHNL( 0.0, 0.0, PHNL / EHNL );
+  LOG("SimpleHNL", pDEBUG)
+    << "EHNL = " << EHNL << ", PHNL = " << PHNL << ", beta = " << PHNL / EHNL
+    << "\nWOLOLO I read p4 = ( " << p4HNL->Px() << ", " << p4HNL->Py() << ", " << p4HNL->Pz() << ", " << p4HNL->E() << " )" ;
+
+  double betaMag = PHNL / EHNL;
+  TVector3 bHNL( p4HNL->Px() / p4HNL->P() * betaMag,
+		 p4HNL->Py() / p4HNL->P() * betaMag, 
+		 p4HNL->Pz() / p4HNL->P() * betaMag );
+  //TVector3 bHNL( 0.0, 0.0, PHNL / EHNL );
 
   // Step 4: Insert final state products into a TClonesArray of TMCParticles
   TLorentzVector v4(*v4d); 
-
-  Interaction * interaction = event->Summary();
 
   //  int idp = 0;
   for(pdg_iter = pdgv.begin(); pdg_iter != pdgv.end(); ++pdg_iter) {

@@ -425,13 +425,33 @@ int main(int argc, char ** argv)
      LOG("gevgen_hnl", pDEBUG)
        << "Selected decay = " << decay;
 
-     //assert( decay == 0 || decay == 1 ); //RETHERE
-
      // select energy and build 4-momentum
      double EHNL = spectrum->GetRandom();     
      while( EHNL < gOptHNLMass ) EHNL = spectrum->GetRandom(); // binning allows masses below HNL mass, throw again
      double PHNL = std::sqrt( EHNL*EHNL - gOptHNLMass * gOptHNLMass );
-     TLorentzVector p4HNL( 0.0, 0.0, PHNL, EHNL );
+
+     // Let's add an angle of deflection. HNL is not generated collinear to beam at (0,0,0) -- let's have a deviation on theta
+     // This is a placeholder, so RETHERE. Add to config?
+     // also what pdf should I use? I'll take a Gaussian for now
+     const double thetaDevMean  = 2.0; // deg
+     const double thetaDevSigma = 0.5; // deg
+
+     const double thetaDevMeanRad  = thetaDevMean  * genie::constants::kPi / 180.0;
+     const double thetaDevSigmaRad = thetaDevSigma * genie::constants::kPi / 180.0;
+
+     double theta = rng3->Gaus( thetaDevMeanRad, thetaDevSigmaRad );
+     double phi   = rng3->Uniform( 0.0, 2.0 * genie::constants::kPi );
+
+     // but switch off deviation to check Lorentz boost formula. RETHERE!!!!
+     // theta = 0.0; phi = 0.0;
+
+     double PxHNL = PHNL * std::sin( theta ) * std::cos( phi );
+     double PyHNL = PHNL * std::sin( theta ) * std::sin( phi );
+     double PzHNL = PHNL * std::cos( theta );
+
+     TLorentzVector p4HNL( PxHNL, PyHNL, PzHNL, EHNL );
+     LOG( "gevgen_hnl", pDEBUG )
+       << " WOLOLO I set p4 = ( " << p4HNL.Px() << ", " << p4HNL.Py() << ", " << p4HNL.Pz() << ", " << p4HNL.E() << " )" ;
 
      Interaction * interaction = Interaction::HNLDecay(HNLprobe,decay,p4HNL);
      event->AttachSummary(interaction);
