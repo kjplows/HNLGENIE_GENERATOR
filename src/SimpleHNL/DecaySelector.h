@@ -43,6 +43,9 @@ namespace genie {
 namespace HNL {
 
     namespace Selector {
+
+      // only need to calculate decay widths once! Store them in this array
+      static double fDecayGammas[] = {-1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0, -1.0};
 	
 	// valid channels with widths
 	std::map< genie::HNL::enums::HNLDecay_t, double > GetValidChannelWidths( const double M, const double Ue42, const double Umu42, const double Ut42, const bool IsMajorana = false );
