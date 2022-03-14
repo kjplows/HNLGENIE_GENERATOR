@@ -120,7 +120,18 @@ void HNLDecayPrimaryVtxGenerator::AddInitialState(
   
   std::vector< double > * prodVtx = genie::HNL::FluxReader::generateVtx3X( fProdVtxHist );
   LOG( "SimpleHNL", pDEBUG )
-    << "Production vertex at: ( " << prodVtx->at(0) << ", " << prodVtx->at(1) << ", " << prodVtx->at(2) << ")";
+    << "Production vertex at: ( " << prodVtx->at(0) << ", " << prodVtx->at(1) << ", " << prodVtx->at(2) << ") [cm]";
+
+  /*
+  std::vector< double > * dummyProdVtx = new std::vector< double >();
+  dummyProdVtx->emplace_back( 0.0 );
+  dummyProdVtx->emplace_back( 0.0 );
+  const double gSigma = 2.0; // deg
+  dummyProdVtx->emplace_back( -100.0 / std::tan( gSigma * genie::constants::kPi / 180.0 ) ); //cm
+
+  LOG( "SimpleHNL", pDEBUG )
+    << "Dummy production vertex at: ( " << dummyProdVtx->at(0) << ", " << dummyProdVtx->at(1) << ", " << dummyProdVtx->at(2) << " ) [cm]";
+  */
   
   GHepStatus_t stis = kIStInitialState;
   GHepStatus_t stdc = kIStDecayedState;
@@ -142,33 +153,20 @@ void HNLDecayPrimaryVtxGenerator::AddInitialState(
 
   LOG( "SimpleHNL", pDEBUG )
     << "Momentum vector reads ( " << p3HNL->at(0) << ", " 
-    << p3HNL->at(1) << ", " << p3HNL->at(2) << " )";
+    << p3HNL->at(1) << ", " << p3HNL->at(2) << " ) [GeV/c]";
 
   // let's find out if this intersects the ID.
   std::vector< double > * entryPoint = genie::HNL::MINERvAGeom::GetEntryPointID( prodVtx, p3HNL );
-  std::vector< double > * exitPoint = genie::HNL::MINERvAGeom::GetExitPointID( prodVtx, p3HNL );
+  std::vector< double > * exitPoint = 0;
 
-  bool didEnterID = ( entryPoint->at(0) > -100.0 );
-  bool didExitIDBack = ( exitPoint->at(0) > -100.0 );
+  bool didEnterID = ( entryPoint->at(3) >= -100.0 );
+  if( didEnterID ) exitPoint = genie::HNL::MINERvAGeom::GetExitPointID( prodVtx, p3HNL );
 
-  if( didEnterID && didExitIDBack ){
-    LOG( "SimpleHNL", pDEBUG )
-      << "This HNL would enter and exit the ID."
-      << "\nEntry point is ( " << entryPoint->at(0) << ", " << entryPoint->at(1)
-      << ", " << entryPoint->at(2) << " )"
-      << "\nExit point is ( " << exitPoint->at(0) << ", " << exitPoint->at(1)
-      << ", " << exitPoint->at(2) << " )";
-  }
-  else if( didEnterID ){
-    LOG( "SimpleHNL", pDEBUG )
-      << "This HNL would enter the ID but exit out the side."
-      << "\nEntry point is ( " << entryPoint->at(0) << ", " << entryPoint->at(1)
-      << ", " << entryPoint->at(2) << " )";
-  }
-  else{
-    LOG( "SimpleHNL", pDEBUG )
-      << "This HNL would not enter the ID.";
-  }
+  bool didExitID = didEnterID;
+  if( didEnterID ) didExitID *= ( exitPoint->at(3) >= -100.0 );
+
+  // RETHERE implement entry through the side.
+  assert( !didEnterID || ( didEnterID && didExitID ) ); // either you don't hit the ID, or you enter and exit. 
 
   event->AddParticle(ipdg,stis,-1,-1,-1,-1, *p4HNL, v4);
 

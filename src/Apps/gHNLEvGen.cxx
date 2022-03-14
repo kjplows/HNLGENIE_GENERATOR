@@ -435,6 +435,9 @@ int main(int argc, char ** argv)
      const double thetaDevMean  = 0.0; // deg
      const double thetaDevSigma = 0.062; // deg
 
+     LOG( "gevgen_hnl", pDEBUG )
+       << "thetaDevSigma = " << thetaDevSigma;
+
      const double thetaDevMeanRad  = thetaDevMean  * genie::constants::kPi / 180.0;
      const double thetaDevSigmaRad = thetaDevSigma * genie::constants::kPi / 180.0;
 
@@ -444,6 +447,9 @@ int main(int argc, char ** argv)
      double PxHNL = PHNL * std::sin( theta ) * std::cos( phi );
      double PyHNL = PHNL * std::sin( theta ) * std::sin( phi );
      double PzHNL = PHNL * std::cos( theta );
+
+     LOG( "gevgen_hnl", pDEBUG )
+       << "Actual angular deviation = " << std::acos( PzHNL / PHNL ) * 180.0 / genie::constants::kPi << " deg";
 
      TLorentzVector p4HNL( PxHNL, PyHNL, PzHNL, EHNL );
 
