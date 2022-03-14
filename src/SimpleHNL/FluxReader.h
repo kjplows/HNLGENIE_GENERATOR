@@ -93,6 +93,7 @@ namespace HNL{
 	std::vector< double > * generatePolDir( const int parPDG, const int HType );
 
 	std::vector< double > * generateVtx3X( const int parPDG, const int HType );
+	std::vector< double > * generateVtx3X( TH3D * vtxHist ); // overloaded
 	double generateVtxT( const int parPDG, const int HType );
 
 	double generateVtxE( const int parPDG, const int HType );

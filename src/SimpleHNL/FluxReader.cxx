@@ -195,19 +195,21 @@ TH1F * genie::HNL::FluxReader::getFluxHist1F( std::string fin, std::string hName
 // overloaded method, linker likes it better this way
 TH3D * genie::HNL::FluxReader::getFluxHist3D( std::string fin, std::string hName,
 					      parent_t par, nutype_t HType ){
-    // flux file contains 4 dirs: numu, numubar, nue, nuebar. Each has flux + helper hists
     TFile *f = TFile::Open( fin.c_str() );
 
     // descend into dir first!
     TDirectory *baseDir = f->GetDirectory( "" );
-    std::string strType;
+    std::string strType = std::string( "dummy" );
+    /*
     switch( HType ){
 	case kNumu:    strType = std::string( "numu" ); break;
 	case kNumubar: strType = std::string( "numubar" ); break;
 	case kNue:     strType = std::string( "nue" ); break;
 	case kNuebar:  strType = std::string( "nuebar" ); break;
     }
-    TDirectory *deepDir = baseDir->GetDirectory( strType.c_str( ) );
+    */
+    TDirectory *deepDir = baseDir;
+      //baseDir->GetDirectory( strType.c_str( ) );
     if( deepDir == NULL ){ std::cerr << "genie::HNL::FluxReader::getFluxHist:" <<
 	    " Could not find " << "directory with name \"" << strType.c_str() <<
 	    "\". Exiting" << std::endl;
@@ -215,6 +217,7 @@ TH3D * genie::HNL::FluxReader::getFluxHist3D( std::string fin, std::string hName
 
     // construct standardised name
     std::string strHist = std::string( hName.c_str( ) );
+    /*
     switch( par ){
 	case kAll:  strHist.append("_all"); break;
 	case kPion: strHist.append("_pion"); break;
@@ -222,6 +225,7 @@ TH3D * genie::HNL::FluxReader::getFluxHist3D( std::string fin, std::string hName
 	case kMuon: strHist.append("_muon"); break;
 	case kNeuk: strHist.append("_neuk"); break;
     }
+    */
     if( !( deepDir->GetListOfKeys()->Contains( strHist.c_str() ) ) ){
 	std::cerr << "genie::HNL::FluxReader::getFluxHist: Could not find histogram " <<
 	    " with name \"" << strHist.c_str() << "\" in path\n" <<
@@ -321,6 +325,18 @@ std::vector< double > * genie::HNL::FluxReader::generateVtx3X( const int parPDG,
     vtxDir->emplace_back( uz );
 
     return vtxDir;
+}
+
+std::vector< double > * genie::HNL::FluxReader::generateVtx3X( TH3D * vtxHist ){
+  double ux = 0.0, uy = 0.0, uz = 0.0;
+  vtxHist->GetRandom3( ux, uy, uz );
+  
+  std::vector< double > * vtxDir = new std::vector< double >( );
+  vtxDir->emplace_back( ux );
+  vtxDir->emplace_back( uy );
+  vtxDir->emplace_back( uz );
+
+  return vtxDir;
 }
 
 double genie::HNL::FluxReader::generateVtxE( const int parPDG, const int HType ){

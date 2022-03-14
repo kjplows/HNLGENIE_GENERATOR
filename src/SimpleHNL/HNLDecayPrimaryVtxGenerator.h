@@ -63,6 +63,7 @@ private:
    mutable TGenPhaseSpace                fPhaseSpaceGenerator;
 
    mutable double                        fEnergy;
+   mutable TH3D *                        fProdVtxHist = 0;
 
    const NuclearModelI * fNuclModel;
 };

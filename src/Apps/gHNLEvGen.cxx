@@ -431,27 +431,21 @@ int main(int argc, char ** argv)
      double PHNL = std::sqrt( EHNL*EHNL - gOptHNLMass * gOptHNLMass );
 
      // Let's add an angle of deflection. HNL is not generated collinear to beam at (0,0,0) -- let's have a deviation on theta
-     // This is a placeholder, so RETHERE. Add to config?
-     // also what pdf should I use? I'll take a Gaussian for now
-     const double thetaDevMean  = 2.0; // deg
-     const double thetaDevSigma = 0.5; // deg
+     // This devation can be described as a Gaussian. Deflection is very small due to small transverse momenta wrt pz
+     const double thetaDevMean  = 0.0; // deg
+     const double thetaDevSigma = 0.062; // deg
 
      const double thetaDevMeanRad  = thetaDevMean  * genie::constants::kPi / 180.0;
      const double thetaDevSigmaRad = thetaDevSigma * genie::constants::kPi / 180.0;
 
-     double theta = rng3->Gaus( thetaDevMeanRad, thetaDevSigmaRad );
+     double theta = rng3->Gaus( thetaDevMeanRad, thetaDevSigmaRad ); if( theta < 0.0 ) theta *= -1.0; // theta |--> -theta <==> phi |--> pi + phi. W.l.o.g. make this choice.
      double phi   = rng3->Uniform( 0.0, 2.0 * genie::constants::kPi );
-
-     // but switch off deviation to check Lorentz boost formula. RETHERE!!!!
-     // theta = 0.0; phi = 0.0;
 
      double PxHNL = PHNL * std::sin( theta ) * std::cos( phi );
      double PyHNL = PHNL * std::sin( theta ) * std::sin( phi );
      double PzHNL = PHNL * std::cos( theta );
 
      TLorentzVector p4HNL( PxHNL, PyHNL, PzHNL, EHNL );
-     LOG( "gevgen_hnl", pDEBUG )
-       << " WOLOLO I set p4 = ( " << p4HNL.Px() << ", " << p4HNL.Py() << ", " << p4HNL.Pz() << ", " << p4HNL.E() << " )" ;
 
      Interaction * interaction = Interaction::HNLDecay(HNLprobe,decay,p4HNL);
      event->AttachSummary(interaction);
@@ -552,7 +546,6 @@ GFluxI * TH1FluxDriver(void)
     << "\nNuebar:  " << hfluxAllEbar->GetEntries() << " entries with max = " << hfluxAllEbar->GetMaximum();
 
   // let's build the mixed flux.
-  // RETHERE - allow for graceful selection! Need an option for mix
   
   TH1F * spectrumF = (TH1F*) hfluxAllMu->Clone(0);
 
@@ -668,30 +661,10 @@ GFluxI * TH1FluxDriver(void)
   LOG("gevgen_hnl", pDEBUG) 
     << "Written spectrum to ./input-flux.root";
 
-  // before doing anything else, add HNL pdg code to PDGLibrary
-  // otherwise the FluxDriver won't play ball
-  AddHNLToPDGLibrary( gOptHNLPdgCode, gOptHNLMass, gOptECoupling, gOptMuCoupling);
+  // keep "beam" == SM-neutrino beam direction at z s.t. cos(theta_z) == 1
+  // angular deviation of HNL (which is tiny, if assumption of collimated parents is made) made in main
   
-  LOG("gevgen_hnl", pDEBUG) 
-    << "Added HNL with |PDG code| " << gOptHNLPdgCode
-    << " and mass " << gOptHNLMass << " GeV/c^{2} to PDGLibrary.";
-  /*
-  PDGCodeList * pcl( false );
-  bool HNLExists = pcl->ExistsInPDGLibrary( gOptHNLPdgCode );
-  if( !HNLExists ){
-    AddHNLToPDGLibrary( gOptHNLPdgCode, gOptHNLMass, gOptECoupling, gOptMuCoupling);
-    LOG("gevgen_hnl", pDEBUG) 
-      << "Added HNL with PDG code " << gOptHNLPdgCode << " to PDGLibrary.";
-  }
-  else{
-    LOG("gevgen_hnl", pDEBUG) 
-      << "HNL with PDG code " << gOptHNLPdgCode << " exists in PDGLibrary.";
-  }
-  */
-
-  // gevgen has these firing exactly on "z" (==beam?) direction at centre
-  // let's keep this code for now before tinkering - FluxReader has capability to generate momenta
-  // given input sample from fluxes
+  // Don't use GCylindTH1Flux's in-built methods - yet.
 
   TVector3 bdir (0.0,0.0,1.0);
   TVector3 bspot(0.0,0.0,1.0);

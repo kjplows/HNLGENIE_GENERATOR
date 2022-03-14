@@ -104,6 +104,23 @@ void HNLDecayPrimaryVtxGenerator::AddInitialState(
 //
 
   TLorentzVector v4(0,0,0,0);
+
+  // let's query *where* the HNL decayed from.
+  // RETHERE - perhaps should return to GCylindTH1Flux-like implementation?
+  if( !fProdVtxHist || fProdVtxHist == 0 ){
+    std::string pvPath = "data/flux/HNL/HNL_vertex_positions.root";
+    std::string pvName = "hHNLVtxPos";
+    fProdVtxHist = genie::HNL::FluxReader::getFluxHist3D( pvPath, pvName,
+							  genie::HNL::enums::kAll,
+							  genie::HNL::enums::kNumu ); // last 2 dummy args! Gotta refactor this
+  }
+  assert( fProdVtxHist );
+  LOG( "SimpleHNL", pDEBUG )
+    << "Found production vertex histo with " << fProdVtxHist->GetEntries() << " entries. Good!";
+  
+  std::vector< double > * prodVtx = genie::HNL::FluxReader::generateVtx3X( fProdVtxHist );
+  LOG( "SimpleHNL", pDEBUG )
+    << "Production vertex at: ( " << prodVtx->at(0) << ", " << prodVtx->at(1) << ", " << prodVtx->at(2) << ")";
   
   GHepStatus_t stis = kIStInitialState;
   GHepStatus_t stdc = kIStDecayedState;
@@ -117,8 +134,42 @@ void HNLDecayPrimaryVtxGenerator::AddInitialState(
   TLorentzVector p4i(0,0,0,mn);
   Interaction * interaction = event->Summary();
   TLorentzVector * p4HNL = interaction->InitState().GetProbeP4( kRfLab );
+  
+  std::vector< double > * p3HNL = new std::vector< double >();
+  p3HNL->emplace_back( p4HNL->Px() );
+  p3HNL->emplace_back( p4HNL->Py() );
+  p3HNL->emplace_back( p4HNL->Pz() );
 
-  // RETHERE TODO: maybe want a v4LAB?
+  LOG( "SimpleHNL", pDEBUG )
+    << "Momentum vector reads ( " << p3HNL->at(0) << ", " 
+    << p3HNL->at(1) << ", " << p3HNL->at(2) << " )";
+
+  // let's find out if this intersects the ID.
+  std::vector< double > * entryPoint = genie::HNL::MINERvAGeom::GetEntryPointID( prodVtx, p3HNL );
+  std::vector< double > * exitPoint = genie::HNL::MINERvAGeom::GetExitPointID( prodVtx, p3HNL );
+
+  bool didEnterID = ( entryPoint->at(0) > -100.0 );
+  bool didExitIDBack = ( exitPoint->at(0) > -100.0 );
+
+  if( didEnterID && didExitIDBack ){
+    LOG( "SimpleHNL", pDEBUG )
+      << "This HNL would enter and exit the ID."
+      << "\nEntry point is ( " << entryPoint->at(0) << ", " << entryPoint->at(1)
+      << ", " << entryPoint->at(2) << " )"
+      << "\nExit point is ( " << exitPoint->at(0) << ", " << exitPoint->at(1)
+      << ", " << exitPoint->at(2) << " )";
+  }
+  else if( didEnterID ){
+    LOG( "SimpleHNL", pDEBUG )
+      << "This HNL would enter the ID but exit out the side."
+      << "\nEntry point is ( " << entryPoint->at(0) << ", " << entryPoint->at(1)
+      << ", " << entryPoint->at(2) << " )";
+  }
+  else{
+    LOG( "SimpleHNL", pDEBUG )
+      << "This HNL would not enter the ID.";
+  }
+
   event->AddParticle(ipdg,stis,-1,-1,-1,-1, *p4HNL, v4);
 
   LOG( "SimpleHNL", pNOTICE )
