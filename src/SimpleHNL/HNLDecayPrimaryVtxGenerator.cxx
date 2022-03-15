@@ -105,6 +105,12 @@ void HNLDecayPrimaryVtxGenerator::AddInitialState(
 
   TLorentzVector v4(0,0,0,0);
 
+  // if couplings haven't been set, set them!
+  if( fUe42 == -1.0 && fUm42 == -1.0 ){
+    // read couplings as "vertex coordinates" from event
+    SetHNLCouplings( event->Vertex()->X(), event->Vertex()->Y() );
+  }
+
   // let's query *where* the HNL decayed from.
   // RETHERE - perhaps should return to GCylindTH1Flux-like implementation?
   if( !fProdVtxHist || fProdVtxHist == 0 ){
@@ -117,22 +123,7 @@ void HNLDecayPrimaryVtxGenerator::AddInitialState(
   assert( fProdVtxHist );
   LOG( "SimpleHNL", pDEBUG )
     << "Found production vertex histo with " << fProdVtxHist->GetEntries() << " entries. Good!";
-  
-  std::vector< double > * prodVtx = genie::HNL::FluxReader::generateVtx3X( fProdVtxHist );
-  LOG( "SimpleHNL", pDEBUG )
-    << "Production vertex at: ( " << prodVtx->at(0) << ", " << prodVtx->at(1) << ", " << prodVtx->at(2) << ") [cm]";
 
-  /*
-  std::vector< double > * dummyProdVtx = new std::vector< double >();
-  dummyProdVtx->emplace_back( 0.0 );
-  dummyProdVtx->emplace_back( 0.0 );
-  const double gSigma = 2.0; // deg
-  dummyProdVtx->emplace_back( -100.0 / std::tan( gSigma * genie::constants::kPi / 180.0 ) ); //cm
-
-  LOG( "SimpleHNL", pDEBUG )
-    << "Dummy production vertex at: ( " << dummyProdVtx->at(0) << ", " << dummyProdVtx->at(1) << ", " << dummyProdVtx->at(2) << " ) [cm]";
-  */
-  
   GHepStatus_t stis = kIStInitialState;
   GHepStatus_t stdc = kIStDecayedState;
   GHepStatus_t stfs = kIStStableFinalState;
@@ -143,6 +134,35 @@ void HNLDecayPrimaryVtxGenerator::AddInitialState(
   // add initial HNL
   double mn  = PDGLibrary::Instance()->Find(ipdg)->Mass();
   TLorentzVector p4i(0,0,0,mn);
+  Interaction * interaction = event->Summary();
+  TLorentzVector * p4HNL = interaction->InitState().GetProbeP4( kRfLab );
+  
+  event->AddParticle(ipdg,stis,-1,-1,-1,-1, *p4HNL, v4);
+
+  LOG( "SimpleHNL", pNOTICE )
+    << "Added initial state.";
+}
+//____________________________________________________________________________
+void HNLDecayPrimaryVtxGenerator::GenerateDecayedHNLPosition(
+  GHepRecord * event) const
+{
+  TLorentzVector v4(0,0,0,0);
+
+  std::vector< double > * prodVtx = genie::HNL::FluxReader::generateVtx3X( fProdVtxHist );
+  LOG( "SimpleHNL", pDEBUG )
+    << "Production vertex at: ( " << prodVtx->at(0) << ", " << prodVtx->at(1) << ", " << prodVtx->at(2) << ") [cm]";
+  
+  /*
+  std::vector< double > * dummyProdVtx = new std::vector< double >();
+  dummyProdVtx->emplace_back( 0.0 );
+  dummyProdVtx->emplace_back( 0.0 );
+  const double gSigma = 2.0; // deg
+  dummyProdVtx->emplace_back( -100.0 / std::tan( gSigma * genie::constants::kPi / 180.0 ) ); //cm
+
+  LOG( "SimpleHNL", pDEBUG )
+    << "Dummy production vertex at: ( " << dummyProdVtx->at(0) << ", " << dummyProdVtx->at(1) << ", " << dummyProdVtx->at(2) << " ) [cm]";
+  */
+
   Interaction * interaction = event->Summary();
   TLorentzVector * p4HNL = interaction->InitState().GetProbeP4( kRfLab );
   
@@ -165,22 +185,47 @@ void HNLDecayPrimaryVtxGenerator::AddInitialState(
   bool didExitID = didEnterID;
   if( didEnterID ) didExitID *= ( exitPoint->at(3) >= -100.0 );
 
-  // RETHERE implement entry through the side.
-  assert( !didEnterID || ( didEnterID && didExitID ) ); // either you don't hit the ID, or you enter and exit. 
+  assert( !didEnterID || ( didEnterID && didExitID ) ); // either you don't hit the ID, or you enter and exit.
 
-  event->AddParticle(ipdg,stis,-1,-1,-1,-1, *p4HNL, v4);
-
-  LOG( "SimpleHNL", pNOTICE )
-    << "Added initial state.";
-}
-//____________________________________________________________________________
-void HNLDecayPrimaryVtxGenerator::GenerateDecayedHNLPosition(
-  GHepRecord * event) const
-{
-  // HNL are point particles, so no trouble here.
+  // create a SimpleHNL object to use Stepper's PropagateTilDecay function
+  // This uniquely determines *where* the decay vertex is
+  // RETHERE: ensure this vertex is within ID, otherwise reroll + remove placeholders
+  // don't worry about modifying POT - we will weight by P(survival to det) * P(decay in det)
+  
+  genie::HNL::SimpleHNL sh = genie::HNL::SimpleHNL( "HNL", -1, genie::kPdgHNL, genie::kPdgKP, p4HNL->M(), fUe42, fUm42, 0.0, false );
+  std::vector< double > prod4Vtx = { 0.0, prodVtx->at(0), prodVtx->at(1), prodVtx->at(2) };
+  std::vector< double > prod4P = { p4HNL->E(), p4HNL->Px(), p4HNL->Py(), p4HNL->Pz() };
+  LOG( "SimpleHNL", pDEBUG )
+    << "Now I see:"
+    << "\nv4HNL = ( " << prod4Vtx.at(0) << ", " << prod4Vtx.at(1) << ", "
+    << prod4Vtx.at(2) << ", " << prod4Vtx.at(3) << " )"
+    << "\np4HNL = ( " << prod4P.at(0) << ", " << prod4P.at(1) << ", "
+    << prod4P.at(2) << ", " << prod4P.at(3) << " )";
+  sh.SetProdVtx( prod4Vtx );
+  sh.Set4Momentum( prod4P );
+  std::vector< double > hnl4vx = sh.GetOrigin4VX();
+  std::vector< double > hnl4vp = sh.Get4VP();
+  LOG( "SimpleHNL", pDEBUG )
+    << "Now HNL sees:"
+    << "\nv4HNL = ( " << hnl4vx.at(0) << ", " << hnl4vx.at(1) 
+    << ", " << hnl4vx.at(2) << ", " << hnl4vx.at(3) << " )"
+    << "\np4HNL = ( " << hnl4vp.at(0) << ", " << hnl4vp.at(1) 
+    << ", " << hnl4vp.at(2) << ", " << hnl4vp.at(3) << " )"
+    << "\nDifference (I - H) v = ( " << prod4Vtx.at(0) - hnl4vx.at(0) << ", "
+    << prod4Vtx.at(1) - hnl4vx.at(1) << ", " << prod4Vtx.at(2) - hnl4vx.at(2) << ", "
+    << prod4Vtx.at(3) - hnl4vx.at(3) << " )"
+    << "\nDifference (I - H) p = ( " << prod4P.at(0) - hnl4vp.at(0) << ", "
+    << prod4P.at(1) - hnl4vp.at(1) << ", " << prod4P.at(2) - hnl4vp.at(2) << ", "
+    << prod4P.at(3) - hnl4vp.at(3) << " )";
+  
+  std::vector< double > dec4VX = genie::HNL::Selector::PropagateTilDecay( sh ); // decay vertex set here
+  TLorentzVector dec4V( dec4VX.at(1), dec4VX.at(2), dec4VX.at(3), dec4VX.at(0) );
+  event->SetVertex( dec4V );
 
   LOG( "SimpleHNL", pNOTICE ) 
-    << "Generated HNL decay vertex position.";
+    << "Generated HNL decay vertex position at \n(x,y,z,t)  = ( "
+    << dec4V.Px() << ", " << dec4V.Py() << ", " << dec4V.Pz() << ", " << dec4V.E() << " ) [cm, ns]"
+    << "\n(x,y,z,t) != ( " << dec4VX.at(1) << ", " << dec4VX.at(2) << ", " << dec4VX.at(3) << ", " << dec4VX.at(0) << " ) [cm, ns]";
 
   return;
 }
@@ -312,7 +357,7 @@ void HNLDecayPrimaryVtxGenerator::GenerateDecayProducts(
   //double thetaPol = 0.0; //angle wrt HNL polarisation
   // assume isotropic for now, //RETHERE to sample Pol from flux & enforce polarised decay
 
-  genie::HNL::SimpleHNL sh = genie::HNL::SimpleHNL( "HNL", decayed_HNL_id, typeMod * genie::kPdgHNL, typeMod * genie::kPdgKP, mN, 1.0, 1.0, 0.0, false ); // RETHERE - find a way to propagate couplings into here!
+  genie::HNL::SimpleHNL sh = genie::HNL::SimpleHNL( "HNL", decayed_HNL_id, typeMod * genie::kPdgHNL, typeMod * genie::kPdgKP, mN, fUe42, fUm42, 0.0, false ); // RETHERE - find a way to propagate couplings into here!
 
   genie::HNL::decayKinematics::TwoBodyEnergies( mN, mh, ml, Eh, El );
   
@@ -486,4 +531,9 @@ void HNLDecayPrimaryVtxGenerator::LoadConfig(void)
   assert(fNuclModel);  
 }
 //___________________________________________________________________________
-
+void HNLDecayPrimaryVtxGenerator::SetHNLCouplings( double Ue42, double Um42 ) const
+{
+  fUe42 = Ue42;
+  fUm42 = Um42;
+}
+//___________________________________________________________________________

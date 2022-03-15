@@ -333,6 +333,13 @@ int main(int argc, char ** argv)
      LOG( "gevgen_hnl", pDEBUG )
        << "HNLprobe = " << HNLprobe;
 
+     if( ievent == 0 ){
+       // cheeky insertion of couplings as a 'vertex position' for 1st event
+       // this will be overridden when the MCJGenerator gets called so not a problem
+       // and in the meantime it lets SimpleHNL know about its coupling scaling
+       event->SetVertex( gOptECoupling, gOptMuCoupling, 0.0, 0.0 );
+     }
+
      // select decay mode
      int decay = -1;
 

@@ -24,7 +24,6 @@
 //----------------------------------------------------------------------------
 // TODO: write exception for (set E > fMass)??
 //       Figure out way to sample co-produced lepton direction for HNL polVector
-//       Ensure betaVec is in *lab* coords, not *beam* coords (i.e. rotate 101 mrad down)
 //----------------------------------------------------------------------------
 
 #ifndef JSIMPLEHNL_H
@@ -113,7 +112,7 @@ namespace genie {
 	    inline const double GetCoMLifetime( ) { return fCoMLifetime; }
 
 	    inline const double GetLifetime( ) { /* return fLifetime; */
-		return CalcLifetime( fBeta, fGamma ); }
+		return CalcLifetime( fGamma ); }
 
 	    inline const int    GetPDG( ) { return fPDG; }
 
@@ -127,15 +126,19 @@ namespace genie {
 
 	    inline const genie::HNL::enums::HNLDecay_t GetDecayMode( ) { return fDecayMode; }
 
-	    inline const std::vector< double > GetDecay4VX( ) {
+	    inline std::vector< double > GetDecay4VX( ) {
 		std::vector< double > decVec;
 		decVec.emplace_back(fT);
 		decVec.emplace_back(fX);
 		decVec.emplace_back(fY);
 		decVec.emplace_back(fZ);
+
+		LOG( "SimpleHNL", pDEBUG )
+		  << "( fT, fX, fY, fZ ) = ( " << fT << ", " << fX << ", " << fY
+		  << ", " << fZ << " )";
 		return decVec; }
 
-	    inline const std::vector< double > GetOrigin4VX( ) {
+	    inline std::vector< double > GetOrigin4VX( ) {
 		std::vector< double > oriVec;
 		oriVec.emplace_back(fT0);
 		oriVec.emplace_back(fX0);
@@ -143,7 +146,7 @@ namespace genie {
 		oriVec.emplace_back(fZ0);
 		return oriVec; }
 
-	    inline const std::vector< double > Get4VP( ) {
+	    inline std::vector< double > Get4VP( ) {
 		std::vector< double > momVec;
 		momVec.emplace_back(fE);
 		momVec.emplace_back(fPx);
@@ -151,15 +154,30 @@ namespace genie {
 		momVec.emplace_back(fPz);
 		return momVec; }
 
-	    inline const std::vector< double > GetBetaVec( ) {
+	    inline std::vector< double > GetBetaVec( ) {
+	      LOG( "SimpleHNL", pDEBUG )
+		<< "At invocation, fE, fPx, fPy, fPz = ( " << fE << ", " 
+		<< fPx << ", " << fPy << ", " << fPz << " )";
+
 		std::vector< double > betaVec;
 		const double mom = GetMomentum( );
-		betaVec.emplace_back( fPx / fE * fPx / mom );
-		betaVec.emplace_back( fPy / fE * fPz / mom );
-		betaVec.emplace_back( fPy / fE * fPz / mom );
+		const int pxMod = ( fPx < 0.0 ) ? -1 : 1;
+		const int pyMod = ( fPy < 0.0 ) ? -1 : 1;
+		const int pzMod = ( fPz < 0.0 ) ? -1 : 1;
+		betaVec.emplace_back( pxMod * fPx / fE * fPx / mom );
+		betaVec.emplace_back( pyMod * fPy / fE * fPy / mom );
+		betaVec.emplace_back( pzMod * fPz / fE * fPz / mom );
+
+		LOG( "SimpleHNL", pDEBUG )
+		  << "E, mom, px, py, pz = " << fE << ", " << mom << ", " << fPx << ", " << fPy
+		  << ", " << fPz
+		  << "\nbeta, gamma = " << fBeta << ", " << fGamma;
+
 		return betaVec; }
 
-	    inline const double GetMomentum( ) { return fPx*fPx + fPy*fPy + fPz*fPz; }
+	    inline const double GetMomentum( ) { 
+	      return fPmag; 
+	    }
 
 	    inline const double GetPolarisationMag( ) { return fPol; }
 	    inline const std::vector< double > * GetPolarisationDir( ) {
@@ -184,13 +202,20 @@ namespace genie {
 			"\nE = " << E << ", M = " << fMass; exit(3); }
 		double mom3 = std::sqrt( E*E - fMass*fMass );
 		double oldmom = GetMomentum( );
-		if( oldmom == 0.0 ) oldmom = 1.0;
+		fPmag = mom3;
+		LOG( "SimpleHNL", pDEBUG ) 
+		  << "oldmom, newmom = " << oldmom << ", " << fPmag;
 		    
-		fPx *= mom3 / oldmom; fPy *= mom3 / oldmom; fPz *= mom3 / oldmom;
+		fPx = mom3 / std::sqrt(3.0); fPy = mom3 / std::sqrt(3.0); fPz = mom3 / std::sqrt(3.0);
 		fE = E;
 		fBeta = CalcBeta( E, mom3 );
 		fGamma = CalcGamma( fBeta );
 		fLifetime = fCoMLifetime / ( fGamma * ( 1.0 + fBeta ) );
+
+		LOG( "SimpleHNL", pDEBUG )
+		  << "\nE, pmag, px, py, pz = " << E << ", " << fPmag << ", " << fPx << ", " << fPy
+		  << ", " << fPz
+		  << "\nbeta, gamma = " << fBeta << ", " << fGamma;
 	    }
 
 	    inline void SetBeta( const double bet ) {
@@ -198,11 +223,11 @@ namespace genie {
 		fBeta = bet;
 		fGamma = CalcGamma( bet );
 		fE = fGamma * fMass;
-		double mom3 = std::sqrt( fE*fE - fMass*fMass );
-		double oldmom = GetMomentum( );
-		if( oldmom == 0.0 ) oldmom = 1.0;
-		
-		fPx *= mom3 / oldmom; fPy *= mom3 / oldmom; fPz *= mom3 / oldmom;
+		double oldmom = fPmag;
+		fPmag = std::sqrt( fE*fE - fMass*fMass );
+
+		fPx *= fPmag / oldmom; fPy *= fPmag / oldmom; fPz *= fPmag / oldmom;
+
 		fLifetime = fCoMLifetime / ( fGamma * ( 1.0 + bet ) );
 	    }
 
@@ -222,10 +247,9 @@ namespace genie {
 		    theta *= -1.0; phi += ap; 
 		}
 
-		const double Pmag = GetMomentum( );
-		fPx = Pmag * std::sin( theta ) * std::cos( phi );
-		fPy = Pmag * std::sin( theta ) * std::sin( phi );
-		fPz = Pmag * std::cos( theta );
+		fPx = fPmag * std::sin( theta ) * std::cos( phi );
+		fPy = fPmag * std::sin( theta ) * std::sin( phi );
+		fPz = fPmag * std::cos( theta );
 	    }
 
 	    inline void SetMomentumDirection( double ux, double uy, double uz ) {
@@ -235,15 +259,22 @@ namespace genie {
 		    LOG( "SimpleHNL", pERROR ) << 
 		      "genie::HNL::SimpleHNL::SetMomentumDirection:: " <<
 		      "Zero vector entered. Exiting."; exit(3); }
-		const double Pmag = GetMomentum( );
 		const double umag = std::sqrt( ( ux*ux + uy*uy + uz*uz ) );
 		const double invu = 1.0 / umag;
 		ux *= invu; uy *= invu; uz *= invu;
-		fPx = Pmag * ux; fPy = Pmag * uy; fPz = Pmag * uz;
+		fPx = fPmag * ux; fPy = fPmag * uy; fPz = fPmag * uz;
+		LOG( "SimpleHNL", pDEBUG )
+		  << "Pmag, umag, ux, uy, uz, invu = "
+		  << fPmag << ", " << umag << ", "
+		  << ux << ", " << uy << ", " << uz << ", " << invu
+		  << "\npx,y,z = " << fPx << ", " << fPy << ", " << fPz;
 	    }
 
 	    inline void Set4Momentum( const std::vector< double > fourP ){
-		SetEnergy( fourP.at(0) ); // also takes care of mag P
+	      LOG( "SimpleHNL", pDEBUG )
+		<< "fourP = ( " << fourP.at(0) << ", " << fourP.at(1)
+		<< ", " << fourP.at(2) << ", " << fourP.at(3) << " )";
+		SetEnergy( fourP.at(0) ); // also takes care of Pmag
 		SetMomentumDirection( fourP.at(1), fourP.at(2), fourP.at(3) ); }
 
 	    inline void SetPolMag( const double pm ){
@@ -272,7 +303,11 @@ namespace genie {
 
 	    inline void SetDecayVtx( const std::vector< double > fourV ){
 		fT = fourV.at(0); fX = fourV.at(1);
-		fY = fourV.at(2); fZ = fourV.at(3); }
+		fY = fourV.at(2); fZ = fourV.at(3); 
+		LOG( "SimpleHNL", pDEBUG )
+		  << "( fT, fX, fY, fZ ) = ( " << fT << ", " << fX << ", " << fY
+		  << ", " << fZ << " )";
+	    }
 
 	    inline void SetInterestingChannels(
 		const std::map< genie::HNL::enums::HNLDecay_t, double > gammaMap ){
@@ -306,37 +341,37 @@ namespace genie {
 	    inline const double CalcGamma( const double bet ) {
 		return std::sqrt( 1.0 / ( 1.0 - bet*bet ) ); }
 
-	    inline const double CalcLifetime( const double bet, const double gam ) {
-		return fCoMLifetime / ( gam * ( 1.0 + bet ) ); } // rest-to-lab transf
+	    inline const double CalcLifetime( const double gam ) {
+	      return fCoMLifetime * gam; } // rest-to-lab transf
 
 	private:
 
-	    std::string      fName;
-	    int              fIndex;
-	    int              fPDG;
-	    int              fParentPDG;
-	    double     fMass;
-	    double     fUe42, fUmu42, fUt42;
-	    bool       fIsMajorana;
-	    std::map< genie::HNL::enums::HNLDecay_t, double > fValidChannels;
-	    double     fCoMLifetime;
+	    mutable std::string      fName;
+	    mutable int              fIndex;
+	    mutable int              fPDG;
+	    mutable int              fParentPDG;
+	    mutable double     fMass;
+	    mutable double     fUe42, fUmu42, fUt42;
+	    mutable bool       fIsMajorana;
+	    mutable std::map< genie::HNL::enums::HNLDecay_t, double > fValidChannels;
+	    mutable double     fCoMLifetime;
 
-	    genie::HNL::enums::nutype_t    fHType;
+	    mutable genie::HNL::enums::nutype_t    fHType;
 	    
-	    double           fDecayThrow;  // determines where decay happens
-	    double           fSelectThrow; // determines what channel to decay to
-	    genie::HNL::enums::HNLDecay_t  fDecayMode;
+	    mutable double           fDecayThrow;  // determines where decay happens
+	    mutable double           fSelectThrow; // determines what channel to decay to
+	    mutable genie::HNL::enums::HNLDecay_t  fDecayMode;
 	    
-	    std::map< genie::HNL::enums::HNLDecay_t, double > fInterestingChannels; // owned by this
+	    mutable std::map< genie::HNL::enums::HNLDecay_t, double > fInterestingChannels;
 	    
-	    double                  fBeta, fGamma;
-	    double                  fLifetime;
-	    double                  fT, fX, fY, fZ; // LAB, decay
-	    double                  fT0, fX0, fY0, fZ0; // LAB, origin
-	    double                  fE, fPx, fPy, fPz; // LAB, momentum
-	    double                  fPol; // polarisation magnitude
-	    double                  fPolUx, fPolUy, fPolUz;
-	    std::vector< double > * fPolDir; // polarisation direction
+	    mutable double                  fBeta, fGamma;
+	    mutable double                  fLifetime;
+	    mutable double                  fT, fX, fY, fZ; // LAB, decay
+	    mutable double                  fT0, fX0, fY0, fZ0; // LAB, origin
+	    mutable double                  fE, fPmag, fPx, fPy, fPz; // LAB, momentum
+	    mutable double                  fPol; // polarisation magnitude
+	    mutable double                  fPolUx, fPolUy, fPolUz;
+	    mutable std::vector< double > * fPolDir; // polarisation direction
 	    
 	}; // class SimpleHNL
 

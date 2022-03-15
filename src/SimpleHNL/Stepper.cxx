@@ -32,13 +32,20 @@ void ::genie::HNL::Selector::fillCounters( std::map< genie::HNL::enums::HNLDecay
 	}
 
 // inclusive method
-void genie::HNL::Selector::PropagateTilDecay( genie::HNL::SimpleHNL sh ){
+std::vector< double > genie::HNL::Selector::PropagateTilDecay( genie::HNL::SimpleHNL sh ){
 
     const std::vector< double > V0X = sh.GetOrigin4VX();
     const std::vector< double > V0P = sh.Get4VP();
 
     const double COMlifetime = sh.GetCoMLifetime( );
     const double LABlifetime = sh.GetLifetime( );
+
+    LOG( "SimpleHNL", pDEBUG )
+      << "\nV0X = ( " << V0X.at(1) << ", " << V0X.at(2) << ", " << V0X.at(3) << " ) [m]"
+      << "\nV0P = ( " << V0P.at(1) << ", " << V0P.at(2) << ", " << V0P.at(3) << " ) [GeV]"
+      << "\n COM, LAB lifetimes = " << COMlifetime << ", " << LABlifetime << " [GeV^{-1}]"
+      << "\n COM, LAB lifetimes = " << COMlifetime / genie::units::GeV / genie::units::ns 
+      << "," << LABlifetime / genie::units::GeV / genie::units::ns << " [ns]";
     
     // Get seed
     if( !fIsRngInit ) initRandom( );
@@ -47,15 +54,30 @@ void genie::HNL::Selector::PropagateTilDecay( genie::HNL::SimpleHNL sh ){
     // Exponential decay <-> N = floor( tau * ln( seed^(-1) ) / dt )
     const double t1 = std::floor( LABlifetime *
 				  std::log( 1.0 / ranthrow ) /
-				  fdt ) * fdt;
+				  fdt ) * fdt / genie::units::GeV / genie::units::ns;
+    // ensure HNL is pointing the right way
+    sh.Set4Momentum( V0P );
+    LOG( "SimpleHNL", pDEBUG ) << "Set 4-momentum. It reads (E,Px,Py,Pz) = ( "
+			       << (sh.Get4VP()).at(0) << ", " << (sh.Get4VP()).at(1)
+			       << ", " << (sh.Get4VP()).at(2) << ", " << (sh.Get4VP()).at(3) << " )";
     const std::vector< double > betaVec  = sh.GetBetaVec( );
-    const std::vector< double > origin4V = sh.GetOrigin4VX( );
-    std::vector< double > decay4V; decay4V.emplace_back( origin4V.at(0) + t1 );
-    decay4V.emplace_back( origin4V.at(1) + betaVec.at(1) * t1 * genie::constants::kLightSpeed );
-    decay4V.emplace_back( origin4V.at(2) + betaVec.at(2) * t1 * genie::constants::kLightSpeed );
-    decay4V.emplace_back( origin4V.at(3) + betaVec.at(3) * t1 * genie::constants::kLightSpeed );
 
-    sh.SetDecayVtx( decay4V );
+    const double nsTocm = ( genie::units::ns * genie::constants::kLightSpeed ) / genie::units::cm;
+    std::vector< double > decay4V; decay4V.emplace_back( V0X.at(0) + t1 );
+    decay4V.emplace_back( V0X.at(1) + betaVec.at(0) * t1 * nsTocm );
+    decay4V.emplace_back( V0X.at(2) + betaVec.at(1) * t1 * nsTocm );
+    decay4V.emplace_back( V0X.at(3) + betaVec.at(2) * t1 * nsTocm );
+
+    LOG( "SimpleHNL", pDEBUG )
+      << "t1 = " << t1 << " [ns], ranthrow = " << ranthrow << ", betaVec = ( "
+      << betaVec.at(0) << ", " << betaVec.at(1) << ", " << betaVec.at(2) << " ) "
+      << "\n\t1 ns = " << nsTocm << " cm";
+
+    LOG( "SimpleHNL", pDEBUG )
+      << "decay4V = ( " << decay4V.at(1) << ", " << decay4V.at(2) << ", " << decay4V.at(3) << " ) [cm]"
+      << ", " << decay4V.at(0) << " [ns]";
+
+    return decay4V;
 }
 
 // Exclusive stepper

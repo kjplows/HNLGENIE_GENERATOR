@@ -55,6 +55,7 @@ private:
    //void GenerateFermiMomentum          (GHepRecord * event) const;
    void GenerateDecayProducts          (GHepRecord * event, double EHNL) const;
    void GetEnergyFromFlux              (void) const;
+   void SetHNLCouplings                (double Ue42, double Um42) const;
 
    mutable int                           fCurrInitStatePdg;
    mutable genie::HNL::enums::HNLDecay_t fCurrDecayMode;
@@ -63,6 +64,7 @@ private:
    mutable TGenPhaseSpace                fPhaseSpaceGenerator;
 
    mutable double                        fEnergy;
+   mutable double                        fUe42 = -1.0, fUm42 = -1.0;
    mutable TH3D *                        fProdVtxHist = 0;
 
    const NuclearModelI * fNuclModel;

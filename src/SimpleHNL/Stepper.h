@@ -52,7 +52,7 @@ namespace HNL {
 	inline void initRandom( ) { fRng = new TRandom3(0); fIsRngInit = true; }
 
 	// inclusive method stepper
-	void PropagateTilDecay( genie::HNL::SimpleHNL sh ); // step 1/3, see Selector.h for 2/3
+	std::vector< double > PropagateTilDecay( genie::HNL::SimpleHNL sh ); // returns decay 4-vertex
 
 	// exclusive method stepper
 	void PropagateAndSelectChannel( genie::HNL::SimpleHNL sh );
