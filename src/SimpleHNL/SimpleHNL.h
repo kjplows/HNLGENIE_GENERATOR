@@ -132,10 +132,6 @@ namespace genie {
 		decVec.emplace_back(fX);
 		decVec.emplace_back(fY);
 		decVec.emplace_back(fZ);
-
-		LOG( "SimpleHNL", pDEBUG )
-		  << "( fT, fX, fY, fZ ) = ( " << fT << ", " << fX << ", " << fY
-		  << ", " << fZ << " )";
 		return decVec; }
 
 	    inline std::vector< double > GetOrigin4VX( ) {
@@ -155,10 +151,6 @@ namespace genie {
 		return momVec; }
 
 	    inline std::vector< double > GetBetaVec( ) {
-	      LOG( "SimpleHNL", pDEBUG )
-		<< "At invocation, fE, fPx, fPy, fPz = ( " << fE << ", " 
-		<< fPx << ", " << fPy << ", " << fPz << " )";
-
 		std::vector< double > betaVec;
 		const double mom = GetMomentum( );
 		const int pxMod = ( fPx < 0.0 ) ? -1 : 1;
@@ -167,12 +159,6 @@ namespace genie {
 		betaVec.emplace_back( pxMod * fPx / fE * fPx / mom );
 		betaVec.emplace_back( pyMod * fPy / fE * fPy / mom );
 		betaVec.emplace_back( pzMod * fPz / fE * fPz / mom );
-
-		LOG( "SimpleHNL", pDEBUG )
-		  << "E, mom, px, py, pz = " << fE << ", " << mom << ", " << fPx << ", " << fPy
-		  << ", " << fPz
-		  << "\nbeta, gamma = " << fBeta << ", " << fGamma;
-
 		return betaVec; }
 
 	    inline const double GetMomentum( ) { 
@@ -202,20 +188,12 @@ namespace genie {
 			"\nE = " << E << ", M = " << fMass; exit(3); }
 		double mom3 = std::sqrt( E*E - fMass*fMass );
 		double oldmom = GetMomentum( );
-		fPmag = mom3;
-		LOG( "SimpleHNL", pDEBUG ) 
-		  << "oldmom, newmom = " << oldmom << ", " << fPmag;
-		    
+		fPmag = mom3;		    
 		fPx = mom3 / std::sqrt(3.0); fPy = mom3 / std::sqrt(3.0); fPz = mom3 / std::sqrt(3.0);
 		fE = E;
 		fBeta = CalcBeta( E, mom3 );
 		fGamma = CalcGamma( fBeta );
 		fLifetime = fCoMLifetime / ( fGamma * ( 1.0 + fBeta ) );
-
-		LOG( "SimpleHNL", pDEBUG )
-		  << "\nE, pmag, px, py, pz = " << E << ", " << fPmag << ", " << fPx << ", " << fPy
-		  << ", " << fPz
-		  << "\nbeta, gamma = " << fBeta << ", " << fGamma;
 	    }
 
 	    inline void SetBeta( const double bet ) {
@@ -263,17 +241,9 @@ namespace genie {
 		const double invu = 1.0 / umag;
 		ux *= invu; uy *= invu; uz *= invu;
 		fPx = fPmag * ux; fPy = fPmag * uy; fPz = fPmag * uz;
-		LOG( "SimpleHNL", pDEBUG )
-		  << "Pmag, umag, ux, uy, uz, invu = "
-		  << fPmag << ", " << umag << ", "
-		  << ux << ", " << uy << ", " << uz << ", " << invu
-		  << "\npx,y,z = " << fPx << ", " << fPy << ", " << fPz;
 	    }
 
 	    inline void Set4Momentum( const std::vector< double > fourP ){
-	      LOG( "SimpleHNL", pDEBUG )
-		<< "fourP = ( " << fourP.at(0) << ", " << fourP.at(1)
-		<< ", " << fourP.at(2) << ", " << fourP.at(3) << " )";
 		SetEnergy( fourP.at(0) ); // also takes care of Pmag
 		SetMomentumDirection( fourP.at(1), fourP.at(2), fourP.at(3) ); }
 
@@ -304,9 +274,6 @@ namespace genie {
 	    inline void SetDecayVtx( const std::vector< double > fourV ){
 		fT = fourV.at(0); fX = fourV.at(1);
 		fY = fourV.at(2); fZ = fourV.at(3); 
-		LOG( "SimpleHNL", pDEBUG )
-		  << "( fT, fX, fY, fZ ) = ( " << fT << ", " << fX << ", " << fY
-		  << ", " << fZ << " )";
 	    }
 
 	    inline void SetInterestingChannels(

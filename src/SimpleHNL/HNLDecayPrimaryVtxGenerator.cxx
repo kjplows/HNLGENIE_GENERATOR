@@ -195,28 +195,9 @@ void HNLDecayPrimaryVtxGenerator::GenerateDecayedHNLPosition(
   genie::HNL::SimpleHNL sh = genie::HNL::SimpleHNL( "HNL", -1, genie::kPdgHNL, genie::kPdgKP, p4HNL->M(), fUe42, fUm42, 0.0, false );
   std::vector< double > prod4Vtx = { 0.0, prodVtx->at(0), prodVtx->at(1), prodVtx->at(2) };
   std::vector< double > prod4P = { p4HNL->E(), p4HNL->Px(), p4HNL->Py(), p4HNL->Pz() };
-  LOG( "SimpleHNL", pDEBUG )
-    << "Now I see:"
-    << "\nv4HNL = ( " << prod4Vtx.at(0) << ", " << prod4Vtx.at(1) << ", "
-    << prod4Vtx.at(2) << ", " << prod4Vtx.at(3) << " )"
-    << "\np4HNL = ( " << prod4P.at(0) << ", " << prod4P.at(1) << ", "
-    << prod4P.at(2) << ", " << prod4P.at(3) << " )";
+  
   sh.SetProdVtx( prod4Vtx );
   sh.Set4Momentum( prod4P );
-  std::vector< double > hnl4vx = sh.GetOrigin4VX();
-  std::vector< double > hnl4vp = sh.Get4VP();
-  LOG( "SimpleHNL", pDEBUG )
-    << "Now HNL sees:"
-    << "\nv4HNL = ( " << hnl4vx.at(0) << ", " << hnl4vx.at(1) 
-    << ", " << hnl4vx.at(2) << ", " << hnl4vx.at(3) << " )"
-    << "\np4HNL = ( " << hnl4vp.at(0) << ", " << hnl4vp.at(1) 
-    << ", " << hnl4vp.at(2) << ", " << hnl4vp.at(3) << " )"
-    << "\nDifference (I - H) v = ( " << prod4Vtx.at(0) - hnl4vx.at(0) << ", "
-    << prod4Vtx.at(1) - hnl4vx.at(1) << ", " << prod4Vtx.at(2) - hnl4vx.at(2) << ", "
-    << prod4Vtx.at(3) - hnl4vx.at(3) << " )"
-    << "\nDifference (I - H) p = ( " << prod4P.at(0) - hnl4vp.at(0) << ", "
-    << prod4P.at(1) - hnl4vp.at(1) << ", " << prod4P.at(2) - hnl4vp.at(2) << ", "
-    << prod4P.at(3) - hnl4vp.at(3) << " )";
   
   std::vector< double > dec4VX = genie::HNL::Selector::PropagateTilDecay( sh ); // decay vertex set here
   TLorentzVector dec4V( dec4VX.at(1), dec4VX.at(2), dec4VX.at(3), dec4VX.at(0) );
@@ -406,10 +387,6 @@ void HNLDecayPrimaryVtxGenerator::GenerateDecayProducts(
   Interaction * interaction = event->Summary();
   TLorentzVector * p4HNL = interaction->InitState().GetProbeP4( kRfLab );
 
-  LOG("SimpleHNL", pDEBUG)
-    << "EHNL = " << EHNL << ", PHNL = " << PHNL << ", beta = " << PHNL / EHNL
-    << "\nWOLOLO I read p4 = ( " << p4HNL->Px() << ", " << p4HNL->Py() << ", " << p4HNL->Pz() << ", " << p4HNL->E() << " )" ;
-
   double betaMag = PHNL / EHNL;
   TVector3 bHNL( p4HNL->Px() / p4HNL->P() * betaMag,
 		 p4HNL->Py() / p4HNL->P() * betaMag, 
@@ -425,10 +402,6 @@ void HNLDecayPrimaryVtxGenerator::GenerateDecayProducts(
      auto it4v = pdgMap.find( pdgc );
      assert( it4v != pdgMap.end() );
      TLorentzVector p4fin = it4v->second;
-
-     LOG("SimpleHNL", pDEBUG)
-       << "PDG code :" << pdgc
-       << "\n p4 (rest) = ( " << p4fin.E() << ", " << p4fin.Px() << ", " << p4fin.Py() << ", " << p4fin.Pz() << " )";
 
      p4fin.Boost(bHNL);
 

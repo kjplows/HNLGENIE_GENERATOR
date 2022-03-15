@@ -319,9 +319,6 @@ int main(int argc, char ** argv)
 	 double posint = hIntegrals->GetBinContent(1) + hIntegrals->GetBinContent(3);
 	 double negint = hIntegrals->GetBinContent(2) + hIntegrals->GetBinContent(4);
 	 typeMod = ( athrow < posint / ( posint + negint ) ) ? 1 : -1;
-	 
-	 LOG( "gevgen_hnl", pDEBUG )
-	   << "posint, negint, throw, typeMod = " << posint << ", " << negint << ", " << athrow << ", " << typeMod;
        }
      }
 
@@ -329,9 +326,6 @@ int main(int argc, char ** argv)
 
      EventRecord * event = new EventRecord;
      int HNLprobe = SelectInitState() * typeMod;
-
-     LOG( "gevgen_hnl", pDEBUG )
-       << "HNLprobe = " << HNLprobe;
 
      if( ievent == 0 ){
        // cheeky insertion of couplings as a 'vertex position' for 1st event
@@ -414,9 +408,6 @@ int main(int argc, char ** argv)
        << "\n !!! Channel: pi  e  . Prob = " << pieP
        << "\n !!! Channel: pi0 nu . Prob = " << pi0nuP
        << "\n !!! ------------------------------------------- \n";
-
-     LOG("gevgen_hnl", pDEBUG)
-       << "Doing random throw";
      
      // now do a random throw
      double ranThrow = rng3->Uniform( 0., 1. ); // HNL's fate is sealed.
@@ -441,9 +432,6 @@ int main(int argc, char ** argv)
      // This devation can be described as a Gaussian. Deflection is very small due to small transverse momenta wrt pz
      const double thetaDevMean  = 0.0; // deg
      const double thetaDevSigma = 0.062; // deg
-
-     LOG( "gevgen_hnl", pDEBUG )
-       << "thetaDevSigma = " << thetaDevSigma;
 
      const double thetaDevMeanRad  = thetaDevMean  * genie::constants::kPi / 180.0;
      const double thetaDevSigmaRad = thetaDevSigma * genie::constants::kPi / 180.0;
@@ -613,7 +601,6 @@ GFluxI * TH1FluxDriver(void)
 
   LOG( "gevgen_hnl", pDEBUG )
     << "\n\n !!! ------------------------------------------------"
-    << "\n !!! Testing flux selection. Options are: "
     << "\n !!! gOptECoupling, gOptMuCoupling = " << gOptECoupling << ", " << gOptMuCoupling
     << "\n !!! gOptHNLKind = " << gOptHNLKind
     << "\n !!! gOptIsMajorana = " << gOptIsMajorana

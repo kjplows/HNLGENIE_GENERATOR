@@ -41,8 +41,6 @@ std::vector< double > genie::HNL::Selector::PropagateTilDecay( genie::HNL::Simpl
     const double LABlifetime = sh.GetLifetime( );
 
     LOG( "SimpleHNL", pDEBUG )
-      << "\nV0X = ( " << V0X.at(1) << ", " << V0X.at(2) << ", " << V0X.at(3) << " ) [m]"
-      << "\nV0P = ( " << V0P.at(1) << ", " << V0P.at(2) << ", " << V0P.at(3) << " ) [GeV]"
       << "\n COM, LAB lifetimes = " << COMlifetime << ", " << LABlifetime << " [GeV^{-1}]"
       << "\n COM, LAB lifetimes = " << COMlifetime / genie::units::GeV / genie::units::ns 
       << "," << LABlifetime / genie::units::GeV / genie::units::ns << " [ns]";
@@ -57,9 +55,6 @@ std::vector< double > genie::HNL::Selector::PropagateTilDecay( genie::HNL::Simpl
 				  fdt ) * fdt / genie::units::GeV / genie::units::ns;
     // ensure HNL is pointing the right way
     sh.Set4Momentum( V0P );
-    LOG( "SimpleHNL", pDEBUG ) << "Set 4-momentum. It reads (E,Px,Py,Pz) = ( "
-			       << (sh.Get4VP()).at(0) << ", " << (sh.Get4VP()).at(1)
-			       << ", " << (sh.Get4VP()).at(2) << ", " << (sh.Get4VP()).at(3) << " )";
     const std::vector< double > betaVec  = sh.GetBetaVec( );
 
     const double nsTocm = ( genie::units::ns * genie::constants::kLightSpeed ) / genie::units::cm;
@@ -70,12 +65,7 @@ std::vector< double > genie::HNL::Selector::PropagateTilDecay( genie::HNL::Simpl
 
     LOG( "SimpleHNL", pDEBUG )
       << "t1 = " << t1 << " [ns], ranthrow = " << ranthrow << ", betaVec = ( "
-      << betaVec.at(0) << ", " << betaVec.at(1) << ", " << betaVec.at(2) << " ) "
-      << "\n\t1 ns = " << nsTocm << " cm";
-
-    LOG( "SimpleHNL", pDEBUG )
-      << "decay4V = ( " << decay4V.at(1) << ", " << decay4V.at(2) << ", " << decay4V.at(3) << " ) [cm]"
-      << ", " << decay4V.at(0) << " [ns]";
+      << betaVec.at(0) << ", " << betaVec.at(1) << ", " << betaVec.at(2) << " ) ";
 
     return decay4V;
 }
