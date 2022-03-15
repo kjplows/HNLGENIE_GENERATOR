@@ -279,6 +279,8 @@ void HNLDecayPrimaryVtxGenerator::GenerateDecayedHNLPosition(
       << " is : " << decayProb;
   }
 
+  weight *= 1.0 / nTries; // penalise bad production vertices!
+
   LOG( "SimpleHNL", pDEBUG )
     << "Setting weight = " << weight;
   event->SetWeight( weight );
