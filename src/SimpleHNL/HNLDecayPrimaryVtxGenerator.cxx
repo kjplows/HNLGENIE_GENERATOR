@@ -208,6 +208,71 @@ void HNLDecayPrimaryVtxGenerator::GenerateDecayedHNLPosition(
     << dec4V.Px() << ", " << dec4V.Py() << ", " << dec4V.Pz() << ", " << dec4V.E() << " ) [cm, ns]"
     << "\n(x,y,z,t) != ( " << dec4VX.at(1) << ", " << dec4VX.at(2) << ", " << dec4VX.at(3) << ", " << dec4VX.at(0) << " ) [cm, ns]";
 
+  double distBeforeDet = 0.0, distInsideDet = 0.0;
+  double timeBeforeDet = 0.0, timeInsideDet = 0.0;
+  double restBeforeDet = 0.0, restInsideDet = 0.0;
+
+  double weight = 1.0;
+
+  if( didEnterID ){
+    // find out distance between production vertex and entry/exit points
+    distBeforeDet = std::sqrt( std::pow( (prodVtx->at(0) - entryPoint->at(0)*100.0), 2.0 ) +
+			       std::pow( (prodVtx->at(1) - entryPoint->at(1)*100.0), 2.0 ) +
+			       std::pow( (prodVtx->at(2) - entryPoint->at(2)*100.0), 2.0 ) ); // cm
+    distInsideDet = std::sqrt( std::pow( (exitPoint->at(0)*100.0 - entryPoint->at(0)*100.0), 2.0 ) +
+			       std::pow( (exitPoint->at(1)*100.0 - entryPoint->at(1)*100.0), 2.0 ) +
+			       std::pow( (exitPoint->at(2)*100.0 - entryPoint->at(2)*100.0), 2.0 ) ); // cm
+    timeBeforeDet = distBeforeDet / sh.GetBeta() * genie::units::cm / 
+      ( genie::units::ns * genie::constants::kLightSpeed ); // lab-frame ToF
+    timeInsideDet = distInsideDet / sh.GetBeta() * genie::units::cm / 
+      ( genie::units::ns * genie::constants::kLightSpeed );
+    restBeforeDet = timeBeforeDet / sh.GetGamma();
+    restInsideDet = timeInsideDet / sh.GetGamma();
+    
+    LOG( "SimpleHNL", pDEBUG )
+      << "distBeforeDet, distInsideDet = " << distBeforeDet << ", " << distInsideDet << " [cm]";
+    
+    LOG( "SimpleHNL", pDEBUG )
+      << "\nBefore entering detector this HNL travelled \nfrom ( " << prodVtx->at(0) << ", "
+      << prodVtx->at(1) << ", " << prodVtx->at(2) << " ) to ( " << entryPoint->at(0)*100.0 << ", " 
+      << entryPoint->at(1)*100.0 << ", " << entryPoint->at(2)*100.0 
+      << " ) [cm] \nwith beta = " << sh.GetBeta()
+      << ", giving time-of-flight = " << timeBeforeDet << " [ns] (LAB)"
+      << " = " << restBeforeDet << " [ns] (REST)";
+    
+    LOG( "SimpleHNL", pDEBUG )
+      << "\nAfter  entering detector this HNL travelled \nfrom ( " << entryPoint->at(0)*100.0 << ", "
+      << entryPoint->at(1)*100.0 << ", " << entryPoint->at(2)*100.0 
+      << " ) to ( " << exitPoint->at(0)*100.0 << ", " 
+      << exitPoint->at(1)*100.0 << ", " << exitPoint->at(2)*100.0
+      << " ) [cm] \nwith beta = " << sh.GetBeta()
+      << ", giving time-of-flight = " << timeInsideDet << " [ns] (LAB)"
+      << " = " << restInsideDet << " [ns] (REST)";
+
+    // calculate weight from this decay
+    double totalWidth = genie::HNL::Selector::GetTotalDecayWidth( sh.GetValidChannels() ); // GeV
+    totalWidth *= genie::units::GeV * genie::units::ns; // ns^{-1}
+    LOG( "SimpleHNL", pDEBUG )
+      << "From " << (sh.GetValidChannels()).size() << " channels the total width in ns^{-1} is: "
+      << totalWidth;
+    weight = std::exp( -totalWidth * restBeforeDet ); // probability to survive until detector
+    double survProb = weight;
+    LOG( "SimpleHNL", pDEBUG )
+      << "Survival probability with beta, gamma, Gamma, d = " << sh.GetBeta() << ", "
+      << sh.GetGamma() << ", " << totalWidth << ", " << distBeforeDet 
+      << " is: " << survProb;
+    weight *= ( 1.0 - std::exp( -totalWidth * restInsideDet ) ); // probability to decay in detector
+    double decayProb = weight / survProb;
+    LOG( "SimpleHNL", pDEBUG )
+      << "Decay probability with beta, gamma, Gamma, l = " << sh.GetBeta() << ", "
+      << sh.GetGamma() << ", " << totalWidth << ", " << distInsideDet
+      << " is : " << decayProb;
+  }
+
+  LOG( "SimpleHNL", pDEBUG )
+    << "Setting weight = " << weight;
+  event->SetWeight( weight );
+
   return;
 }
 //____________________________________________________________________________
