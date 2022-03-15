@@ -103,7 +103,7 @@ std::vector< double > * genie::HNL::MINERvAGeom::GetEntryPointID( const std::vec
   }
   
   LOG( "SimpleHNL", pDEBUG )
-    << "This HNL does not enter the ID from the front.";
+    << "This HNL does not enter the ID.";
   entryVec->emplace_back( -999.9 );
   entryVec->emplace_back( -999.9 );
   entryVec->emplace_back( -999.9 );

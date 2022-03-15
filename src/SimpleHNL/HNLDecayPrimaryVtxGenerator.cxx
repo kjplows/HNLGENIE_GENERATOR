@@ -180,8 +180,20 @@ void HNLDecayPrimaryVtxGenerator::GenerateDecayedHNLPosition(
   std::vector< double > * exitPoint = 0;
 
   bool didEnterID = ( entryPoint->at(3) >= -100.0 );
-  if( didEnterID ) exitPoint = genie::HNL::MINERvAGeom::GetExitPointID( prodVtx, p3HNL );
 
+  int nTries = 1; // how many tries did it take to get an HNL that enters the detector?
+  while( !didEnterID ){
+    nTries++;
+    LOG( "SimpleHNL", pDEBUG )
+      << "This HNL would not enter the detector. Generating new production vertex...";
+    prodVtx = genie::HNL::FluxReader::generateVtx3X( fProdVtxHist );
+    entryPoint = genie::HNL::MINERvAGeom::GetEntryPointID( prodVtx, p3HNL );
+    didEnterID = ( entryPoint->at(3) >= -100.0 );
+  }
+  LOG( "SimpleHNL", pDEBUG )
+    << "It took " << nTries << " tries to make a detector-intersecting trajectory.";
+
+  if( didEnterID ) exitPoint = genie::HNL::MINERvAGeom::GetExitPointID( prodVtx, p3HNL );
   bool didExitID = didEnterID;
   if( didEnterID ) didExitID *= ( exitPoint->at(3) >= -100.0 );
 
@@ -189,8 +201,6 @@ void HNLDecayPrimaryVtxGenerator::GenerateDecayedHNLPosition(
 
   // create a SimpleHNL object to use Stepper's PropagateTilDecay function
   // This uniquely determines *where* the decay vertex is
-  // RETHERE: ensure this vertex is within ID, otherwise reroll + remove placeholders
-  // don't worry about modifying POT - we will weight by P(survival to det) * P(decay in det)
   
   genie::HNL::SimpleHNL sh = genie::HNL::SimpleHNL( "HNL", -1, genie::kPdgHNL, genie::kPdgKP, p4HNL->M(), fUe42, fUm42, 0.0, false );
   std::vector< double > prod4Vtx = { 0.0, prodVtx->at(0), prodVtx->at(1), prodVtx->at(2) };
