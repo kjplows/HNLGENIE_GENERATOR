@@ -303,6 +303,8 @@ int main(int argc, char ** argv)
   
   while (1)
   {
+    if( ievent % 1000 == 0 ) std::cerr << ievent << " / " << gOptNev << " \r" << std::flush;
+
      if(ievent == gOptNev) break;
 
      LOG("gevgen_hnl", pNOTICE)
