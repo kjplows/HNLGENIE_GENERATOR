@@ -279,7 +279,9 @@ void HNLDecayPrimaryVtxGenerator::GenerateDecayedHNLPosition(
       << " is : " << decayProb;
   }
 
-  weight *= 1.0 / nTries; // penalise bad production vertices!
+  // do not penalise in *weight*, skews shape of physics variables
+  // Want to show this impact in POT counting instead. Same physics, different try.
+  //weight *= 1.0 / nTries; // penalise bad production vertices!
 
   LOG( "SimpleHNL", pDEBUG )
     << "Setting weight = " << weight;
