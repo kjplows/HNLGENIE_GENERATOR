@@ -189,6 +189,7 @@ TH1F * genie::HNL::FluxReader::getFluxHist1F( std::string fin, std::string hName
 	    deepDir->GetPath() << " . Exiting" << std::endl; exit(3); }
     
     TH1F * histPtr = dynamic_cast< TH1F* >( deepDir->Get( strHist.c_str() ) );
+
     return histPtr;
 }
 
@@ -230,8 +231,9 @@ TH3D * genie::HNL::FluxReader::getFluxHist3D( std::string fin, std::string hName
 	std::cerr << "genie::HNL::FluxReader::getFluxHist: Could not find histogram " <<
 	    " with name \"" << strHist.c_str() << "\" in path\n" <<
 	    deepDir->GetPath() << " . Exiting" << std::endl; exit(3); }
-    
+
     TH3D * histPtr = dynamic_cast< TH3D* >( deepDir->Get( strHist.c_str() ) );
+
     return histPtr;
 }
 
@@ -300,6 +302,7 @@ std::vector< double > * genie::HNL::FluxReader::generatePolDir( const int parPDG
     polDir->emplace_back( uy );
     polDir->emplace_back( uz );
 
+    delete polHist;
     return polDir;
 }
 
@@ -324,6 +327,7 @@ std::vector< double > * genie::HNL::FluxReader::generateVtx3X( const int parPDG,
     vtxDir->emplace_back( uy );
     vtxDir->emplace_back( uz );
 
+    delete vtxHist;
     return vtxDir;
 }
 
@@ -349,6 +353,7 @@ double genie::HNL::FluxReader::generateVtxE( const int parPDG, const int HType )
     // now get random.
     double E = eneHist->GetRandom( );
 
+    delete eneHist;
     return E;
 }
 
@@ -375,11 +380,12 @@ std::vector< double > * genie::HNL::FluxReader::generateVtx3P( const int parPDG,
     momVec->emplace_back( uy );
     momVec->emplace_back( uz );
 
+    delete momHist;
     return momVec;
 }
 
 genie::HNL::SimpleHNL genie::HNL::FluxReader::generateHNL( ){
-    return genie::HNL::SimpleHNL( "HNL", 0, 1914, ::genie::kPdgKP, fmN, fUe, fUm, fUt, false );
+  return genie::HNL::SimpleHNL( "HNL", 0, genie::kPdgHNL, ::genie::kPdgKP, fmN, fUe, fUm, fUt, false );
 }
 
 genie::HNL::SimpleHNL genie::HNL::FluxReader::generateHNL( const int PDG, const int parPDG,

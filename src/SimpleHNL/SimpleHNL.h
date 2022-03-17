@@ -263,7 +263,8 @@ namespace genie {
 		      "Zero vector entered. Exiting."; exit(1); }
 		const double PM = std::sqrt( plx*plx + ply*ply * plz*plz );
 		fPolUx = plx / PM; fPolUy = ply / PM; fPolUz = plz / PM;
-	        fPolDir = new std::vector< double >( );
+		if( !fPolDir || fPolDir == 0 ) fPolDir = new std::vector< double >( );
+		else fPolDir->clear();
 		fPolDir->emplace_back( fPolUx ); fPolDir->emplace_back( fPolUy );
 		fPolDir->emplace_back( fPolUz ); }
 

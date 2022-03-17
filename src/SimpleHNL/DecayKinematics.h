@@ -45,6 +45,7 @@
 
 #include "Conventions/Constants.h"
 #include "Conventions/Units.h"
+#include "Numerical/RandomGen.h"
 
 #include "BRFunctions.h"
 #include "Enums.h"    

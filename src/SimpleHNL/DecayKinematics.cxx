@@ -75,9 +75,12 @@ void genie::HNL::decayKinematics::TwoBodyKinematics( genie::HNL::SimpleHNL sh, c
 
     double thetaPolEll = 0.0, phiPolEll = 0.0; // wrt polarisation axis
     TwoBodyAngle( sh, mh, ml, thetaPolEll );
-    if( !fIsRngInitD ){ initRandom( ); } // assume cylidrical symmetry for phi
+    //if( !fIsRngInitD ){ initRandom( ); } // assume cylidrical symmetry for phi
     const double phiLow = 0.0, phiHigh = 2.0 * genie::constants::kPi;
-    phiPolEll = fRngD->Uniform( phiLow, phiHigh );
+    
+    RandomGen * rnd = RandomGen::Instance();
+    //phiPolEll = fRngD->Uniform( phiLow, phiHigh );
+    phiPolEll = rnd->RndGen().Uniform( phiLow, phiHigh );
 
     // Cartesian coordinates on unit sphere, wrt polarisation axis
     const double pax = std::sin( thetaPolEll ) * std::cos( phiPolEll );
@@ -166,8 +169,10 @@ const double genie::HNL::decayKinematics::ExtractVarFromDifferentialGamma( const
     // we have dG/dv ==> 1/G dG/dv is a pdf on v-space
     const double varInt = varTF1->Integral( x1, x2 );
 
-    if( !fIsRngInitD ) initRandom( );
-    const double ranthrow = fRngD->Uniform( );
+    //if( !fIsRngInitD ) initRandom( );
+    //const double ranthrow = fRngD->Uniform( );
+    RandomGen * rnd = RandomGen::Instance();
+    const double ranthrow = rnd->RndGen().Uniform();
 
     // return root of ( \int_{x_{1}}^{x} dv 1/G dG/dv - ranthrow )
     // G = \int_{x_{1}}^{x_{2}} dv dG/dv
