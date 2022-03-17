@@ -173,7 +173,8 @@ double genie::HNL::Selector::GetTotalDecayWidth( std::map< genie::HNL::enums::HN
 
     LOG("SimpleHNL", pDEBUG)
       << " Total gamma from N_channels = " << gammaMap.size()
-      << " is = " << totGamma;
+      << " is = " << totGamma << " [GeV]"
+      << " or = " << totGamma * genie::units::GeV * genie::units::ns << " [ns^{-1}]";
 
     return totGamma;
 }
@@ -183,7 +184,7 @@ double genie::HNL::Selector::CalcCoMLifetime( const double M, const double Ue42,
 
     std::map< genie::HNL::enums::HNLDecay_t, double > allChannels = genie::HNL::Selector::GetValidChannelWidths( M, Ue42, Umu42, Ut42, IsMajorana );
     double totGamma = genie::HNL::Selector::GetTotalDecayWidth( allChannels );
-    return 1.0 / totGamma;
+    return 1.0 / totGamma; // GeV^{-1}
 }
 
 // let's pick the interesting channels

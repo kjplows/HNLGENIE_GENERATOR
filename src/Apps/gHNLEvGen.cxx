@@ -351,7 +351,7 @@ int main(int argc, char ** argv)
      std::vector< genie::HNL::enums::HNLDecay_t > * intChannels = new std::vector< genie::HNL::enums::HNLDecay_t >();
      intChannels->emplace_back( genie::HNL::enums::kPiE );
      intChannels->emplace_back( genie::HNL::enums::kPiMu );
-     intChannels->emplace_back( genie::HNL::enums::kPi0Nu ); // TESTING: What happens if we allow these decays?
+     //intChannels->emplace_back( genie::HNL::enums::kPi0Nu ); // TESTING: What happens if we allow these decays?
 
      LOG("gevgen_hnl", pDEBUG)
        << " Getting valid channels ";
@@ -365,16 +365,16 @@ int main(int argc, char ** argv)
      auto pieMapG  = gammaMap.find( pieDecay );
      double piePG  = pieMapG->second;
 
-     genie::HNL::enums::HNLDecay_t pi0nuDecay =  genie::HNL::enums::kPi0Nu;
-     auto pi0nuMapG  = gammaMap.find( pi0nuDecay );
-     double pi0nuPG  = pi0nuMapG->second;
+     //genie::HNL::enums::HNLDecay_t pi0nuDecay =  genie::HNL::enums::kPi0Nu;
+     //auto pi0nuMapG  = gammaMap.find( pi0nuDecay );
+     //double pi0nuPG  = pi0nuMapG->second;
 
      LOG("gevgen_hnl", pDEBUG)
        << "\n\n !!! ------------------------------------------- "
        << "\n !!! Here are the gammas of the interesting channels: "
        << "\n !!! Channel: pi  mu . Gamma = " << pimuPG
        << "\n !!! Channel: pi  e  . Gamma = " << piePG
-       << "\n !!! Channel: pi0 nu . Gamma = " << pi0nuPG
+       //<< "\n !!! Channel: pi0 nu . Gamma = " << pi0nuPG
        << "\n !!! ------------------------------------------- \n";
 
      LOG("gevgen_hnl", pDEBUG)
@@ -400,15 +400,15 @@ int main(int argc, char ** argv)
      auto pieMap   = PMap.find( pieDecay );
      double pieP   = pieMap->second;
 
-     auto pi0nuMap = PMap.find( pi0nuDecay );
-     double pi0nuP = pi0nuMap->second;
+     //auto pi0nuMap = PMap.find( pi0nuDecay );
+     //double pi0nuP = pi0nuMap->second;
 
      LOG("gevgen_hnl", pDEBUG)
        << "\n\n !!! ------------------------------------------- "
        << "\n !!! Here are the probabilities of the interesting channels: "
        << "\n !!! Channel: pi  mu . Prob = " << pimuP
        << "\n !!! Channel: pi  e  . Prob = " << pieP
-       << "\n !!! Channel: pi0 nu . Prob = " << pi0nuP
+       //<< "\n !!! Channel: pi0 nu . Prob = " << pi0nuP
        << "\n !!! ------------------------------------------- \n";
      
      // now do a random throw
