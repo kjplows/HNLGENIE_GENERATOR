@@ -104,6 +104,8 @@ void genie::HNL::decayKinematics::TwoBodyKinematics( genie::HNL::SimpleHNL sh, c
     slx = slx / slm; shx = -slx;
     sly = sly / slm; shy = -sly;
     slz = slz / slm; shz = -slz; //this has same angles wrt -polVec ==> opposite momentum
+
+    delete sepAxis;
 }
 
 // define characteristic rest frame axis
@@ -132,20 +134,22 @@ const TVector3* genie::HNL::decayKinematics::RestFrameAxis( genie::HNL::SimpleHN
 TLorentzVector* genie::HNL::decayKinematics::RestToLabFrame( genie::HNL::SimpleHNL sh, TLorentzVector* rest4V ){
     // first, HNL betaVec in lab frame
     const std::vector< double > betaVec = sh.GetBetaVec( );
-    const TVector3* betaTVec = new TVector3( -betaVec.at(0), -betaVec.at(1), -betaVec.at(2) ); // rest --> lab boosts by -beta
-    TLorentzVector *lab4V = new TLorentzVector();
+    const TVector3 * betaTVec = new TVector3( -betaVec.at(0), -betaVec.at(1), -betaVec.at(2) ); // rest --> lab boosts by -beta
+    TLorentzVector * lab4V = new TLorentzVector();
     lab4V->SetPxPyPzE( rest4V->Px(), rest4V->Py(), rest4V->Pz(), rest4V->E() );
     lab4V->Boost( *betaTVec );
+    delete betaTVec;
     return lab4V;
 }
 
 TLorentzVector* genie::HNL::decayKinematics::LabToRestFrame( genie::HNL::SimpleHNL sh, TLorentzVector* lab4V ){
     // first, HNL betaVec in lab frame
     const std::vector< double > betaVec = sh.GetBetaVec( );
-    const TVector3* betaTVec = new TVector3( betaVec.at(0), betaVec.at(1), betaVec.at(2) );     // lab --> rest boosts by +beta
-    TLorentzVector *rest4V = new TLorentzVector();
+    const TVector3 * betaTVec = new TVector3( betaVec.at(0), betaVec.at(1), betaVec.at(2) );     // lab --> rest boosts by +beta
+    TLorentzVector * rest4V = new TLorentzVector();
     rest4V->SetPxPyPzE( lab4V->Px(), lab4V->Py(), lab4V->Pz(), lab4V->E() );
     rest4V->Boost( *betaTVec );
+    delete betaTVec;
     return rest4V;
 }
 
@@ -173,6 +177,8 @@ const double genie::HNL::decayKinematics::ExtractVarFromDifferentialGamma( const
 	   && xx <= x2 ){
 	prevInt = currentInt;
 	currentInt += varTF1->Integral( xx, xx + dx ) / varInt; xx += dx; }
+
+    delete varTF1;
 
     return xx;
 }

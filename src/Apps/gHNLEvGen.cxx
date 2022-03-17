@@ -463,9 +463,12 @@ int main(int argc, char ** argv)
      ntpw.AddEventRecord(ievent, event);
      mcjmonitor.Update(ievent,event);
      delete event;
+     delete intChannels;
 
      ievent++;
   } // event loop
+
+  delete rng3;
 
   LOG("gevgen_hnl", pDEBUG)
     << "Event loop finished.";

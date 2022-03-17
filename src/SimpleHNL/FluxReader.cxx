@@ -435,4 +435,7 @@ void genie::HNL::FluxReader::setFluxInfo( genie::HNL::SimpleHNL sh ){
     vtx4X->emplace_back( vtx3X->at(1) );
     vtx4X->emplace_back( vtx3X->at(2) );
     sh.SetProdVtx( (*vtx4X) );
+
+    delete vtx3X;
+    delete vtx4X;
 }

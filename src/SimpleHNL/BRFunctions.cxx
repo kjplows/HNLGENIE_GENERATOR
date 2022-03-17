@@ -138,6 +138,8 @@ double genie::HNL::Selector::DWidth_PiPi0Ell( const double M, const double ml,
       intNow += std::abs( preSimp * midW * fev );
     }
   }
+
+  delete f;
     
   intNow *= preFac * bigMats;
 
@@ -209,6 +211,8 @@ double genie::HNL::Selector::DWidth_Pi0Pi0Nu( const double M,
       intNow += std::abs( preSimp * midW * fev );
     }
   }
+
+  delete f;
 
   intNow *= preFac * bigMats * smallMats;
 

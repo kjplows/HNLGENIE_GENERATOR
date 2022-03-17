@@ -287,6 +287,8 @@ void HNLDecayPrimaryVtxGenerator::GenerateDecayedHNLPosition(
     << "Setting weight = " << weight;
   event->SetWeight( weight );
 
+  delete p3HNL;
+
   return;
 }
 //____________________________________________________________________________
@@ -431,6 +433,8 @@ void HNLDecayPrimaryVtxGenerator::GenerateDecayProducts(
   TRandom3 *rand = new TRandom3(0); // gotta move to Numerical/RandomGen
   double thetaPol = rand->Uniform( 0.0, genie::constants::kPi );
   double phi = rand->Uniform( 0.0, 2.0 * genie::constants::kPi );
+
+  delete rand; // done with this
 
   double p3h = std::sqrt( Eh*Eh - mh*mh );
   TLorentzVector p4h( p3h*std::sin(thetaPol)*std::cos(phi),
