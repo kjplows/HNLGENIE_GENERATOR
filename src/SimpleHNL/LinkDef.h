@@ -6,13 +6,13 @@
 
 #pragma link C++ namespace genie;
 #pragma link C++ namespace genie::HNL;
-#pragma link C++ namespace genie::HNL::Selector;
-#pragma link C++ namespace genie::HNL::FluxReader;
-#pragma link C++ namespace genie::HNL::decayKinematics;
-#pragma link C++ namespace genie::HNL::Defaults;
-#pragma link C++ namespace genie::HNL::enums;
-#pragma link C++ namespace genie::HNL::utils;
-#pragma link C++ namespace genie::HNL::MINERvAGeom;
+#pragma link C++ namespace genie::HNL::HNLSelector;
+#pragma link C++ namespace genie::HNL::HNLFluxReader;
+#pragma link C++ namespace genie::HNL::HNLdecayKinematics;
+#pragma link C++ namespace genie::HNL::HNLdefaults;
+#pragma link C++ namespace genie::HNL::HNLenums;
+#pragma link C++ namespace genie::HNL::HNLutils;
+#pragma link C++ namespace genie::HNL::HNLMINERvAGeom;
 
 #pragma link C++ class genie::HNLDecayModelI;
 #pragma link C++ class genie::HNL::SimpleHNL;

@@ -3,7 +3,7 @@
 
   Provides the typedef for the allowed decay channels
 
-\namespace  genie::HNL::Selector
+\namespace  genie::HNL::HNLSelector
 
 \brief      Typedef enum HNL decay channels
 
@@ -26,7 +26,7 @@
 namespace genie {
 namespace HNL {
 
-    namespace Selector {
+    namespace HNLSelector {
 	
 	typedef enum t_HNLDecay {
 
@@ -45,7 +45,7 @@ namespace HNL {
 	    
 	} HNLDecay_t;
 	
-    } // namespace Selector
+    } // namespace HNLSelector
 
 } // namespace HNL
 } // namespace genie

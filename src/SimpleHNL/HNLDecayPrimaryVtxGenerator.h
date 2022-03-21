@@ -57,11 +57,11 @@ private:
    void GetEnergyFromFlux              (void) const;
    void SetHNLCouplings                (double Ue42, double Um42) const;
 
-   mutable int                           fCurrInitStatePdg;
-   mutable genie::HNL::enums::HNLDecay_t fCurrDecayMode;
-   mutable int                           fCurrDecayedHNL;
-//mutable bool                          fNucleonIsBound;
-   mutable TGenPhaseSpace                fPhaseSpaceGenerator;
+   mutable int                              fCurrInitStatePdg;
+   mutable genie::HNL::HNLenums::HNLDecay_t fCurrDecayMode;
+   mutable int                              fCurrDecayedHNL;
+//mutable bool                              fNucleonIsBound;
+   mutable TGenPhaseSpace                   fPhaseSpaceGenerator;
 
    mutable double                        fEnergy;
    mutable double                        fUe42 = -1.0, fUm42 = -1.0;

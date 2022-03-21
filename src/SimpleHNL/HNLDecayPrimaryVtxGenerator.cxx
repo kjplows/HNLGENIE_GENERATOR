@@ -53,7 +53,7 @@ void HNLDecayPrimaryVtxGenerator::ProcessEventRecord(
   Interaction * interaction = event->Summary();
   //fCurrInitStatePdg = interaction->InitState().Tgt().Pdg();
   fCurrInitStatePdg = interaction->InitState().ProbePdg();
-  fCurrDecayMode = (genie::HNL::enums::HNLDecay_t) interaction->ExclTag().DecayMode();
+  fCurrDecayMode = (genie::HNL::HNLenums::HNLDecay_t) interaction->ExclTag().DecayMode();
   XclsTag exclTag = interaction->ExclTag();
   exclTag.SetHNL();
   interaction->SetExclTag(exclTag);
@@ -76,8 +76,8 @@ void HNLDecayPrimaryVtxGenerator::ProcessEventRecord(
 void HNLDecayPrimaryVtxGenerator::GetEnergyFromFlux() const
 {
   if( fEnergy != 0.0 ) return;
-  if( genie::HNL::FluxReader::fMasterFlux ){
-    fEnergy = genie::HNL::FluxReader::getEFromMaster();
+  if( genie::HNL::HNLFluxReader::fMasterFlux ){
+    fEnergy = genie::HNL::HNLFluxReader::getEFromMaster();
     return;
   }
   
@@ -116,9 +116,9 @@ void HNLDecayPrimaryVtxGenerator::AddInitialState(
   if( !fProdVtxHist || fProdVtxHist == 0 ){
     std::string pvPath = "data/flux/HNL/HNL_vertex_positions.root";
     std::string pvName = "hHNLVtxPos";
-    fProdVtxHist = genie::HNL::FluxReader::getFluxHist3D( pvPath, pvName,
-							  genie::HNL::enums::kAll,
-							  genie::HNL::enums::kNumu ); // last 2 dummy args! Gotta refactor this
+    fProdVtxHist = genie::HNL::HNLFluxReader::getFluxHist3D( pvPath, pvName,
+							  genie::HNL::HNLenums::kAll,
+							  genie::HNL::HNLenums::kNumu ); // last 2 dummy args! Gotta refactor this
   }
   assert( fProdVtxHist );
   LOG( "SimpleHNL", pDEBUG )
@@ -148,7 +148,7 @@ void HNLDecayPrimaryVtxGenerator::GenerateDecayedHNLPosition(
 {
   TLorentzVector v4(0,0,0,0);
 
-  std::vector< double > * prodVtx = genie::HNL::FluxReader::generateVtx3X( fProdVtxHist );
+  std::vector< double > * prodVtx = genie::HNL::HNLFluxReader::generateVtx3X( fProdVtxHist );
   LOG( "SimpleHNL", pDEBUG )
     << "Production vertex at: ( " << prodVtx->at(0) << ", " << prodVtx->at(1) << ", " << prodVtx->at(2) << ") [cm]";
   
@@ -176,7 +176,7 @@ void HNLDecayPrimaryVtxGenerator::GenerateDecayedHNLPosition(
     << p3HNL->at(1) << ", " << p3HNL->at(2) << " ) [GeV/c]";
 
   // let's find out if this intersects the ID.
-  std::vector< double > * entryPoint = genie::HNL::MINERvAGeom::GetEntryPointID( prodVtx, p3HNL );
+  std::vector< double > * entryPoint = genie::HNL::HNLMINERvAGeom::GetEntryPointID( prodVtx, p3HNL );
   std::vector< double > * exitPoint = 0;
 
   bool didEnterID = ( entryPoint->at(3) >= -100.0 );
@@ -186,14 +186,14 @@ void HNLDecayPrimaryVtxGenerator::GenerateDecayedHNLPosition(
     nTries++;
     LOG( "SimpleHNL", pDEBUG )
       << "This HNL would not enter the detector. Generating new production vertex...";
-    prodVtx = genie::HNL::FluxReader::generateVtx3X( fProdVtxHist );
-    entryPoint = genie::HNL::MINERvAGeom::GetEntryPointID( prodVtx, p3HNL );
+    prodVtx = genie::HNL::HNLFluxReader::generateVtx3X( fProdVtxHist );
+    entryPoint = genie::HNL::HNLMINERvAGeom::GetEntryPointID( prodVtx, p3HNL );
     didEnterID = ( entryPoint->at(3) >= -100.0 );
   }
   LOG( "SimpleHNL", pDEBUG )
     << "It took " << nTries << " tries to make a detector-intersecting trajectory.";
 
-  if( didEnterID ) exitPoint = genie::HNL::MINERvAGeom::GetExitPointID( prodVtx, p3HNL );
+  if( didEnterID ) exitPoint = genie::HNL::HNLMINERvAGeom::GetExitPointID( prodVtx, p3HNL );
   bool didExitID = didEnterID;
   if( didEnterID ) didExitID *= ( exitPoint->at(3) >= -100.0 );
 
@@ -209,7 +209,7 @@ void HNLDecayPrimaryVtxGenerator::GenerateDecayedHNLPosition(
   sh.SetProdVtx( prod4Vtx );
   sh.Set4Momentum( prod4P );
   
-  std::vector< double > dec4VX = genie::HNL::Selector::PropagateTilDecay( sh ); // decay vertex set here
+  std::vector< double > dec4VX = genie::HNL::HNLSelector::PropagateTilDecay( sh ); // decay vertex set here
   TLorentzVector dec4V( dec4VX.at(1), dec4VX.at(2), dec4VX.at(3), dec4VX.at(0) );
   event->SetVertex( dec4V );
 
@@ -260,7 +260,7 @@ void HNLDecayPrimaryVtxGenerator::GenerateDecayedHNLPosition(
       << " = " << restInsideDet << " [ns] (REST)";
 
     // calculate weight from this decay
-    double totalWidth = genie::HNL::Selector::GetTotalDecayWidth( sh.GetValidChannels() ); // GeV
+    double totalWidth = genie::HNL::HNLSelector::GetTotalDecayWidth( sh.GetValidChannels() ); // GeV
     totalWidth *= genie::units::GeV * genie::units::ns; // ns^{-1}
     LOG( "SimpleHNL", pDEBUG )
       << "From " << (sh.GetValidChannels()).size() << " channels the total width in ns^{-1} is: "
@@ -309,10 +309,10 @@ void HNLDecayPrimaryVtxGenerator::GenerateDecayProducts(
   int typeMod = ( fCurrInitStatePdg > 0 ) ? 1 : -1;
 
   // vector of known (i.e. implemented) decays
-  std::vector< genie::HNL::enums::HNLDecay_t > knownDecays;
-  knownDecays.emplace_back( genie::HNL::enums::kPiMu );
-  knownDecays.emplace_back( genie::HNL::enums::kPiE );
-  knownDecays.emplace_back( genie::HNL::enums::kPi0Nu );
+  std::vector< genie::HNL::HNLenums::HNLDecay_t > knownDecays;
+  knownDecays.emplace_back( genie::HNL::HNLenums::kPiMu );
+  knownDecays.emplace_back( genie::HNL::HNLenums::kPiE );
+  knownDecays.emplace_back( genie::HNL::HNLenums::kPi0Nu );
 
   bool decayIsKnown = ( std::find( std::begin( knownDecays ), std::end( knownDecays ), fCurrDecayMode )
 			!= std::end( knownDecays ) ) ;
@@ -322,19 +322,19 @@ void HNLDecayPrimaryVtxGenerator::GenerateDecayProducts(
   }
   assert( decayIsKnown );
   
-  if( fCurrDecayMode == genie::HNL::enums::kPiMu || fCurrDecayMode == genie::HNL::enums::kPiE ){
+  if( fCurrDecayMode == genie::HNL::HNLenums::kPiMu || fCurrDecayMode == genie::HNL::HNLenums::kPiE ){
     pdgv.push_back( typeMod * genie::kPdgPiP ); // all 2 decay modes do this
   }
-  else if( fCurrDecayMode == genie::HNL::enums::kPi0Nu ){
+  else if( fCurrDecayMode == genie::HNL::HNLenums::kPi0Nu ){
     pdgv.push_back( genie::kPdgPi0 ); // pi0 is its own antiparticle
   }
   
-  if( fCurrDecayMode == genie::HNL::enums::kPiMu ) pdgv.push_back( typeMod * genie::kPdgMuon );
-  else if( fCurrDecayMode == genie::HNL::enums::kPiE ) pdgv.push_back( typeMod * genie::kPdgElectron );
-  else if( fCurrDecayMode == genie::HNL::enums::kPi0Nu ) pdgv.push_back( typeMod * genie::kPdgNuMu );
+  if( fCurrDecayMode == genie::HNL::HNLenums::kPiMu ) pdgv.push_back( typeMod * genie::kPdgMuon );
+  else if( fCurrDecayMode == genie::HNL::HNLenums::kPiE ) pdgv.push_back( typeMod * genie::kPdgElectron );
+  else if( fCurrDecayMode == genie::HNL::HNLenums::kPi0Nu ) pdgv.push_back( typeMod * genie::kPdgNuMu );
 
-  //assert( fCurrDecayMode == genie::HNL::enums::kPiMu ||
-  //	  fCurrDecayMode == genie::HNL::enums::kPiE ); // force 2-body decay
+  //assert( fCurrDecayMode == genie::HNL::HNLenums::kPiMu ||
+  //	  fCurrDecayMode == genie::HNL::HNLenums::kPiE ); // force 2-body decay
 
   //I *could* do this, or I could actually implement the custom 3-body decays
   //inside SimpleHNL.
@@ -391,27 +391,27 @@ void HNLDecayPrimaryVtxGenerator::GenerateDecayProducts(
   // Step 2: Actually do the decay. 
   // NucleonDecay's solution is the TGenPhaseSpace generator
   // For now, just add 2-body decays & use SimpleHNL kinematics
-  // from the genie::HNL::decayKinematics namespace
+  // from the genie::HNL::HNLdecayKinematics namespace
 
   double mN = p4d->M();
   assert( mN >= 0.0 );
   double ml = -1.0, mh = -1.0;
   int pdgh = -1, pdgl = -1;
   
-  if( fCurrDecayMode == genie::HNL::enums::kPiMu || fCurrDecayMode == genie::HNL::enums::kPiE ){
+  if( fCurrDecayMode == genie::HNL::HNLenums::kPiMu || fCurrDecayMode == genie::HNL::HNLenums::kPiE ){
     mh = genie::constants::kPionMass; pdgh = typeMod * genie::kPdgPiP;
   }
-  else if( fCurrDecayMode == genie::HNL::enums::kPi0Nu ){
+  else if( fCurrDecayMode == genie::HNL::HNLenums::kPi0Nu ){
     mh = genie::constants::kPi0Mass; pdgh = genie::kPdgPi0;
   }
 
-  if( fCurrDecayMode == genie::HNL::enums::kPiMu ){ 
+  if( fCurrDecayMode == genie::HNL::HNLenums::kPiMu ){ 
     ml = genie::constants::kMuonMass; pdgl = typeMod * genie::kPdgMuon;
   }
-  else if( fCurrDecayMode == genie::HNL::enums::kPiE ){ 
+  else if( fCurrDecayMode == genie::HNL::HNLenums::kPiE ){ 
     ml = genie::constants::kElectronMass; pdgl = typeMod * genie::kPdgElectron; 
   }
-  else if( fCurrDecayMode == genie::HNL::enums::kPi0Nu ){
+  else if( fCurrDecayMode == genie::HNL::HNLenums::kPi0Nu ){
     ml = 0.0; pdgl = typeMod * genie::kPdgNuMu;
   }
 
@@ -421,9 +421,9 @@ void HNLDecayPrimaryVtxGenerator::GenerateDecayProducts(
 
   genie::HNL::SimpleHNL sh = genie::HNL::SimpleHNL( "HNL", decayed_HNL_id, typeMod * genie::kPdgHNL, typeMod * genie::kPdgKP, mN, fUe42, fUm42, 0.0, false ); // RETHERE - find a way to propagate couplings into here!
 
-  genie::HNL::decayKinematics::TwoBodyEnergies( mN, mh, ml, Eh, El );
+  genie::HNL::HNLdecayKinematics::TwoBodyEnergies( mN, mh, ml, Eh, El );
   
-  //genie::HNL::decayKinematics::TwoBodyAngle( sh, mh, ml, thetaPol ); 
+  //genie::HNL::HNLdecayKinematics::TwoBodyAngle( sh, mh, ml, thetaPol ); 
   // causes crash. Will investigate. Let's randomise for now!
 
   LOG("SimpleHNL", pINFO)
@@ -502,11 +502,11 @@ void HNLDecayPrimaryVtxGenerator::GenerateDecayProducts(
      interaction->ExclTagPtr()->Reset();
 
      int nPiP = 0, nPi0 = 0, nPiM = 0;
-     if( fCurrDecayMode == genie::HNL::enums::kPiMu || fCurrDecayMode == genie::HNL::enums::kPiE ){
+     if( fCurrDecayMode == genie::HNL::HNLenums::kPiMu || fCurrDecayMode == genie::HNL::HNLenums::kPiE ){
        nPiP = ( typeMod > 0 ) ? 1 : 0;
        nPiM = 1 - nPiP; // either 1/0 or 0/1
      }
-     else if( fCurrDecayMode == genie::HNL::enums::kPi0Nu ){
+     else if( fCurrDecayMode == genie::HNL::HNLenums::kPi0Nu ){
        nPi0 = 1;
      }       
      interaction->ExclTagPtr()->SetNPions( nPiP, nPi0, nPiM );

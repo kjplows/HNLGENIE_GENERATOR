@@ -1,7 +1,7 @@
 //-------------------------------------------------------------------
 /*!
 
-\namespace  genie::HNL::MINERvAGeom
+\namespace  genie::HNL::HNLMINERvAGeom
 
 \brief      Basic geometry constants defining MINERvA position + coords
 
@@ -12,6 +12,8 @@
 \cpright    ??? - TBD  
 
  */
+//-------------------------------------------------------------------
+// TODO: Got to rotate the box and hexagon by numi_beam_angle_rad!
 //-------------------------------------------------------------------
 
 #ifndef JMINERVAGEOM_H
@@ -30,7 +32,7 @@
 namespace genie {
 namespace HNL {
 
-  namespace MINERvAGeom {
+  namespace HNLMINERvAGeom {
 
     // defines MINERvA centre (centre of tracker) in MINERvA coords
     const double MINtheta = 60.0 * genie::constants::kPi / 180.0;
@@ -73,7 +75,7 @@ namespace HNL {
     std::vector< double > * GetEntryPointID( const std::vector< double > * prodVtx, const std::vector< double > * momVec );
     std::vector< double > * GetExitPointID( const std::vector< double > * prodVtx, const std::vector< double > * momVec );
 
-  } // namespace MINERvAGeom
+  } // namespace HNLMINERvAGeom
 
 } // namespace HNL
 } // namespace genie

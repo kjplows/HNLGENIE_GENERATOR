@@ -10,7 +10,7 @@
   b) Rest frame: determined by HNL \vec{\beta}
   c) Pol  frame: determined by HNL parent \vec{\beta} (if 2-body prod)
 
-\namespace  genie::HNL::decayKinematics
+\namespace  genie::HNL::HNLdecayKinematics
 
 \brief      Rest-frame kinematics for HNL decay products
 
@@ -61,7 +61,7 @@ namespace HNL {
 
     class SimpleHNL;
 
-    namespace decayKinematics {
+    namespace HNLdecayKinematics {
 
 	// generic 2-body decay N --> \pi \ell   
 	void TwoBodyEnergies( const double mN, const double mh, const double ml,
@@ -86,9 +86,9 @@ namespace HNL {
     
 	// emission angles of product wrt HNL polarisation vector
 	const double RestTheta( const double mN, const double pol,
-				const genie::HNL::enums::HNLDecay_t chan, const double m1 );
+				const genie::HNL::HNLenums::HNLDecay_t chan, const double m1 );
 	const double RestPhi( const double mN, const double pol,
-			      const genie::HNL::enums::HNLDecay_t chan, const double m1 );
+			      const genie::HNL::HNLenums::HNLDecay_t chan, const double m1 );
                               //assume cylindrical symmetry ?
 
 	// define characteristic axis in rest frame: r(MIN centre) - r(HNL decay)
@@ -114,8 +114,9 @@ namespace HNL {
 	extern bool fIsRngInitD;
 
 	void initRandom( );
+	void clearRandom( );
 	
-    } //namespace decayKinematics
+    } //namespace HNLdecayKinematics
 
 } //namespace HNL
 } //namespace genie

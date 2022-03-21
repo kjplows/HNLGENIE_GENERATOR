@@ -70,9 +70,9 @@ TParticlePDG * PDGLibrary::Find(int pdgc)
 void PDGLibrary::AddSimpleHNL( int pdgc, double mHNL, double Ue42, double Um42 )
 { 
   // use mass and couplings to get valid channels and add up their width
-  std::map< genie::HNL::enums::HNLDecay_t, double > validChannels = 
-    genie::HNL::Selector::GetValidChannelWidths( mHNL, Ue42, Um42, 0.0 );
-  double totGamma = genie::HNL::Selector::GetTotalDecayWidth( validChannels );
+  std::map< genie::HNL::HNLenums::HNLDecay_t, double > validChannels = 
+    genie::HNL::HNLSelector::GetValidChannelWidths( mHNL, Ue42, Um42, 0.0 );
+  double totGamma = genie::HNL::HNLSelector::GetTotalDecayWidth( validChannels );
   
   // add generic HNL with correct mass
   TParticlePDG * HNLParticle = fDatabasePDG->AddParticle( "HNL", "Generic Heavy Neutral Lepton", mHNL, false, totGamma, 0, "lepton", std::abs(pdgc) );

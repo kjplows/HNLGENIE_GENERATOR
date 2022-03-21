@@ -24,7 +24,7 @@
 namespace genie {
 namespace HNL {
 
-    namespace defaults {
+    namespace HNLdefaults {
 
 	static const double HNLDefaultMass    = genie::constants::kMuonMass + genie::constants::kPionMass + 10.0 * genie::units::MeV;
 	static const double HNLDefaultECoup   = 0.0;
@@ -34,7 +34,7 @@ namespace HNL {
 	static const double HNLDefaultPDG    = ::genie::kPdgHNL; // generic HNL pdg code
 	static const double HNLDefaultParPDG = ::genie::kPdgKP;  // produced by kaon
 
-    } // namespace defaults
+    } // namespace HNLdefaults
 
 } // namespace HNL
 } // namespace genie

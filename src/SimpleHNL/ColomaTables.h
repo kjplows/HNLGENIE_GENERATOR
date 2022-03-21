@@ -4,7 +4,7 @@
   Lookup tables provided for the functions `f_{1}(x)` and `f_{2}(x)`
   that enter the N --> \nu \ell_{\beta} \ell_{\beta} channel
 
-\namespace  genie::HNL::Selector
+\namespace  genie::HNL::HNLSelector
 
 \brief      Form factor lookup tables
 
@@ -23,7 +23,7 @@
 namespace genie {
 namespace HNL {
 
-    namespace Selector {
+    namespace HNLSelector {
 
 	// lookup tables, 50x10 + 1
 	
@@ -157,7 +157,7 @@ namespace HNL {
 					   1.168e-04, 9.823e-05, 8.181e-05, 6.740e-05, 5.486e-05, 4.405e-05, 3.482e-05, 2.703e-05, 2.056e-05, 1.526e-05,
 					   1.100e-05, 7.653e-06, 5.100e-06, 3.216e-06, 1.887e-06, 1.003e-06, 4.621e-07, 1.699e-07, 4.136e-08, 3.678e-09, 0.000e+00 };
 
-    } // namespace Selector
+    } // namespace HNLSelector
 
 } // namespace HNL
 } // namespace genie

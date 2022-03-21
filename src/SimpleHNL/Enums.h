@@ -30,7 +30,7 @@
 namespace genie {
 namespace HNL {
 
-    namespace enums {
+    namespace HNLenums {
 
 	/// The HNL decay channels
 	typedef enum t_HNLDecay {
@@ -215,7 +215,7 @@ namespace HNL {
 
 	} HNLPDG_t;
 
-    }
+    } // namespace HNLenums
 
 } // namespace HNL
 } // namespace genie

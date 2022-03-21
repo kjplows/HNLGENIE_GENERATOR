@@ -44,15 +44,15 @@ void genie::HNL::HNLDecayer::Initialize( void ) const {
     if( fECoup == 0.0 ){
 	if( fMuCoup == 0.0 ){ LOG( "HNLDecayer", pERROR ) << "Both e and mu couplings are zero!";
 	    exit(3); }
-	else { fCoupConf = std::string( "MuonOnly" ); fCoupIdx = genie::HNL::enums::kMuonIdx; }
+	else { fCoupConf = std::string( "MuonOnly" ); fCoupIdx = genie::HNL::HNLenums::kMuonIdx; }
     }
     else {
-	if( fMuCoup == 0.0 ){ fCoupConf =  std::string( "ElectronOnly" );fCoupIdx = genie::HNL::enums::kElectronIdx; }
-	else if( fMuCoup == fECoup ){ fCoupConf = std::string( "EqualCouplings" ); fCoupIdx = genie::HNL::enums::kEqualIdx; }
+	if( fMuCoup == 0.0 ){ fCoupConf =  std::string( "ElectronOnly" );fCoupIdx = genie::HNL::HNLenums::kElectronIdx; }
+	else if( fMuCoup == fECoup ){ fCoupConf = std::string( "EqualCouplings" ); fCoupIdx = genie::HNL::HNLenums::kEqualIdx; }
 	else{
 	    LOG( "HNLDecayer", pNOTICE ) << "Non-standard coupling configuration: |U_e4|^2 :" <<
 		" |U_mu4|^2 = " << fECoup/fMuCoup << " : 1";
-	    fCoupConf = std::string( "OtherCouplings" ); fCoupIdx = genie::HNL::enums::kOtherIdx; }
+	    fCoupConf = std::string( "OtherCouplings" ); fCoupIdx = genie::HNL::HNLenums::kOtherIdx; }
     }
 }
 
@@ -60,19 +60,19 @@ void genie::HNL::HNLDecayer::Initialize( void ) const {
 /// Is this ever going to be seen by GENIE??
 void genie::HNL::HNLDecayer::InitializeParticle( genie::HNL::SimpleHNL sh ) const {
 
-    double shE = genie::HNL::FluxReader::generateVtxE( sh.GetParentPDG( ), sh.GetHType( ) );
+    double shE = genie::HNL::HNLFluxReader::generateVtxE( sh.GetParentPDG( ), sh.GetHType( ) );
     sh.SetEnergy( shE ); // lab frame!
 
-    std::vector< double > * sh3P = genie::HNL::FluxReader::generateVtx3P( sh.GetParentPDG( ),
+    std::vector< double > * sh3P = genie::HNL::HNLFluxReader::generateVtx3P( sh.GetParentPDG( ),
 						       sh.GetHType( ), shE );
     double sh3Px = sh3P->at( 0 ), sh3Py = sh3P->at( 1 ), sh3Pz = sh3P->at( 2 );
     sh.SetMomentumDirection( sh3Px, sh3Py, sh3Pz );
 
-    std::vector< double > * shX = genie::HNL::FluxReader::generateVtx3X( sh.GetParentPDG( ),
+    std::vector< double > * shX = genie::HNL::HNLFluxReader::generateVtx3X( sh.GetParentPDG( ),
 						      sh.GetHType( ) );
     // need to use these! For making the trajectory
     // double shXx = shX->at( 0 ), shXy = shX->at( 1 ), shXz = shX->at( 2 );
-    // double shT = genie::HNL::FluxReader::generateVtxT( sh.GetParentPDG( ), sh.GetHType( ) );
+    // double shT = genie::HNL::HNLFluxReader::generateVtxT( sh.GetParentPDG( ), sh.GetHType( ) );
     double shT = 0.0; //placeholder
     shX->insert( shX->begin( ), shT ); // make into vector of 4 elements
     sh.SetProdVtx( (*shX) );
@@ -80,21 +80,21 @@ void genie::HNL::HNLDecayer::InitializeParticle( genie::HNL::SimpleHNL sh ) cons
     // set polarisation mag + dir
     int lPDG = 0;
     switch( sh.GetHType( ) ){
-	case genie::HNL::enums::kNone: 
+	case genie::HNL::HNLenums::kNone: 
 	    LOG( "HNLDecay", pERROR ) <<
 	      "\n *** The SimpleHNL object with name & index = " <<
 	      sh.GetName( ) << ", " << sh.GetIndex( ) <<
 	      " has unspecified coupling-type `kNone`. Exiting.";
 	    exit( 3 ); break;
-	case genie::HNL::enums::kNumu: case genie::HNL::enums::kNumubar:
+	case genie::HNL::HNLenums::kNumu: case genie::HNL::HNLenums::kNumubar:
 	    lPDG = ( std::abs( sh.GetParentPDG( ) ) != ::genie::kPdgMuon ) ?
 		::genie::kPdgMuon : ::genie::kPdgElectron; break;
-	case genie::HNL::enums::kNue: case genie::HNL::enums::kNuebar:
+	case genie::HNL::HNLenums::kNue: case genie::HNL::HNLenums::kNuebar:
 	    lPDG = ::genie::kPdgElectron; break;
     }
-    double polMag = genie::HNL::FluxReader::generatePolMag( sh.GetParentPDG( ), lPDG );
+    double polMag = genie::HNL::HNLFluxReader::generatePolMag( sh.GetParentPDG( ), lPDG );
     sh.SetPolMag( polMag );
-    std::vector< double > *polDir = genie::HNL::FluxReader::generatePolDir( sh.GetParentPDG( ), sh.GetHType( ) );
+    std::vector< double > *polDir = genie::HNL::HNLFluxReader::generatePolDir( sh.GetParentPDG( ), sh.GetHType( ) );
     sh.SetPolarisationDirection( polDir->at(0), polDir->at(1), polDir->at(2) );
     
 }
@@ -140,20 +140,20 @@ TClonesArray* genie::HNL::HNLDecayer::Decay( const DecayerInputs_t & inp ) const
     // we have all the valid channels, the CoM and lab lifetime
     
     // let's find out where this decays
-    genie::HNL::Selector::PropagateTilDecay( fSh );
+    genie::HNL::HNLSelector::PropagateTilDecay( fSh );
     
     // Let's pick pi \ell as the interesting thing, shall we?
 
-    std::vector< genie::HNL::enums::HNLDecay_t > * intChannels = new std::vector< genie::HNL::enums::HNLDecay_t >( ); // un-point!
-    genie::HNL::enums::HNLDecay_t piEll = ( fMuCoup == 0.0 ) ? genie::HNL::enums::kPiE : genie::HNL::enums::kPiMu;
+    std::vector< genie::HNL::HNLenums::HNLDecay_t > * intChannels = new std::vector< genie::HNL::HNLenums::HNLDecay_t >( ); // un-point!
+    genie::HNL::HNLenums::HNLDecay_t piEll = ( fMuCoup == 0.0 ) ? genie::HNL::HNLenums::kPiE : genie::HNL::HNLenums::kPiMu;
     intChannels->emplace_back( piEll );
-    const std::map< genie::HNL::enums::HNLDecay_t, double > gammaMap = fSh.GetValidChannels( );
-    std::map< genie::HNL::enums::HNLDecay_t, double > intMap = genie::HNL::Selector::SetInterestingChannels( (*intChannels), gammaMap );
+    const std::map< genie::HNL::HNLenums::HNLDecay_t, double > gammaMap = fSh.GetValidChannels( );
+    std::map< genie::HNL::HNLenums::HNLDecay_t, double > intMap = genie::HNL::HNLSelector::SetInterestingChannels( (*intChannels), gammaMap );
     fSh.SetInterestingChannels( intMap );
 
     // transform intMap gammas to probabilities
     // in this case, we have P( N --> pi \ell ) = 1;
-    std::map< genie::HNL::enums::HNLDecay_t, double > PMap = genie::HNL::Selector::GetProbabilities( intMap );
+    std::map< genie::HNL::HNLenums::HNLDecay_t, double > PMap = genie::HNL::HNLSelector::GetProbabilities( intMap );
 
     // do a random throw
     if( !fRng ) fRng = new TRandom3( );
@@ -163,20 +163,20 @@ TClonesArray* genie::HNL::HNLDecayer::Decay( const DecayerInputs_t & inp ) const
     /* if( exclusive ) return ... */
     
     // now select decay mode
-    genie::HNL::enums::HNLDecay_t selectedDecayChan = genie::HNL::Selector::SelectChannelInclusive( PMap, ranThrow );
+    genie::HNL::HNLenums::HNLDecay_t selectedDecayChan = genie::HNL::HNLSelector::SelectChannelInclusive( PMap, ranThrow );
 
     const int nd = 2; // 2 daughters for now, RETHERE later
     
     TDecayChannel * ch;
     int daughterPDG[ nd ] = { };
     switch( selectedDecayChan ){
-	case genie::HNL::enums::kPiMu:
+	case genie::HNL::HNLenums::kPiMu:
 	    daughterPDG[0] = ::genie::kPdgPiP;
 	    daughterPDG[1] = ::genie::kPdgMuon;
 	    ch = new TDecayChannel( 0, 0, 1.0, 2, daughterPDG ); // what does MatrixElementCode mean?
 	                                                         // also should BR = 1.0? I've chosen!
 	    break;
-	case genie::HNL::enums::kPiE:
+	case genie::HNL::HNLenums::kPiE:
 	    daughterPDG[0] = ::genie::kPdgPiP;
 	    daughterPDG[1] = ::genie::kPdgElectron;
 	    ch = new TDecayChannel( 0, 0, 1.0, 2, daughterPDG );
@@ -186,11 +186,11 @@ TClonesArray* genie::HNL::HNLDecayer::Decay( const DecayerInputs_t & inp ) const
 
     // now let's do some gosh darn kinematics.
     const double mh = genie::constants::kPionMass;
-    const double ml = ( selectedDecayChan == genie::HNL::enums::kPiE ) ? genie::constants::kElectronMass : genie::constants::kMuonMass;
+    const double ml = ( selectedDecayChan == genie::HNL::HNLenums::kPiE ) ? genie::constants::kElectronMass : genie::constants::kMuonMass;
 
     double Eh = 0.0, El = 0.0, thetaPol = 0.0;
-    genie::HNL::decayKinematics::TwoBodyEnergies( fMass, mh, ml, Eh, El );
-    genie::HNL::decayKinematics::TwoBodyAngle( fSh, mh, ml, thetaPol ); //assume isotropic polarisation for now, theta* = thetaPol
+    genie::HNL::HNLdecayKinematics::TwoBodyEnergies( fMass, mh, ml, Eh, El );
+    genie::HNL::HNLdecayKinematics::TwoBodyAngle( fSh, mh, ml, thetaPol ); //assume isotropic polarisation for now, theta* = thetaPol
 
     // this is in HNL rest frame. Let's make some nice TLorentzVectors and boost them.
     const double rPhi = fRng->Uniform( 0.0, 2.0 * genie::constants::kPi );

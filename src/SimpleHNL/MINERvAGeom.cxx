@@ -1,6 +1,6 @@
 #include "MINERvAGeom.h"
 
-std::vector< double > * genie::HNL::MINERvAGeom::GetEntryPointIDBox( const std::vector< double > * prodVtx,
+std::vector< double > * genie::HNL::HNLMINERvAGeom::GetEntryPointIDBox( const std::vector< double > * prodVtx,
 								     const std::vector< double > * momVec ){
   // very barebones implementation - box centred around ID centre
   // RETHERE - this has *nothing* to do with actual MINERvA geometry!
@@ -112,7 +112,7 @@ std::vector< double > * genie::HNL::MINERvAGeom::GetEntryPointIDBox( const std::
   return entryVec;
 }
 
-std::vector< double > * genie::HNL::MINERvAGeom::GetExitPointIDBox( const std::vector< double > * prodVtx,
+std::vector< double > * genie::HNL::HNLMINERvAGeom::GetExitPointIDBox( const std::vector< double > * prodVtx,
 								    const std::vector< double > * momVec ){
   // very barebones implementation - box centred around ID centre
   // RETHERE - this has *nothing* to do with actual MINERvA geometry!
@@ -224,7 +224,7 @@ std::vector< double > * genie::HNL::MINERvAGeom::GetExitPointIDBox( const std::v
   return exitVec;
 }
 
-std::vector< double > * genie::HNL::MINERvAGeom::GetEntryPointID( const std::vector< double > * prodVtx, const std::vector< double > * momVec ){
+std::vector< double > * genie::HNL::HNLMINERvAGeom::GetEntryPointID( const std::vector< double > * prodVtx, const std::vector< double > * momVec ){
   // checks against a hexagonal FV of ID size
 
   std::vector< double > * entryVec = new std::vector< double >();
@@ -380,7 +380,7 @@ std::vector< double > * genie::HNL::MINERvAGeom::GetEntryPointID( const std::vec
   return entryVec;
 }
 
-std::vector< double > * genie::HNL::MINERvAGeom::GetExitPointID( const std::vector< double > * prodVtx, const std::vector< double > * momVec ){
+std::vector< double > * genie::HNL::HNLMINERvAGeom::GetExitPointID( const std::vector< double > * prodVtx, const std::vector< double > * momVec ){
   // checks against a hexagonal FV of ID size
 
   std::vector< double > * exitVec = new std::vector< double >();

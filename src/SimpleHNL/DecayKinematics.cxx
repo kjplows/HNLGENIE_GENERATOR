@@ -17,22 +17,26 @@
 
 // extern variables defined here
 
-TRandom3 * genie::HNL::decayKinematics::fRngD;
-bool genie::HNL::decayKinematics::fIsRngInitD;
+TRandom3 * genie::HNL::HNLdecayKinematics::fRngD;
+bool genie::HNL::HNLdecayKinematics::fIsRngInitD;
 
-//using namespace genie::HNL::decayKinematics;
+//using namespace genie::HNL::HNLdecayKinematics;
 
-void genie::HNL::decayKinematics::initRandom( ){
+void genie::HNL::HNLdecayKinematics::initRandom( ){
     fRngD = new TRandom3(0); fIsRngInitD = true; 
 }
 
-void genie::HNL::decayKinematics::TwoBodyEnergies( const double mN, const double mh, const double ml,
+void genie::HNL::HNLdecayKinematics::clearRandom( ){
+  delete fRngD; fIsRngInitD = false;
+}
+
+void genie::HNL::HNLdecayKinematics::TwoBodyEnergies( const double mN, const double mh, const double ml,
 			    double &Eh, double &El ){
     Eh = ( mN*mN + mh*mh - ml*ml ) / ( 2.0 * mN );
     El = ( mN*mN - mh*mh + ml*ml ) / ( 2.0 * mN );
 }
 
-void genie::HNL::decayKinematics::TwoBodyAngle( genie::HNL::SimpleHNL sh, const double mh, const double ml,
+void genie::HNL::HNLdecayKinematics::TwoBodyAngle( genie::HNL::SimpleHNL sh, const double mh, const double ml,
 			 double &thetaPol ){
     if( mh == genie::constants::kPionMass && ( ml == genie::constants::kElectronMass || ml == genie::constants::kMuonMass ) ){
 	// construct differential decay width. Get pol info from sh
@@ -42,7 +46,7 @@ void genie::HNL::decayKinematics::TwoBodyAngle( genie::HNL::SimpleHNL sh, const 
 	const double P = sh.GetPolarisationMag( ); // note this is signed! For M --> 0 P --> -1
 
 	double thePreFac = 0.0, theCnstPart = 0.0, thePropPart = 0.0;
-	genie::HNL::Selector::Diff1Width_PiAndLepton_CosTheta( M, Ua42, ml, thePreFac, theCnstPart, thePropPart );
+	genie::HNL::HNLSelector::Diff1Width_PiAndLepton_CosTheta( M, Ua42, ml, thePreFac, theCnstPart, thePropPart );
 	thePropPart *= P;
 	// now construct const char * and const double[] for formula & params
 	// ExtractVar will deal with this
@@ -66,7 +70,7 @@ void genie::HNL::decayKinematics::TwoBodyAngle( genie::HNL::SimpleHNL sh, const 
 }
 
 // returns full kinematic information about both products in lab frame
-void genie::HNL::decayKinematics::TwoBodyKinematics( genie::HNL::SimpleHNL sh, const double mh, const double ml,
+void genie::HNL::HNLdecayKinematics::TwoBodyKinematics( genie::HNL::SimpleHNL sh, const double mh, const double ml,
 			      double &Eh, double &El,
 			      double &slx, double &sly, double &slz,
 			      double &shx, double &shy, double &shz ){
@@ -112,7 +116,7 @@ void genie::HNL::decayKinematics::TwoBodyKinematics( genie::HNL::SimpleHNL sh, c
 }
 
 // define characteristic rest frame axis
-const TVector3* genie::HNL::decayKinematics::RestFrameAxis( genie::HNL::SimpleHNL sh ){
+const TVector3* genie::HNL::HNLdecayKinematics::RestFrameAxis( genie::HNL::SimpleHNL sh ){
     /* We make a choice of axis for reference in rest frame.
        I choose this to be separation vector: decay vtx to detector centre.
 
@@ -122,7 +126,7 @@ const TVector3* genie::HNL::decayKinematics::RestFrameAxis( genie::HNL::SimpleHN
     
     const std::vector< double > betaVec     = sh.GetBetaVec( );
     const std::vector< double > dk4V        = sh.GetDecay4VX( );
-    const std::vector< double > * minCentre = genie::HNL::MINERvAGeom::GetMINERvACentre( );
+    const std::vector< double > * minCentre = genie::HNL::HNLMINERvAGeom::GetMINERvACentre( );
 	
     const double sx = minCentre->at(0) - dk4V.at(1);
     const double sy = minCentre->at(1) - dk4V.at(2);
@@ -134,7 +138,7 @@ const TVector3* genie::HNL::decayKinematics::RestFrameAxis( genie::HNL::SimpleHN
 }
 
 // translate TLorentzVector between rest <--> lab frames
-TLorentzVector* genie::HNL::decayKinematics::RestToLabFrame( genie::HNL::SimpleHNL sh, TLorentzVector* rest4V ){
+TLorentzVector* genie::HNL::HNLdecayKinematics::RestToLabFrame( genie::HNL::SimpleHNL sh, TLorentzVector* rest4V ){
     // first, HNL betaVec in lab frame
     const std::vector< double > betaVec = sh.GetBetaVec( );
     const TVector3 * betaTVec = new TVector3( -betaVec.at(0), -betaVec.at(1), -betaVec.at(2) ); // rest --> lab boosts by -beta
@@ -145,7 +149,7 @@ TLorentzVector* genie::HNL::decayKinematics::RestToLabFrame( genie::HNL::SimpleH
     return lab4V;
 }
 
-TLorentzVector* genie::HNL::decayKinematics::LabToRestFrame( genie::HNL::SimpleHNL sh, TLorentzVector* lab4V ){
+TLorentzVector* genie::HNL::HNLdecayKinematics::LabToRestFrame( genie::HNL::SimpleHNL sh, TLorentzVector* lab4V ){
     // first, HNL betaVec in lab frame
     const std::vector< double > betaVec = sh.GetBetaVec( );
     const TVector3 * betaTVec = new TVector3( betaVec.at(0), betaVec.at(1), betaVec.at(2) );     // lab --> rest boosts by +beta
@@ -156,7 +160,7 @@ TLorentzVector* genie::HNL::decayKinematics::LabToRestFrame( genie::HNL::SimpleH
     return rest4V;
 }
 
-const double genie::HNL::decayKinematics::ExtractVarFromDifferentialGamma( const std::string name, const char * formChar,
+const double genie::HNL::HNLdecayKinematics::ExtractVarFromDifferentialGamma( const std::string name, const char * formChar,
 					      const double x1, const double x2,
 					      const double params[],
 					      const int nSteps ){

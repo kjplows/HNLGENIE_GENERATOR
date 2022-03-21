@@ -140,12 +140,12 @@ namespace HNL {
 	mutable bool fIsIsotropicPol; // non-weighted input seems to give isotropic polVec ==> no angular dependence of products in HNL rest frame!
 	mutable bool fIsExclusive; // inclusive v exclusive decay mode
 	
-	mutable double fMass; const double fDefMass = genie::HNL::defaults::HNLDefaultMass;
-	mutable double fECoup; const double fDefECoup = genie::HNL::defaults::HNLDefaultECoup;
-	mutable double fMuCoup; const double fDefMuCoup = genie::HNL::defaults::HNLDefaultMuCoup; // assuming pseudo-unitarity!
-	mutable double fTauCoup; const double fDefTauCoup = genie::HNL::defaults::HNLDefaultTauCoup;
+	mutable double fMass; const double fDefMass = genie::HNL::HNLdefaults::HNLDefaultMass;
+	mutable double fECoup; const double fDefECoup = genie::HNL::HNLdefaults::HNLDefaultECoup;
+	mutable double fMuCoup; const double fDefMuCoup = genie::HNL::HNLdefaults::HNLDefaultMuCoup; // assuming pseudo-unitarity!
+	mutable double fTauCoup; const double fDefTauCoup = genie::HNL::HNLdefaults::HNLDefaultTauCoup;
 	mutable std::string fCoupConf; 
-	mutable genie::HNL::enums::coupIdx_t fCoupIdx; // which coupling configuration?
+	mutable genie::HNL::HNLenums::coupIdx_t fCoupIdx; // which coupling configuration?
 
 	mutable TRandom3 *fRng;
 

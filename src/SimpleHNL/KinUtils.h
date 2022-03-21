@@ -1,7 +1,7 @@
 //----------------------------------------------------------------------------
 /*!
 
-\namespace  genie::HNL::utils
+\namespace  genie::HNL::HNLutils
 
 \brief      Useful kinematic functions
 
@@ -23,7 +23,7 @@
 namespace genie{
 namespace HNL {
 
-    namespace utils {
+    namespace HNLutils {
 
 	inline double MassX( double m1, double m2 ) {
 	    if( m2 <= 0. || m1 < 0.) { LOG( "SimpleHNL", pERROR ) << "BRFunctions::MassX:: Illegal masses m1 = " << m1 << ", m2 = " << m2; exit( 3 ); }
@@ -34,7 +34,7 @@ namespace HNL {
 	    return x*x + y*y + z*z - 2. * ( x*y + y*z + z*x );
 	}
 	
-    } // namespace utils
+    } // namespace HNLutils
 
 } //namespace HNL
 } //namespace genie

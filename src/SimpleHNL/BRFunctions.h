@@ -4,7 +4,7 @@
   Definitions of the auxiliary functions needed
   to calculate the decay widths of HNL to various channels
 
-\namespace  genie::HNL::Selector
+\namespace  genie::HNL::HNLSelector
 
 \brief      Decay widths of HNL
 
@@ -42,7 +42,7 @@
 namespace genie {
 namespace HNL {
 
-    namespace Selector {
+    namespace HNLSelector {
 
 	// physical constants, PDG 2021
 	static const double s2w = 0.22767; // Weinberg mixing angle consistent with genie kMw, kMz
@@ -125,7 +125,7 @@ namespace HNL {
 					      double &theCnstPart,
 					      double &thePropPart );
     
-    } // namespace Selector
+    } // namespace HNLSelector
 
 } // namespace HNL
 } // namespace genie

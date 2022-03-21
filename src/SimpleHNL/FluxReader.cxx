@@ -11,8 +11,8 @@
 
 #include "FluxReader.h"
 
-using namespace genie::HNL::FluxReader;
-using namespace genie::HNL::enums;
+using namespace genie::HNL::HNLFluxReader;
+using namespace genie::HNL::HNLenums;
 
 /* Input flux files should be organised in the following manner:
    
@@ -34,34 +34,34 @@ using namespace genie::HNL::enums;
 
 // extern variables defined here
 
-std::string genie::HNL::FluxReader::fPath;
-genie::HNL::enums::parent_t genie::HNL::FluxReader::fParent;
-genie::HNL::enums::nutype_t genie::HNL::FluxReader::fNuType;
+std::string genie::HNL::HNLFluxReader::fPath;
+genie::HNL::HNLenums::parent_t genie::HNL::HNLFluxReader::fParent;
+genie::HNL::HNLenums::nutype_t genie::HNL::HNLFluxReader::fNuType;
 
-double genie::HNL::FluxReader::fmN;
-double genie::HNL::FluxReader::fUe;
-double genie::HNL::FluxReader::fUm;
-double genie::HNL::FluxReader::fUt;
+double genie::HNL::HNLFluxReader::fmN;
+double genie::HNL::HNLFluxReader::fUe;
+double genie::HNL::HNLFluxReader::fUm;
+double genie::HNL::HNLFluxReader::fUt;
 
-int genie::HNL::FluxReader::fPDG;
-int genie::HNL::FluxReader::fParPDG;
+int genie::HNL::HNLFluxReader::fPDG;
+int genie::HNL::HNLFluxReader::fParPDG;
 
-bool genie::HNL::FluxReader::fMaj;
+bool genie::HNL::HNLFluxReader::fMaj;
 
-TH1D * genie::HNL::FluxReader::fMasterFlux;
+TH1D * genie::HNL::HNLFluxReader::fMasterFlux;
 
-std::string genie::HNL::FluxReader::selectCoup( const double Ue42, const double Umu42, const double Ut42 ){
+std::string genie::HNL::HNLFluxReader::selectCoup( const double Ue42, const double Umu42, const double Ut42 ){
     // I am not sensitive to the tau coupling so only Ue42, Umu42 matter
 
     std::string theCoups = std::string("Init");
     
-    if( Ue42 < 0 || Umu42 < 0 || Ut42 < 0 ){ std::cerr << "genie::HNL::FluxReader: Illegal couplings: e mu t = " << Ue42 << " " << Umu42 << " " << Ut42 << std::endl; exit(3); }
-    if( Ue42 + Umu42 == 0.0 ){ std::cerr << "genie::HNL::FluxReader: Warning - HNL has no electron or muon couplings. We aren't sensitive to tau! Exiting" << std::endl; exit(4); }
+    if( Ue42 < 0 || Umu42 < 0 || Ut42 < 0 ){ std::cerr << "genie::HNL::HNLFluxReader: Illegal couplings: e mu t = " << Ue42 << " " << Umu42 << " " << Ut42 << std::endl; exit(3); }
+    if( Ue42 + Umu42 == 0.0 ){ std::cerr << "genie::HNL::HNLFluxReader: Warning - HNL has no electron or muon couplings. We aren't sensitive to tau! Exiting" << std::endl; exit(4); }
 
     if( Ue42 == Umu42 ){ theCoups = std::string("EqualCouplings"); }
     else if( Ue42 == 0.0 ){ theCoups = std::string("MuonOnly"); }
     else if( Umu42 == 0.0 ){ theCoups = std::string("ElectronOnly"); }
-    else{ std::cerr << "genie::HNL::FluxReader::selectCoup: Unknown coupling" <<
+    else{ std::cerr << "genie::HNL::HNLFluxReader::selectCoup: Unknown coupling" <<
 	    "configuration! Couplings e mu = " << Ue42 << " " << Umu42 << ", exiting" << std::endl; exit(4); }
 
     fUe = Ue42; fUm = Umu42; fUt = Ut42;
@@ -69,7 +69,7 @@ std::string genie::HNL::FluxReader::selectCoup( const double Ue42, const double 
     return theCoups;
 }
 
-int genie::HNL::FluxReader::selectMass( const double mN ){
+int genie::HNL::HNLFluxReader::selectMass( const double mN ){
     /// move mass to closest mass hypothesis
 
     const massHyp_t massesHyp[] = {
@@ -96,7 +96,7 @@ int genie::HNL::FluxReader::selectMass( const double mN ){
     }
 
     if( mN < 0.0 || mN > masses[ nMasses ] ){
-	std::cerr << "genie::HNL::FluxReader::selectMass: Illegal mass mN = " <<
+	std::cerr << "genie::HNL::HNLFluxReader::selectMass: Illegal mass mN = " <<
 	    mN << std::endl; exit(3); }
 
     int mp = -1; fmN = 0.0;
@@ -122,7 +122,7 @@ int genie::HNL::FluxReader::selectMass( const double mN ){
     
 }
 
-void genie::HNL::FluxReader::selectFile( const std::string strconf,
+void genie::HNL::HNLFluxReader::selectFile( const std::string strconf,
 					 const double Ue42, const double Umu42, const double Ut42,
 					 const double mN ){
     std::string filePath = std::string( "" );
@@ -134,7 +134,7 @@ void genie::HNL::FluxReader::selectFile( const std::string strconf,
     fPath = filePath;
 }
 
-void genie::HNL::FluxReader::selectParent( const int parPDG ){
+void genie::HNL::HNLFluxReader::selectParent( const int parPDG ){
     fParent = kNoPar; fParPDG = parPDG;
     
     if( std::abs( parPDG ) == ::genie::kPdgPiP ) fParent = kPion;
@@ -142,11 +142,11 @@ void genie::HNL::FluxReader::selectParent( const int parPDG ){
     else if( std::abs( parPDG ) == ::genie::kPdgMuon ) fParent = kMuon;
     else if( std::abs( parPDG ) == ::genie::kPdgK0L ) fParent = kNeuk;
     else{ LOG( "SimpleHNL", pERROR ) << 
-	  "genie::HNL::FluxReader::selectFile: Unknown parent with PDG code " <<
+	  "genie::HNL::HNLFluxReader::selectFile: Unknown parent with PDG code " <<
 	  parPDG; exit( 3 ); }
 }
 
-void genie::HNL::FluxReader::selectNuType( const int hType ){
+void genie::HNL::HNLFluxReader::selectNuType( const int hType ){
     fNuType = kNone;
     if( hType == 1 ){ fNuType == kNumu; }
     else if( hType == 2 ){ fNuType == kNumubar; }
@@ -154,7 +154,7 @@ void genie::HNL::FluxReader::selectNuType( const int hType ){
     else if( hType == 4 ){ fNuType == kNuebar; }
 }
 
-TH1F * genie::HNL::FluxReader::getFluxHist1F( std::string fin, std::string hName,
+TH1F * genie::HNL::HNLFluxReader::getFluxHist1F( std::string fin, std::string hName,
 					      parent_t par, nutype_t HType ){
     // flux file contains 4 dirs: numu, numubar, nue, nuebar. Each has flux + helper hists
     TFile *f = TFile::Open( fin.c_str() );
@@ -169,7 +169,7 @@ TH1F * genie::HNL::FluxReader::getFluxHist1F( std::string fin, std::string hName
 	case kNuebar:  strType = std::string( "nuebar" ); break;
     }
     TDirectory *deepDir = baseDir->GetDirectory( strType.c_str( ) );
-    if( deepDir == NULL ){ std::cerr << "genie::HNL::FluxReader::getFluxHist:" <<
+    if( deepDir == NULL ){ std::cerr << "genie::HNL::HNLFluxReader::getFluxHist:" <<
 	    " Could not find " << "directory with name \"" << strType.c_str() <<
 	    "\". Exiting" << std::endl;
 	exit(3); }
@@ -184,7 +184,7 @@ TH1F * genie::HNL::FluxReader::getFluxHist1F( std::string fin, std::string hName
 	case kNeuk: strHist.append("_neuk"); break;
     }
     if( !( deepDir->GetListOfKeys()->Contains( strHist.c_str() ) ) ){
-	std::cerr << "genie::HNL::FluxReader::getFluxHist: Could not find histogram " <<
+	std::cerr << "genie::HNL::HNLFluxReader::getFluxHist: Could not find histogram " <<
 	    " with name \"" << strHist.c_str() << "\" in path\n" <<
 	    deepDir->GetPath() << " . Exiting" << std::endl; exit(3); }
     
@@ -194,7 +194,7 @@ TH1F * genie::HNL::FluxReader::getFluxHist1F( std::string fin, std::string hName
 }
 
 // overloaded method, linker likes it better this way
-TH3D * genie::HNL::FluxReader::getFluxHist3D( std::string fin, std::string hName,
+TH3D * genie::HNL::HNLFluxReader::getFluxHist3D( std::string fin, std::string hName,
 					      parent_t par, nutype_t HType ){
     TFile *f = TFile::Open( fin.c_str() );
 
@@ -211,7 +211,7 @@ TH3D * genie::HNL::FluxReader::getFluxHist3D( std::string fin, std::string hName
     */
     TDirectory *deepDir = baseDir;
       //baseDir->GetDirectory( strType.c_str( ) );
-    if( deepDir == NULL ){ std::cerr << "genie::HNL::FluxReader::getFluxHist:" <<
+    if( deepDir == NULL ){ std::cerr << "genie::HNL::HNLFluxReader::getFluxHist:" <<
 	    " Could not find " << "directory with name \"" << strType.c_str() <<
 	    "\". Exiting" << std::endl;
 	exit(3); }
@@ -228,7 +228,7 @@ TH3D * genie::HNL::FluxReader::getFluxHist3D( std::string fin, std::string hName
     }
     */
     if( !( deepDir->GetListOfKeys()->Contains( strHist.c_str() ) ) ){
-	std::cerr << "genie::HNL::FluxReader::getFluxHist: Could not find histogram " <<
+	std::cerr << "genie::HNL::HNLFluxReader::getFluxHist: Could not find histogram " <<
 	    " with name \"" << strHist.c_str() << "\" in path\n" <<
 	    deepDir->GetPath() << " . Exiting" << std::endl; exit(3); }
 
@@ -237,7 +237,7 @@ TH3D * genie::HNL::FluxReader::getFluxHist3D( std::string fin, std::string hName
     return histPtr;
 }
 
-double genie::HNL::FluxReader::generatePolMag( const int lPDG, const int parPDG ){
+double genie::HNL::HNLFluxReader::generatePolMag( const int lPDG, const int parPDG ){
     /* Assumes 2-body decay. 
        If parent is neuk then assume we have kaon polarisation
        If parent is muon then assume we have pion polarisation
@@ -248,33 +248,33 @@ double genie::HNL::FluxReader::generatePolMag( const int lPDG, const int parPDG 
 
     if( std::abs( lPDG ) == ::genie::kPdgElectron ){ ml = genie::constants::kElectronMass; }
     else if( std::abs( lPDG ) == ::genie::kPdgMuon ){ ml = genie::constants::kMuonMass; }
-    else{ std::cerr << "genie::HNL::FluxReader::generatePolMag: Unknown lepton PDG = " <<
+    else{ std::cerr << "genie::HNL::HNLFluxReader::generatePolMag: Unknown lepton PDG = " <<
 	    lPDG << std::endl; exit(3); }
 
     if( std::abs( parPDG ) == ::genie::kPdgPiP ){ mpar = genie::constants::kPionMass; }
     else if( std::abs( parPDG ) == ::genie::kPdgKP ){ mpar = genie::constants::kKaonMass; }
     else if( std::abs( parPDG ) == ::genie::kPdgMuon ){
 	mpar = genie::constants::kPionMass;
-	std::cout << "genie::HNL::FluxReader::generatePolMag: WARNING: \n" <<
+	std::cout << "genie::HNL::HNLFluxReader::generatePolMag: WARNING: \n" <<
 	    "Muon parent requested, changing polarisation to pion equivalent. \n" <<
 	    "Also note that the lepton will be set to electron. \n" <<
 	    "This is very crude, unphysical behaviour, and it should be fixed." <<
 	    std::endl; } //! RETHERE
     else if( std::abs( parPDG ) == ::genie::kPdgK0L ){
 	mpar = genie::constants::kKaonMass;
-	std::cout << "genie::HNL::FluxReader::generatePolMag: WARNING: \n" <<
+	std::cout << "genie::HNL::HNLFluxReader::generatePolMag: WARNING: \n" <<
 	    "Neuk parent requested, changing polarisation to kaon equivalent. \n" <<
 	    "This is very crude, unphysical behaviour, and it should be fixed." <<
 	    std::endl; } //! RETHERE
-    else{ std::cerr << "genie::HNL::FluxReader::generatePolMag: Unknown parent PDG = " <<
+    else{ std::cerr << "genie::HNL::HNLFluxReader::generatePolMag: Unknown parent PDG = " <<
 	    parPDG << std::endl; exit(3); }
 
     double num = ( ml*ml - fmN*fmN ) *
-	std::sqrt( genie::HNL::utils::Kallen( mpar*mpar, fmN*fmN, ml*ml ) );
+	std::sqrt( genie::HNL::HNLutils::Kallen( mpar*mpar, fmN*fmN, ml*ml ) );
     double den = mpar*mpar * ( ml*ml + fmN*fmN ) -
 	std::pow( ml*ml - fmN*fmN , 2.0 );
 
-    if( std::abs( num / den ) > 1.0 ){ std::cerr << "genie::HNL::FluxReader::" <<
+    if( std::abs( num / den ) > 1.0 ){ std::cerr << "genie::HNL::HNLFluxReader::" <<
 	    "generatePolMag: Warning: Polarisation magnitude over 1.0 . Setting to 1.0 ." <<
 	    std::endl;
 	num *= std::abs( den / num ); }
@@ -282,7 +282,7 @@ double genie::HNL::FluxReader::generatePolMag( const int lPDG, const int parPDG 
     return num / den;
 }
 
-std::vector< double > * genie::HNL::FluxReader::generatePolDir( const int parPDG, const int HType ){
+std::vector< double > * genie::HNL::HNLFluxReader::generatePolDir( const int parPDG, const int HType ){
     // coproduced lepton is always mu/e if HType == nu{mu/e}(bar)
     // and always e if parPDG == mu
 
@@ -306,12 +306,12 @@ std::vector< double > * genie::HNL::FluxReader::generatePolDir( const int parPDG
     return polDir;
 }
 
-double genie::HNL::FluxReader::generateVtxT( const int parPDG, const int HType ){
-  LOG( "SimpleHNL", pDEBUG ) << "genie::HNL::FluxReader::generateVtxT:: Dummy method! WIP";
+double genie::HNL::HNLFluxReader::generateVtxT( const int parPDG, const int HType ){
+  LOG( "SimpleHNL", pDEBUG ) << "genie::HNL::HNLFluxReader::generateVtxT:: Dummy method! WIP";
 }
 // need to think about this more!
 
-std::vector< double > * genie::HNL::FluxReader::generateVtx3X( const int parPDG, const int HType ){
+std::vector< double > * genie::HNL::HNLFluxReader::generateVtx3X( const int parPDG, const int HType ){
     // first, select parent, nutype and load histo
     std::string vtxHistName = std::string("vtxHist");
     selectParent( parPDG );
@@ -331,7 +331,7 @@ std::vector< double > * genie::HNL::FluxReader::generateVtx3X( const int parPDG,
     return vtxDir;
 }
 
-std::vector< double > * genie::HNL::FluxReader::generateVtx3X( TH3D * vtxHist ){
+std::vector< double > * genie::HNL::HNLFluxReader::generateVtx3X( TH3D * vtxHist ){
   double ux = 0.0, uy = 0.0, uz = 0.0;
   vtxHist->GetRandom3( ux, uy, uz );
   
@@ -343,7 +343,7 @@ std::vector< double > * genie::HNL::FluxReader::generateVtx3X( TH3D * vtxHist ){
   return vtxDir;
 }
 
-double genie::HNL::FluxReader::generateVtxE( const int parPDG, const int HType ){
+double genie::HNL::HNLFluxReader::generateVtxE( const int parPDG, const int HType ){
     // first, select parent, nutype and load histo
     std::string eneHistName = std::string("eneHist");
     selectParent( parPDG );
@@ -357,7 +357,7 @@ double genie::HNL::FluxReader::generateVtxE( const int parPDG, const int HType )
     return E;
 }
 
-std::vector< double > * genie::HNL::FluxReader::generateVtx3P( const int parPDG, const int HType,
+std::vector< double > * genie::HNL::HNLFluxReader::generateVtx3P( const int parPDG, const int HType,
 							       const double inE ){
     // first, select parent, nutype and load histo
     std::string momHistName = std::string("momHist");
@@ -384,17 +384,17 @@ std::vector< double > * genie::HNL::FluxReader::generateVtx3P( const int parPDG,
     return momVec;
 }
 
-genie::HNL::SimpleHNL genie::HNL::FluxReader::generateHNL( ){
+genie::HNL::SimpleHNL genie::HNL::HNLFluxReader::generateHNL( ){
   return genie::HNL::SimpleHNL( "HNL", 0, genie::kPdgHNL, ::genie::kPdgKP, fmN, fUe, fUm, fUt, false );
 }
 
-genie::HNL::SimpleHNL genie::HNL::FluxReader::generateHNL( const int PDG, const int parPDG,
+genie::HNL::SimpleHNL genie::HNL::HNLFluxReader::generateHNL( const int PDG, const int parPDG,
 							   const double mN, const double Ue42,
 							   const double Umu42, const double Ut42 ){
     return genie::HNL::SimpleHNL( "HNL", 0, PDG, parPDG, mN, Ue42, Umu42, Ut42, false );
 }
 
-void genie::HNL::FluxReader::setFluxInfo( genie::HNL::SimpleHNL sh ){
+void genie::HNL::HNLFluxReader::setFluxInfo( genie::HNL::SimpleHNL sh ){
     const int shPDG    = sh.GetPDG( ); fPDG = shPDG;
     const int shParPDG = sh.GetParentPDG( ); fParPDG = shParPDG;
 

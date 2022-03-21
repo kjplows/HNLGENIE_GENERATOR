@@ -1,48 +1,48 @@
 #include "BRFunctions.h"
 
 // Get Coloma et al's form factor functions
-double genie::HNL::Selector::GetColomaF1( double x ) {
+double genie::HNL::HNLSelector::GetColomaF1( double x ) {
   if( x < 0. || x > 0.5 ) { LOG( "SimpleHNL", pERROR ) << "BRFunctions::GetColomaF1:: Illegal x = " << x; exit( 3 ); }
   if( x == 0.5 ) return 0.;
-  int i = x/genie::HNL::Selector::PARTWIDTH;
-  if( x - i*genie::HNL::Selector::PARTWIDTH ==0 ) return genie::HNL::Selector::ColomaF1[i];
-  return 1./2. * ( genie::HNL::Selector::ColomaF1[i] + genie::HNL::Selector::ColomaF1[i+1] );
+  int i = x/genie::HNL::HNLSelector::PARTWIDTH;
+  if( x - i*genie::HNL::HNLSelector::PARTWIDTH ==0 ) return genie::HNL::HNLSelector::ColomaF1[i];
+  return 1./2. * ( genie::HNL::HNLSelector::ColomaF1[i] + genie::HNL::HNLSelector::ColomaF1[i+1] );
 }
 
-double genie::HNL::Selector::GetColomaF2( double x ) {
+double genie::HNL::HNLSelector::GetColomaF2( double x ) {
   if( x < 0. || x > 0.5 ) { LOG( "SimpleHNL", pERROR ) << "BRFunctions::GetColomaF2:: Illegal x = " << x; exit( 3 ); }
   if( x == 0.5 ) return 0.;
-  int i = x/genie::HNL::Selector::PARTWIDTH;
-  if( x - i*genie::HNL::Selector::PARTWIDTH==0 ) return genie::HNL::Selector::ColomaF2[i];
-  return 1./2. * ( genie::HNL::Selector::ColomaF2[i] + genie::HNL::Selector::ColomaF2[i+1] );
+  int i = x/genie::HNL::HNLSelector::PARTWIDTH;
+  if( x - i*genie::HNL::HNLSelector::PARTWIDTH==0 ) return genie::HNL::HNLSelector::ColomaF2[i];
+  return 1./2. * ( genie::HNL::HNLSelector::ColomaF2[i] + genie::HNL::HNLSelector::ColomaF2[i+1] );
 }
 
 // total decay widths, various channels
-double genie::HNL::Selector::DWidth_PiZeroAndNu( const double M, const double Ue42, const double Umu42, const double Ut42 ) {
-  const double x       = genie::HNL::utils::MassX( mPi0, M );
+double genie::HNL::HNLSelector::DWidth_PiZeroAndNu( const double M, const double Ue42, const double Umu42, const double Ut42 ) {
+  const double x       = genie::HNL::HNLutils::MassX( mPi0, M );
   const double preFac  = GF2 * M*M*M / ( 32. * pi );
   const double kinPart = ( 1. - x*x ) * ( 1. - x*x );
   return preFac * ( Ue42 + Umu42 + Ut42 ) * fpi2 * kinPart;
 }
 
-double genie::HNL::Selector::DWidth_PiAndLepton( const double M, const double Ua42, const double ma ) {
-  const double xPi     = genie::HNL::utils::MassX( mPi, M );
-  const double xLep    = genie::HNL::utils::MassX( ma, M );
+double genie::HNL::HNLSelector::DWidth_PiAndLepton( const double M, const double Ua42, const double ma ) {
+  const double xPi     = genie::HNL::HNLutils::MassX( mPi, M );
+  const double xLep    = genie::HNL::HNLutils::MassX( ma, M );
   const double preFac  = GF2 * M*M*M / ( 16. * pi );
-  const double kalPart = TMath::Sqrt( genie::HNL::utils::Kallen( 1, xPi*xPi, xLep*xLep ) );
+  const double kalPart = TMath::Sqrt( genie::HNL::HNLutils::Kallen( 1, xPi*xPi, xLep*xLep ) );
   const double othPart = 1. - xPi*xPi - xLep*xLep * ( 2. + xPi*xPi - xLep*xLep );
 
   return preFac * fpi2 * Ua42 * Vud2 * kalPart * othPart;
 }
 
-double genie::HNL::Selector::DWidth_Invisible( const double M, const double Ue42, const double Umu42, const double Ut42 ) {
+double genie::HNL::HNLSelector::DWidth_Invisible( const double M, const double Ue42, const double Umu42, const double Ut42 ) {
   const double preFac = GF2 * TMath::Power( M, 5. ) / ( 192. * pi*pi*pi );
   return preFac * ( Ue42 + Umu42 + Ut42 );
 }
 
-double genie::HNL::Selector::DWidth_SameLepton( const double M, const double Ue42, const double Umu42, const double Ut42, const double mb, bool bIsMu ) {
+double genie::HNL::HNLSelector::DWidth_SameLepton( const double M, const double Ue42, const double Umu42, const double Ut42, const double mb, bool bIsMu ) {
   const double preFac = GF2 * TMath::Power( M, 5. ) / ( 192. * pi*pi*pi );
-  const double x      = genie::HNL::utils::MassX( mb, M );
+  const double x      = genie::HNL::HNLutils::MassX( mb, M );
   const double f1     = GetColomaF1( x );
   const double f2     = GetColomaF2( x );
   const double C1Part = ( Ue42 + Umu42 + Ut42 ) * f1 * BR_C1;
@@ -52,9 +52,9 @@ double genie::HNL::Selector::DWidth_SameLepton( const double M, const double Ue4
   return preFac * ( C1Part + C2Part + D1Part + D2Part );
 }
 
-double genie::HNL::Selector::DWidth_DiffLepton( const double M, const double Ua42, const double Ub42, const int IsMajorana ) {
+double genie::HNL::HNLSelector::DWidth_DiffLepton( const double M, const double Ua42, const double Ub42, const int IsMajorana ) {
   const double preFac = GF2 * TMath::Power( M, 5. ) / ( 192. * pi*pi*pi );
-  const double x = genie::HNL::utils::MassX( mMu, M );
+  const double x = genie::HNL::HNLutils::MassX( mMu, M );
   const double kinPol = 1. - 8. * x*x + 8. * TMath::Power( x, 6. ) - TMath::Power( x, 8. );
   const double kinLn  = -12. * TMath::Power( x, 4. ) * TMath::Log( x*x );
   const double kinPart = kinPol + kinLn;
@@ -63,7 +63,7 @@ double genie::HNL::Selector::DWidth_DiffLepton( const double M, const double Ua4
 }
 
 // note that these BR are very very tiny.
-double genie::HNL::Selector::DWidth_PiPi0Ell( const double M, const double ml,
+double genie::HNL::HNLSelector::DWidth_PiPi0Ell( const double M, const double ml,
 					      const double Ue42, const double Umu42, const double Ut42,
 					      const bool isElectron)
 {
@@ -149,7 +149,7 @@ double genie::HNL::Selector::DWidth_PiPi0Ell( const double M, const double ml,
 
 // *especially* this channel, there's N4 in the propagator so it emits *both* the pi-zeros!!!
 // It is subleading in |U_\ell 4|^2, therefore not important to get this exactly right
-double genie::HNL::Selector::DWidth_Pi0Pi0Nu( const double M,
+double genie::HNL::HNLSelector::DWidth_Pi0Pi0Nu( const double M,
 					      const double Ue42, const double Umu42, const double Ut42 )
 { 
   const double preFac = fpi2 * fpi2 * GF2 * GF2 * std::pow( M, 5.0 ) / ( 64.0 * pi*pi*pi );
@@ -221,16 +221,16 @@ double genie::HNL::Selector::DWidth_Pi0Pi0Nu( const double M,
 
 // differential decay width for HNL channels!
 
-void genie::HNL::Selector::Diff1Width_PiAndLepton_CosTheta( const double M, const double Ua42,
+void genie::HNL::HNLSelector::Diff1Width_PiAndLepton_CosTheta( const double M, const double Ua42,
 							    const double ml,
 							    double &thePreFac, 
 							    double &theCnstPart,
 							    double &thePropPart ) {
   const double preFac   = 1. / ( 32.0 * pi * M*M*M );
-  const double sqrKal   = std::sqrt( genie::HNL::utils::Kallen( M*M, mPi*mPi, ml*ml ) );
+  const double sqrKal   = std::sqrt( genie::HNL::HNLutils::Kallen( M*M, mPi*mPi, ml*ml ) );
   const double formPart = fpi2 * Ua42 * Vud2 * GF2;
   const double parConst = std::pow( ( M*M - ml*ml ), 2.0 ) - mPi*mPi*( M*M + ml*ml );
-  const double parCoeff = -1.0 * ( M*M - ml*ml ) * std::sqrt( genie::HNL::utils::Kallen( M*M, mPi*mPi, ml*ml ) );
+  const double parCoeff = -1.0 * ( M*M - ml*ml ) * std::sqrt( genie::HNL::HNLutils::Kallen( M*M, mPi*mPi, ml*ml ) );
   
   thePreFac   = preFac * sqrKal * formPart;
   theCnstPart = parConst;
@@ -238,7 +238,7 @@ void genie::HNL::Selector::Diff1Width_PiAndLepton_CosTheta( const double M, cons
 }
 
 // formula for N --> pi pi0 ell decay rate
-double genie::HNL::Selector::PiPi0EllForm( double *x, double *par ){
+double genie::HNL::HNLSelector::PiPi0EllForm( double *x, double *par ){
     double MN = par[0];
     double MMu = par[1];
     double MPi = par[2];
@@ -266,7 +266,7 @@ double genie::HNL::Selector::PiPi0EllForm( double *x, double *par ){
 }
 
 // formula for N --> pi0 pi0 nu decay rate
-double genie::HNL::Selector::Pi0Pi0NuForm( double *x, double *par ){
+double genie::HNL::HNLSelector::Pi0Pi0NuForm( double *x, double *par ){
     double MN = par[0];
     double MPi0 = par[1];
     

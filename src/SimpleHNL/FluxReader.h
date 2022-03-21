@@ -9,7 +9,7 @@
 
   Solution: Read in couplings directly from the *file name*. 
 
-\namespace  genie::HNL::FluxReader
+\namespace  genie::HNL::HNLFluxReader
 
 \brief      Reads in flux at MINERvA centre
 
@@ -50,11 +50,11 @@ namespace HNL{
 
     class SimpleHNL;
 
-    namespace FluxReader{
+    namespace HNLFluxReader{
 
 	extern std::string fPath; // flux file to poke
-	extern genie::HNL::enums::parent_t fParent; // which component of the flux to analyse
-	extern genie::HNL::enums::nutype_t fNuType; // which HNL kind do I want to analyse0
+	extern genie::HNL::HNLenums::parent_t fParent; // which component of the flux to analyse
+	extern genie::HNL::HNLenums::nutype_t fNuType; // which HNL kind do I want to analyse0
 
 	extern double fmN; // HNL mass
 	extern double fUe, fUm, fUt; // SM couplings
@@ -84,10 +84,10 @@ namespace HNL{
 	void selectNuType( const int HType );
 
 	TH1F * getFluxHist1F( std::string fin, std::string hName,
-			    genie::HNL::enums::parent_t par, genie::HNL::enums::nutype_t HType ); // need to overload for TH3
+			    genie::HNL::HNLenums::parent_t par, genie::HNL::HNLenums::nutype_t HType ); // need to overload for TH3
 
 	TH3D * getFluxHist3D( std::string fin, std::string hName,
-			    genie::HNL::enums::parent_t par, genie::HNL::enums::nutype_t HType ); // need to overload for TH3
+			    genie::HNL::HNLenums::parent_t par, genie::HNL::HNLenums::nutype_t HType ); // need to overload for TH3
 	
 	double generatePolMag( const int lPDG, const int parPDG );
 	std::vector< double > * generatePolDir( const int parPDG, const int HType );
@@ -115,7 +115,7 @@ namespace HNL{
 
 	inline double getSelectedMass(){ return fmN; }
 
-    } // namespace FluxReader
+    } // namespace HNLFluxReader
 
 } // namespace HNL
 } // namespace genie

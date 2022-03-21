@@ -56,11 +56,11 @@ namespace genie {
 		fUe42( defUe42 ), fUmu42( defUmu42 ), fUt42( defUt42 ),
 		fIsMajorana( false ),
 		fValidChannels(
-		    genie::HNL::Selector::GetValidChannelWidths( defMass,
+		    genie::HNL::HNLSelector::GetValidChannelWidths( defMass,
 						defUe42, defUmu42, defUt42,
 						false ) ),
 		fCoMLifetime(
-		    genie::HNL::Selector::CalcCoMLifetime( defMass,
+		    genie::HNL::HNLSelector::CalcCoMLifetime( defMass,
 					  defUe42, defUmu42, defUt42,
 					  false ) )
 	    { } /// default c'tor
@@ -75,11 +75,11 @@ namespace genie {
 		    fUe42( Ue42 ), fUmu42( Umu42 ), fUt42( Ut42 ),
 		    fIsMajorana( IsMajorana ),
 		    fValidChannels(
-			genie::HNL::Selector::GetValidChannelWidths( mass,
+			genie::HNL::HNLSelector::GetValidChannelWidths( mass,
 						    Ue42, Umu42, Ut42,
 						    IsMajorana ) ),
 		    fCoMLifetime(
-			genie::HNL::Selector::CalcCoMLifetime( mass,
+			genie::HNL::HNLSelector::CalcCoMLifetime( mass,
 					      Ue42, Umu42, Ut42,
 					      IsMajorana ) )
 	    { } /// normal constructor
@@ -118,13 +118,13 @@ namespace genie {
 
 	    inline const int    GetParentPDG( ) { return fParentPDG; }
 
-	    inline const genie::HNL::enums::nutype_t GetHType( ) { return fHType; }
+	    inline const genie::HNL::HNLenums::nutype_t GetHType( ) { return fHType; }
 
 	    inline const double GetDecayThrow( ) { return fDecayThrow; }
 
 	    inline const double GetSelectThrow( ) { return fSelectThrow; }
 
-	    inline const genie::HNL::enums::HNLDecay_t GetDecayMode( ) { return fDecayMode; }
+	    inline const genie::HNL::HNLenums::HNLDecay_t GetDecayMode( ) { return fDecayMode; }
 
 	    inline std::vector< double > GetDecay4VX( ) {
 		std::vector< double > decVec;
@@ -169,10 +169,10 @@ namespace genie {
 	    inline const std::vector< double > * GetPolarisationDir( ) {
 		return fPolDir; }
 
-	    inline const std::map< genie::HNL::enums::HNLDecay_t, double > GetValidChannels( ) {
+	    inline const std::map< genie::HNL::HNLenums::HNLDecay_t, double > GetValidChannels( ) {
 		return fValidChannels; }
 
-	    inline const std::map< genie::HNL::enums::HNLDecay_t, double > GetInterestingChannels( ) {
+	    inline const std::map< genie::HNL::HNLenums::HNLDecay_t, double > GetInterestingChannels( ) {
 		return fInterestingChannels; }
 
 	    // setters
@@ -278,10 +278,10 @@ namespace genie {
 	    }
 
 	    inline void SetInterestingChannels(
-		const std::map< genie::HNL::enums::HNLDecay_t, double > gammaMap ){
+		const std::map< genie::HNL::HNLenums::HNLDecay_t, double > gammaMap ){
 		fInterestingChannels = gammaMap; }
 
-	    inline void SetDecayMode( const genie::HNL::enums::HNLDecay_t decayMode ){
+	    inline void SetDecayMode( const genie::HNL::HNLenums::HNLDecay_t decayMode ){
 		fDecayMode = decayMode; }
 
 	    inline void SetParentPDG( const int parPDG ){
@@ -290,17 +290,17 @@ namespace genie {
 	    inline void SetPDG( const int PDG ){
 		fPDG = PDG; }
 
-	    inline void SetHType( const genie::HNL::enums::nutype_t HType ){
+	    inline void SetHType( const genie::HNL::HNLenums::nutype_t HType ){
 		fHType = HType; }
 	    
 	protected:
 	    // default c'tor values
-	    int defPDG = genie::HNL::defaults::HNLDefaultPDG; 
-	    int defParPDG = genie::HNL::defaults::HNLDefaultParPDG;
-	    double defMass  = genie::HNL::defaults::HNLDefaultMass;
-	    double defUe42  = genie::HNL::defaults::HNLDefaultECoup;
-	    double defUmu42 = genie::HNL::defaults::HNLDefaultMuCoup;
-	    double defUt42  = genie::HNL::defaults::HNLDefaultTauCoup;
+	    int defPDG = genie::HNL::HNLdefaults::HNLDefaultPDG; 
+	    int defParPDG = genie::HNL::HNLdefaults::HNLDefaultParPDG;
+	    double defMass  = genie::HNL::HNLdefaults::HNLDefaultMass;
+	    double defUe42  = genie::HNL::HNLdefaults::HNLDefaultECoup;
+	    double defUmu42 = genie::HNL::HNLdefaults::HNLDefaultMuCoup;
+	    double defUt42  = genie::HNL::HNLdefaults::HNLDefaultTauCoup;
 
 	    // basic calculators
 	    inline const double CalcBeta( const double E, const double P3 ) {
@@ -321,16 +321,16 @@ namespace genie {
 	    mutable double     fMass;
 	    mutable double     fUe42, fUmu42, fUt42;
 	    mutable bool       fIsMajorana;
-	    mutable std::map< genie::HNL::enums::HNLDecay_t, double > fValidChannels;
+	    mutable std::map< genie::HNL::HNLenums::HNLDecay_t, double > fValidChannels;
 	    mutable double     fCoMLifetime;
 
-	    mutable genie::HNL::enums::nutype_t    fHType;
+	    mutable genie::HNL::HNLenums::nutype_t    fHType;
 	    
 	    mutable double           fDecayThrow;  // determines where decay happens
 	    mutable double           fSelectThrow; // determines what channel to decay to
-	    mutable genie::HNL::enums::HNLDecay_t  fDecayMode;
+	    mutable genie::HNL::HNLenums::HNLDecay_t  fDecayMode;
 	    
-	    mutable std::map< genie::HNL::enums::HNLDecay_t, double > fInterestingChannels;
+	    mutable std::map< genie::HNL::HNLenums::HNLDecay_t, double > fInterestingChannels;
 	    
 	    mutable double                  fBeta, fGamma;
 	    mutable double                  fLifetime;

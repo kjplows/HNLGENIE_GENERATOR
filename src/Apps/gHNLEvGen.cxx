@@ -235,7 +235,8 @@ int main(int argc, char ** argv)
   // Init messenger and random number seed
   utils::app_init::MesgThresholds(RunOpt::Instance()->MesgThresholdFiles());
   utils::app_init::RandGen(gOptRanSeed);
-  TRandom3 * rng3 = new TRandom3(0); // RETHERE change to GENIE rng!!
+  //TRandom3 * rng3 = new TRandom3(0);
+  RandomGen * rnd = RandomGen::Instance();
 
   // Initialize an Ntuple Writer to save GHEP records into a TTree
   NtpWriter ntpw(kDefOptNtpFormat, gOptRunNu);
@@ -243,18 +244,18 @@ int main(int argc, char ** argv)
   ntpw.Initialize();
 
   // need to find the closest mass point to ensure gst consistency. RETHERE
-  const int iMassPoint = genie::HNL::FluxReader::selectMass( gOptHNLMass );
+  const int iMassPoint = genie::HNL::HNLFluxReader::selectMass( gOptHNLMass );
   // assert the "heavy" HNL that can decay to pimu
-  const double massLow2  = ( ( genie::HNL::enums::massHypMap ).find( genie::HNL::enums::kMedium9Hyp ) )->second;
-  const double massLow   = ( ( genie::HNL::enums::massHypMap ).find( genie::HNL::enums::kHeavy0Hyp ) )->second;
-  const double massHigh  = ( ( genie::HNL::enums::massHypMap ).find( genie::HNL::enums::kHeavyJHyp ) )->second;
+  const double massLow2  = ( ( genie::HNL::HNLenums::massHypMap ).find( genie::HNL::HNLenums::kMedium9Hyp ) )->second;
+  const double massLow   = ( ( genie::HNL::HNLenums::massHypMap ).find( genie::HNL::HNLenums::kHeavy0Hyp ) )->second;
+  const double massHigh  = ( ( genie::HNL::HNLenums::massHypMap ).find( genie::HNL::HNLenums::kHeavyJHyp ) )->second;
   // slightly smaller masses get bumped up to the first heavy point. Include them.
   assert( gOptHNLMass >= massLow2 + 1.0 / 2.0 * ( massLow - massLow2 ) );
   int iMass = iMassPoint - 30; // 30 light+medium, 20 heavy
   // now also have to set pdg code to make sense!
   gOptHNLPdgCode = 1900 + 1 + iMass; // lightest non-generic = 1901
 
-  double useThisMass = genie::HNL::FluxReader::getSelectedMass();
+  double useThisMass = genie::HNL::HNLFluxReader::getSelectedMass();
   LOG( "gevgen_hnl", pINFO )
     << "Modifying HNL mass to closest mass point, " << useThisMass << " GeV.";
   gOptHNLMass = useThisMass;
@@ -315,7 +316,8 @@ int main(int argc, char ** argv)
        if( gOptHNLKind == 0 ) typeMod = 1;
        else if( gOptHNLKind == 1 ) typeMod = -1;
        else{ // decide dynamically based on integrated fluxes
-	 double athrow = rng3->Uniform( 0.0, 1.0 );
+	 //double athrow = rng3->Uniform( 0.0, 1.0 );
+	 double athrow = rnd->RndGen().Uniform( 0.0, 1.0 );
 	 std::string integralsName = std::string( "hIntegrals" );
 	 TH1D * hIntegrals = ( TH1D * ) baseDir->Get( integralsName.c_str() );
 	 double posint = hIntegrals->GetBinContent(1) + hIntegrals->GetBinContent(3);
@@ -348,24 +350,24 @@ int main(int argc, char ** argv)
      
      LOG("gevgen_hnl", pDEBUG)
        << " Creating interesting channels vector ";
-     std::vector< genie::HNL::enums::HNLDecay_t > * intChannels = new std::vector< genie::HNL::enums::HNLDecay_t >();
-     intChannels->emplace_back( genie::HNL::enums::kPiE );
-     intChannels->emplace_back( genie::HNL::enums::kPiMu );
-     //intChannels->emplace_back( genie::HNL::enums::kPi0Nu ); // TESTING: What happens if we allow these decays?
+     std::vector< genie::HNL::HNLenums::HNLDecay_t > * intChannels = new std::vector< genie::HNL::HNLenums::HNLDecay_t >();
+     intChannels->emplace_back( genie::HNL::HNLenums::kPiE );
+     intChannels->emplace_back( genie::HNL::HNLenums::kPiMu );
+     //intChannels->emplace_back( genie::HNL::HNLenums::kPi0Nu ); // TESTING: What happens if we allow these decays?
 
      LOG("gevgen_hnl", pDEBUG)
        << " Getting valid channels ";
-     const std::map< genie::HNL::enums::HNLDecay_t, double > gammaMap = sh.GetValidChannels();
+     const std::map< genie::HNL::HNLenums::HNLDecay_t, double > gammaMap = sh.GetValidChannels();
 
-     genie::HNL::enums::HNLDecay_t pimuDecay = genie::HNL::enums::kPiMu;
+     genie::HNL::HNLenums::HNLDecay_t pimuDecay = genie::HNL::HNLenums::kPiMu;
      auto pimuMapG  = gammaMap.find( pimuDecay );
      double pimuPG  = pimuMapG->second;
 
-     genie::HNL::enums::HNLDecay_t pieDecay =  genie::HNL::enums::kPiE;
+     genie::HNL::HNLenums::HNLDecay_t pieDecay =  genie::HNL::HNLenums::kPiE;
      auto pieMapG  = gammaMap.find( pieDecay );
      double piePG  = pieMapG->second;
 
-     //genie::HNL::enums::HNLDecay_t pi0nuDecay =  genie::HNL::enums::kPi0Nu;
+     //genie::HNL::HNLenums::HNLDecay_t pi0nuDecay =  genie::HNL::HNLenums::kPi0Nu;
      //auto pi0nuMapG  = gammaMap.find( pi0nuDecay );
      //double pi0nuPG  = pi0nuMapG->second;
 
@@ -379,8 +381,8 @@ int main(int argc, char ** argv)
 
      LOG("gevgen_hnl", pDEBUG)
        << " Setting interesting channels map ";
-     std::map< genie::HNL::enums::HNLDecay_t, double > intMap =
-       genie::HNL::Selector::SetInterestingChannels( (*intChannels), gammaMap );
+     std::map< genie::HNL::HNLenums::HNLDecay_t, double > intMap =
+       genie::HNL::HNLSelector::SetInterestingChannels( (*intChannels), gammaMap );
      
      LOG("gevgen_hnl", pDEBUG)
        << " Telling SimpleHNL about interesting channels ";
@@ -389,8 +391,8 @@ int main(int argc, char ** argv)
      // get probability that channels in intChannels will be selected
      LOG("gevgen_hnl", pDEBUG)
        << " Building probablilities of interesting channels ";
-     std::map< genie::HNL::enums::HNLDecay_t, double > PMap = 
-       genie::HNL::Selector::GetProbabilities( intMap );
+     std::map< genie::HNL::HNLenums::HNLDecay_t, double > PMap = 
+       genie::HNL::HNLSelector::GetProbabilities( intMap );
 
      // I want to see what these probabilities are.
      
@@ -412,13 +414,14 @@ int main(int argc, char ** argv)
        << "\n !!! ------------------------------------------- \n";
      
      // now do a random throw
-     double ranThrow = rng3->Uniform( 0., 1. ); // HNL's fate is sealed.
+     //double ranThrow = rng3->Uniform( 0., 1. );
+     double ranThrow = rnd->RndGen().Uniform( 0., 1. ); // HNL's fate is sealed.
 
      LOG("gevgen_hnl", pDEBUG)
        << "Random throw = " << ranThrow;
 
-     genie::HNL::enums::HNLDecay_t selectedDecayChan =
-       genie::HNL::Selector::SelectChannelInclusive( PMap, ranThrow );
+     genie::HNL::HNLenums::HNLDecay_t selectedDecayChan =
+       genie::HNL::HNLSelector::SelectChannelInclusive( PMap, ranThrow );
 
      decay = ( int ) selectedDecayChan;
 
@@ -438,8 +441,8 @@ int main(int argc, char ** argv)
      const double thetaDevMeanRad  = thetaDevMean  * genie::constants::kPi / 180.0;
      const double thetaDevSigmaRad = thetaDevSigma * genie::constants::kPi / 180.0;
 
-     double theta = rng3->Gaus( thetaDevMeanRad, thetaDevSigmaRad ); if( theta < 0.0 ) theta *= -1.0; // theta |--> -theta <==> phi |--> pi + phi. W.l.o.g. make this choice.
-     double phi   = rng3->Uniform( 0.0, 2.0 * genie::constants::kPi );
+     double theta = rnd->RndGen().Gaus( thetaDevMeanRad, thetaDevSigmaRad ); if( theta < 0.0 ) theta *= -1.0; // theta |--> -theta <==> phi |--> pi + phi. W.l.o.g. make this choice.
+     double phi   = rnd->RndGen().Uniform( 0.0, 2.0 * genie::constants::kPi );
 
      double PxHNL = PHNL * std::sin( theta ) * std::cos( phi );
      double PyHNL = PHNL * std::sin( theta ) * std::sin( phi );
@@ -468,7 +471,7 @@ int main(int argc, char ** argv)
      ievent++;
   } // event loop
 
-  delete rng3;
+  //delete rng3;
 
   LOG("gevgen_hnl", pDEBUG)
     << "Event loop finished.";
@@ -511,21 +514,21 @@ GFluxI * TH1FluxDriver(void)
   }
 
   // select coupling configuration & mass point
-  string coup = genie::HNL::FluxReader::selectCoup( gOptECoupling, gOptMuCoupling, 0.0 );
+  string coup = genie::HNL::HNLFluxReader::selectCoup( gOptECoupling, gOptMuCoupling, 0.0 );
 
   LOG("gevgen_hnl", pDEBUG)
     << "Couplings inserted: e: " << gOptECoupling << ", mu: " << gOptMuCoupling
     << " ==> coupling configuration = " << coup.c_str();
 
-  int closest_masspoint = genie::HNL::FluxReader::selectMass( gOptHNLMass );
+  int closest_masspoint = genie::HNL::HNLFluxReader::selectMass( gOptHNLMass );
 
   LOG("gevgen_hnl", pDEBUG)
     << "Mass inserted: " << gOptHNLMass << " GeV ==> mass point " << closest_masspoint;
   LOG("gevgen_hnl", pDEBUG)
     << "Using fluxes in base path " << gOptFluxFilePath.c_str();
   
-  genie::HNL::FluxReader::selectFile( gOptFluxFilePath, gOptECoupling, gOptMuCoupling, 0., gOptHNLMass );
-  string finPath = genie::HNL::FluxReader::fPath;
+  genie::HNL::HNLFluxReader::selectFile( gOptFluxFilePath, gOptECoupling, gOptMuCoupling, 0., gOptHNLMass );
+  string finPath = genie::HNL::HNLFluxReader::fPath;
   LOG("gevgen_hnl", pDEBUG)
     << "Looking for fluxes in " << finPath.c_str();
   assert( !gSystem->AccessPathName( finPath.c_str()) );
@@ -534,10 +537,10 @@ GFluxI * TH1FluxDriver(void)
 
   string hFluxName = Form( "hHNLFluxCenterAcc_%d", closest_masspoint );
 
-  TH1F *hfluxAllMu    = genie::HNL::FluxReader::getFluxHist1F( finPath, hFluxName, genie::HNL::enums::kAll, genie::HNL::enums::kNumu );
-  TH1F *hfluxAllMubar = genie::HNL::FluxReader::getFluxHist1F( finPath, hFluxName, genie::HNL::enums::kAll, genie::HNL::enums::kNumubar );
-  TH1F *hfluxAllE     = genie::HNL::FluxReader::getFluxHist1F( finPath, hFluxName, genie::HNL::enums::kAll, genie::HNL::enums::kNue );
-  TH1F *hfluxAllEbar  = genie::HNL::FluxReader::getFluxHist1F( finPath, hFluxName, genie::HNL::enums::kAll, genie::HNL::enums::kNuebar );
+  TH1F *hfluxAllMu    = genie::HNL::HNLFluxReader::getFluxHist1F( finPath, hFluxName, genie::HNL::HNLenums::kAll, genie::HNL::HNLenums::kNumu );
+  TH1F *hfluxAllMubar = genie::HNL::HNLFluxReader::getFluxHist1F( finPath, hFluxName, genie::HNL::HNLenums::kAll, genie::HNL::HNLenums::kNumubar );
+  TH1F *hfluxAllE     = genie::HNL::HNLFluxReader::getFluxHist1F( finPath, hFluxName, genie::HNL::HNLenums::kAll, genie::HNL::HNLenums::kNue );
+  TH1F *hfluxAllEbar  = genie::HNL::HNLFluxReader::getFluxHist1F( finPath, hFluxName, genie::HNL::HNLenums::kAll, genie::HNL::HNLenums::kNuebar );
 
   assert(hfluxAllMu);
   assert(hfluxAllMubar);
@@ -635,7 +638,7 @@ GFluxI * TH1FluxDriver(void)
 
   // RETHERE, VERY placeholder-y
   // pass this flux to FluxReader to sample from
-  genie::HNL::FluxReader::setFluxHisto( spectrum );
+  genie::HNL::HNLFluxReader::setFluxHisto( spectrum );
 
   // save input flux
 

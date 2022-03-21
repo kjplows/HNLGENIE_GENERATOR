@@ -5,7 +5,7 @@
   If inclusive: just pick position of vertex
   If exclusive: also query which channel ran out first
 
-\namespace  genie::HNL::Selector
+\namespace  genie::HNL::HNLSelector
 
 \brief      Vertex position calculator
 
@@ -41,12 +41,12 @@ namespace HNL {
 
     class SimpleHNL;
 
-    namespace Selector {
+    namespace HNLSelector {
 
         extern TRandom3 * fRng;
 	extern bool fIsRngInit;
 	
-	extern std::map< genie::HNL::enums::HNLDecay_t, double > fCounterMap;
+	extern std::map< genie::HNL::HNLenums::HNLDecay_t, double > fCounterMap;
 	const double fdt = 0.01 * genie::units::nanosecond; // in lab frame
 
 	inline void initRandom( ) { fRng = new TRandom3(0); fIsRngInit = true; }
@@ -61,9 +61,9 @@ namespace HNL {
 	void emptyCounters( );
 
 	// populate the vector of counters
-	void fillCounters( std::map< genie::HNL::enums::HNLDecay_t, double > gammaMap );
+	void fillCounters( std::map< genie::HNL::HNLenums::HNLDecay_t, double > gammaMap );
 
-    } // namespace Selector
+    } // namespace HNLSelector
     
 } // namespace HNL
 } // namespace genie
