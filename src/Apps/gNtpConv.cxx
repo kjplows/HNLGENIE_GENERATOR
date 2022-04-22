@@ -490,14 +490,14 @@ void ConvertToGST(void)
   s_tree->Branch("niem",          &brNiEM,	    "niem/I"	    );
   s_tree->Branch("niother",       &brNiOther,       "niother/I"     );
   s_tree->Branch("ni",	         &brNi,	            "ni/I"	    );
-  s_tree->Branch("pdgi",          brPdgi,	    "pdgi[ni]/I "   );
-  s_tree->Branch("resc",          brResc,	    "resc[ni]/I "   );
+  s_tree->Branch("pdgi",          brPdgi,	    "pdgi[ni]/I"    );
+  s_tree->Branch("resc",          brResc,	    "resc[ni]/I"    );
   s_tree->Branch("Ei",	          brEi,	            "Ei[ni]/D"      );
   s_tree->Branch("pxi",	          brPxi,	    "pxi[ni]/D"     );
   s_tree->Branch("pyi",	          brPyi,	    "pyi[ni]/D"     );
   s_tree->Branch("pzi",	          brPzi,	    "pzi[ni]/D"     );
   s_tree->Branch("nf",	         &brNf,	            "nf/I"	    );
-  s_tree->Branch("pdgf",          brPdgf,	    "pdgf[nf]/I "   );
+  s_tree->Branch("pdgf",          brPdgf,	    "pdgf[nf]/I"    );
   s_tree->Branch("Ef",	          brEf,	            "Ef[nf]/D"      );
   s_tree->Branch("pxf",	          brPxf,	    "pxf[nf]/D"     );
   s_tree->Branch("pyf",	          brPyf,	    "pyf[nf]/D"     );
@@ -542,23 +542,37 @@ void ConvertToGST(void)
   LOG("gntpc", pNOTICE) << "*** Analyzing: " << nmax << " events";
 
   TLorentzVector pdummy(0,0,0,0);
-
+  
   // if HNL, pick up branches about mass + couplings + nature
+  
   double locHNLMass, locHNLECoup, locHNLMuCoup; bool locHNLIsMajorana; int locHNLType;
   TBranch * BRHNLMass = er_tree->GetBranch( "hnl_mass" ); BRHNLMass->SetAddress( &locHNLMass );
   TBranch * BRHNLECoup = er_tree->GetBranch( "hnl_coup_e" ); BRHNLECoup->SetAddress( &locHNLECoup );
   TBranch * BRHNLMuCoup = er_tree->GetBranch( "hnl_coup_mu" ); BRHNLMuCoup->SetAddress( &locHNLMuCoup );
-  TBranch * BRHNLIsMajorana = er_tree->GetBranch( "hnl_ismaj" ); BRHNLIsMajorana->SetAddress( &locHNLIsMajorana );
-  TBranch * BRHNLType = er_tree->GetBranch( "hnl_type" ); BRHNLType->SetAddress( &locHNLType );
+  if(false){
+    TBranch * BRHNLIsMajorana = er_tree->GetBranch( "hnl_ismaj" ); BRHNLIsMajorana->SetAddress( &locHNLIsMajorana );
+    TBranch * BRHNLType = er_tree->GetBranch( "hnl_type" ); BRHNLType->SetAddress( &locHNLType );
+  }
 
   // Event loop
   for(Long64_t iev = 0; iev < nmax; iev++) {
     er_tree->GetEntry(iev);
 
+    if( BRHNLMass && !PDGLibrary::Instance()->Find(genie::kPdgHNL) ){ // hack to let gst insert HNL into PDGLibrary
+      LOG("gntpc", pDEBUG) << "Adding HNL to PDG library "
+			   << "with mass = " << locHNLMass << ", "
+			   << "|U_e4|^2 = " << locHNLECoup << " and"
+			   << "|U_m4|^2 = " << locHNLMuCoup;
+      PDGLibrary::Instance()->AddSimpleHNL( genie::kPdgHNL, locHNLMass, locHNLECoup, locHNLMuCoup );
+    }
+
     NtpMCRecHeader rec_header = mcrec->hdr;
     EventRecord &  event      = *(mcrec->event);
 
     LOG("gntpc", pINFO) << rec_header;
+
+    LOG("gntpc", pDEBUG) << "Showing event";
+
     LOG("gntpc", pINFO) << event;
 
     // Go further only if the event is physical

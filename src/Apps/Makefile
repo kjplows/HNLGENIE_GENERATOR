@@ -68,6 +68,9 @@ endif
 ifeq ($(strip $(GOPT_ENABLE_SIMPLE_HNL)),YES)
 TGT_BASE += gevgen_hnl
 endif
+ifeq ($(strip $(GOPT_ENABLE_REVERSE_GNTPC)), YES)
+TGT_BASE += grvntpc
+endif
 
 TGT = $(addprefix $(GENIE_BIN_PATH)/,$(TGT_BASE))
 
@@ -133,6 +136,12 @@ $(GENIE_BIN_PATH)/gevgen_ndcy: gNucleonDecayEvGen.o $(call find_libs,gevgen_ndcy
 $(GENIE_BIN_PATH)/gevgen_hnl: gHNLEvGen.o $(call find_libs,gevgen_hnl)
 	@echo "** Building gevgen_hnl"
 	$(LD) $(LDFLAGS) gHNLEvGen.o $(LIBRARIES) -o $(GENIE_BIN_PATH)/gevgen_hnl
+
+# Reverse gntpc app
+#
+$(GENIE_BIN_PATH)/grvntpc: gReverseNtpConv.o $(call find_libs,grvntpc)
+	@echo "** Building grvntpc"
+	$(LD) $(LDFLAGS) gReverseNtpConv.o $(LIBRARIES) -o $(GENIE_BIN_PATH)/grvntpc
 
 # neutron-antineutron event generation app
 #
