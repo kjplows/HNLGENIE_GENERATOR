@@ -120,10 +120,10 @@ bool genie::pdg::IsChargedLepton(int pdgc)
 //____________________________________________________________________________
 bool genie::pdg::IsHeavyNeutralLepton(int pdgc)
 {
-  bool isGeneric  = genie::pdg::IsGenericHNL(pdgc) || genie::pdg::IsGenericHNLBar(pdgc);
-  bool isSpecific = genie::pdg::IsSpecificHNL(pdgc) || genie::pdg::IsSpecificHNLBar(pdgc);
+  //bool isGeneric  = genie::pdg::IsGenericHNL(pdgc) || genie::pdg::IsGenericHNLBar(pdgc);
+  //bool isSpecific = genie::pdg::IsSpecificHNL(pdgc) || genie::pdg::IsSpecificHNLBar(pdgc);
 
-  return ( isGeneric || isSpecific );
+  return std::abs( pdgc ) == genie::kPdgHNL;
 }
 //____________________________________________________________________________
 bool genie::pdg::IsNeutrino(int pdgc)
@@ -170,11 +170,13 @@ bool genie::pdg::IsGenericHNLBar(int pdgc){
 }
 //____________________________________________________________________________
 bool genie::pdg::IsSpecificHNL(int pdgc){
-  return (pdgc >= kPdgHNLHeavy0 && pdgc <= kPdgHNLHeavyJ);
+  //return (pdgc >= kPdgHNLHeavy0 && pdgc <= kPdgHNLHeavyJ);
+  return false; // deactivated these!
 }
 //____________________________________________________________________________
 bool genie::pdg::IsSpecificHNLBar(int pdgc){
-  return (pdgc <= kPdgHNLBarHeavy0 && pdgc >= kPdgHNLBarHeavyJ);
+  //return (pdgc <= kPdgHNLBarHeavy0 && pdgc >= kPdgHNLBarHeavyJ);
+  return false; // deactivated these!
 }
 //____________________________________________________________________________
 bool genie::pdg::IsNuE(int pdgc)

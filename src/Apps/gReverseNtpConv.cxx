@@ -509,9 +509,25 @@ void ConvertFromGST(void)
     TLorentzVector x4HNL( brVtxX, brVtxY, brVtxZ, brVtxT );
     int probepdg = brNeutrino;
     Interaction * interaction = Interaction::HNLDecay( probepdg, HNLenums::kInit, p4HNL );
+    // make sure InitialState knows about this!
+    interaction->InitStatePtr()->SetProbePdg( probepdg );
+    interaction->InitStatePtr()->SetProbeP4( p4HNL );
 
-    LOG( "grvntpc", pDEBUG ) << "Attaching summary. . .";
-    event->AttachSummary(interaction);
+    assert( interaction->InitStatePtr()->Probe() );
+    
+    // update vtx
+    event->SetVertex( x4HNL );
+
+    // update kine
+    interaction->KinePtr()->SetW( brKineWs, true );
+    interaction->KinePtr()->SetQ2( brKineQ2s, true );
+    interaction->KinePtr()->Sett( brKineTs, true );
+
+    // update xclstag
+    interaction->ExclTagPtr()->SetNPions( brNfPip, brNfPi0, brNfPim );
+
+    // update weight
+    event->SetWeight( brWeight );
 
     // Add particles to the event record
     LOG( "grvntpc", pDEBUG ) << "Adding particles to event record";
@@ -536,6 +552,11 @@ void ConvertFromGST(void)
     if( d3pdg != 0 ){
       event->AddParticle( d3pdg, kIStStableFinalState, 0, -1, -1, -1, d3p4, x4HNL );
     }
+
+    LOG( "grvntpc", pDEBUG ) << "Attaching summary. . .";
+    event->AttachSummary(interaction);
+
+    assert( event->Probe() );
 
     // Add event at the output ntuple & clean-up
     LOG( "grvntpc", pDEBUG ) << "Adding to event record. . .";

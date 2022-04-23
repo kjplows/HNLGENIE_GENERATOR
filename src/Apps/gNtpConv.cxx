@@ -646,9 +646,10 @@ void ConvertToGST(void)
     bool is_weakcc = proc_info.IsWeakCC();
     bool is_weaknc = proc_info.IsWeakNC();
     bool is_mec    = proc_info.IsMEC();
+    bool is_hnl    = proc_info.IsHNLDecay();
 
     if (!hitnucl && neutrino) {
-        assert(is_coh || is_imd || is_imdanh || is_nuel);
+        assert(is_coh || is_imd || is_imdanh || is_nuel || is_hnl);
     }
   
     // Hit quark - set only for DIS events
@@ -664,7 +665,6 @@ void ConvertToGST(void)
 
     // is this an HNL decay?
     bool hnl = xcls.IsHNLEvent();
-    bool is_hnl = hnl;
 
     // Get NEUT and NUANCE equivalent reaction codes (if any)
     brCodeNeut    = utils::ghep::NeutReactionCode(&event);
