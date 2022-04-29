@@ -17,8 +17,11 @@
 #ifndef JKINUTILS_H
 #define JKINUTILS_H
 
+// -- C++ includes
+#include <cassert>
+
 // -- GENIE includes
-#include "Messenger/Messenger.h"
+//#include "Messenger/Messenger.h" // this breaks rootcint for ROOT 5
 
 namespace genie{
 namespace HNL {
@@ -26,7 +29,8 @@ namespace HNL {
     namespace HNLutils {
 
 	inline double MassX( double m1, double m2 ) {
-	    if( m2 <= 0. || m1 < 0.) { LOG( "SimpleHNL", pERROR ) << "BRFunctions::MassX:: Illegal masses m1 = " << m1 << ", m2 = " << m2; exit( 3 ); }
+	  //if( m2 <= 0. || m1 < 0.) { LOG( "SimpleHNL", pERROR ) << "BRFunctions::MassX:: Illegal masses m1 = " << m1 << ", m2 = " << m2; exit( 3 ); }
+	  assert( m1 >= 0. && m2 > 0. );
 	    return m1 / m2;
 	}
 	

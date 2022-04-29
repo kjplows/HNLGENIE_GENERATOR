@@ -25,7 +25,6 @@
 // TODO: 1) Streamline calculators. All functions are currently
 //          "calculators", i.e. void. Do I want better return types?
 //       2) Rigorous kinematics. Do the calcs yourself.
-//       3) Figure out where to declare the detector centre. (in MINERvA coords)
 //-------------------------------------------------------------------
 
 #ifndef JDECAYKINEMATICS_H
@@ -78,17 +77,17 @@ namespace HNL {
 	// no such thing as generic 3-body decay.
 	// Either N --> \nu_{j} + \ell_{i} \ell_{j}\bar or N --> \nu + \ell \ell\bar
 	// or one of the pion routes
-	void ThreeBodyEnergies( );
-	void ThreeBodyAngleLep1( );
-	void ThreeBodyAngleLep2( );
+	//void ThreeBodyEnergies( );
+	//void ThreeBodyAngleLep1( );
+	//void ThreeBodyAngleLep2( );
 
-	void ThreeBodyKinematics( );
+	//void ThreeBodyKinematics( );
     
 	// emission angles of product wrt HNL polarisation vector
-	const double RestTheta( const double mN, const double pol,
-				const genie::HNL::HNLenums::HNLDecay_t chan, const double m1 );
-	const double RestPhi( const double mN, const double pol,
-			      const genie::HNL::HNLenums::HNLDecay_t chan, const double m1 );
+	//const double RestTheta( const double mN, const double pol,
+	//			const genie::HNL::HNLenums::HNLDecay_t chan, const double m1 );
+	//const double RestPhi( const double mN, const double pol,
+	//		      const genie::HNL::HNLenums::HNLDecay_t chan, const double m1 );
                               //assume cylindrical symmetry ?
 
 	// define characteristic axis in rest frame: r(MIN centre) - r(HNL decay)

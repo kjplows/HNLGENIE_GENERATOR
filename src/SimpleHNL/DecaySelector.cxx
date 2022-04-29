@@ -9,6 +9,7 @@
 
 #include "DecaySelector.h"
 
+#include "Messenger/Messenger.h"
 #include "EVGCore/EVGThreadException.h"
 
 //using namespace ::genie::HNL::HNLSelector;

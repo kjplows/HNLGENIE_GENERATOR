@@ -24,7 +24,7 @@
 #define JBRFUNCTIONS_H
 
 // -- C++ includes
-#include <TMath.h>
+#include <cassert>
 
 // -- ROOT includes
 #include "TF1.h"
@@ -34,10 +34,15 @@
 // -- GENIE includes
 #include "Conventions/Constants.h"
 #include "Conventions/Units.h"
-#include "Messenger/Messenger.h"
 
+//#include "Messenger/Messenger.h"
+
+// not fictitious, this is needed
 #include "ColomaTables.h"
 #include "KinUtils.h"
+//fictitious diagnostic include, remove this
+#include "Enums.h"
+#include "Defaults.h"
 
 namespace genie {
 namespace HNL {
@@ -95,7 +100,7 @@ namespace HNL {
 
 	// invisible
 	double DWidth_Invisible( const double M, const double Ue42, const double Umu42, const double Ut42 );
-
+	
 	// N --> nu + \ell_{\beta} \ell_{\beta} , \beta = e or mu
 	double DWidth_SameLepton( const double M, const double Ue42, const double Umu42, const double Ut42, const double mb, bool bIsMu );
 
@@ -103,7 +108,7 @@ namespace HNL {
 	// alpha is the "correct" lepton number sign ( Q < 0 for N, Q > 0 for Nbar)
 	double DWidth_DiffLepton( const double M, const double Ua42, const double Ub42, const int IsMajorana );
 
-	// N --> pi^\pm + pi^0 + \ell_{\alpha}^\mp, \alpha = e or mu
+// N --> pi^\pm + pi^0 + \ell_{\alpha}^\mp, \alpha = e or mu
 	double DWidth_PiPi0Ell( const double M, const double ml,
 				const double Ue42, const double Umu42, const double Ut42,
 				const bool isElectron = false );
@@ -124,7 +129,7 @@ namespace HNL {
 					      double &thePreFac,
 					      double &theCnstPart,
 					      double &thePropPart );
-    
+
     } // namespace HNLSelector
 
 } // namespace HNL

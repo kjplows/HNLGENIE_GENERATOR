@@ -10,6 +10,7 @@
 //----------------------------------------------------------------------------
 
 #include "FluxReader.h"
+#include "Messenger/Messenger.h"
 
 using namespace genie::HNL::HNLFluxReader;
 using namespace genie::HNL::HNLenums;
@@ -85,15 +86,70 @@ int genie::HNL::HNLFluxReader::selectMass( const double mN ){
 	kHeavyFHyp,  kHeavyGHyp,  kHeavyHHyp,  kHeavyIHyp,  kHeavyJHyp };
     const int nMasses = sizeof(massesHyp)/sizeof(massesHyp[0]) - 1;
 
+    // ROOTCINT does not like the map for some reason, explicitly declare the masses here instead. Ugh.
+    double masses[ nMasses + 1 ] = {
+				         1.000 * genie::units::keV,
+				        10.000 * genie::units::keV,
+				        50.000 * genie::units::keV,
+				       100.000 * genie::units::keV,
+				         1.000 * genie::units::MeV,
+				         5.000 * genie::units::MeV,
+				        10.000 * genie::units::MeV,
+				        15.000 * genie::units::MeV,
+				        20.000 * genie::units::MeV,
+				        25.000 * genie::units::MeV,
+				        30.000 * genie::units::MeV,
+				        33.000 * genie::units::MeV,
+					35.000 * genie::units::MeV,
+					40.000 * genie::units::MeV,
+					45.000 * genie::units::MeV,
+					50.000 * genie::units::MeV,
+					60.000 * genie::units::MeV,
+					70.000 * genie::units::MeV,
+					80.000 * genie::units::MeV,
+					90.000 * genie::units::MeV,
+				       100.000 * genie::units::MeV,
+				       114.523 * genie::units::MeV,
+				       129.046 * genie::units::MeV,
+				       143.569 * genie::units::MeV,
+				       158.092 * genie::units::MeV,
+				       172.614 * genie::units::MeV,
+				       187.137 * genie::units::MeV,
+				       201.660 * genie::units::MeV,
+				       216.183 * genie::units::MeV,
+				       230.706 * genie::units::MeV,
+				       245.229 * genie::units::MeV,
+				       260.983 * genie::units::MeV,
+				       276.738 * genie::units::MeV,
+				       292.492 * genie::units::MeV,
+				       308.246 * genie::units::MeV,
+				       324.001 * genie::units::MeV,
+				       339.755 * genie::units::MeV,
+				       355.510 * genie::units::MeV,
+				       371.264 * genie::units::MeV,
+				       387.019 * genie::units::MeV,
+				       397.434 * genie::units::MeV,
+				       407.948 * genie::units::MeV,
+				       418.626 * genie::units::MeV,
+				       428.978 * genie::units::MeV,
+				       439.493 * genie::units::MeV,
+				       450.007 * genie::units::MeV,
+				       460.622 * genie::units::MeV,
+				       471.137 * genie::units::MeV,
+				       481.652 * genie::units::MeV,
+				       492.166 * genie::units::MeV
+    };
     // because masses are kept in a *map*, gotta build array of the second elements!
-    double masses[ nMasses + 1 ];
+    /*
     for( int i = 0; i <= nMasses; i++ ){
       massHyp_t thisHyp = massesHyp[i];
+      std::map< HNLenums::massHyp_t, double > massHypMap =  HNLenums::BuildMassHypMap();
       auto pos = massHypMap.find( thisHyp );
       masses[i] = pos->second;
       LOG("SimpleHNL", pINFO) 
 	<< "At position " << i << " the mass hypothesis is " << masses[i];
     }
+    */
 
     if( mN < 0.0 || mN > masses[ nMasses ] ){
 	std::cerr << "genie::HNL::HNLFluxReader::selectMass: Illegal mass mN = " <<
@@ -308,6 +364,7 @@ std::vector< double > * genie::HNL::HNLFluxReader::generatePolDir( const int par
 
 double genie::HNL::HNLFluxReader::generateVtxT( const int parPDG, const int HType ){
   LOG( "SimpleHNL", pDEBUG ) << "genie::HNL::HNLFluxReader::generateVtxT:: Dummy method! WIP";
+  return 0.0;
 }
 // need to think about this more!
 

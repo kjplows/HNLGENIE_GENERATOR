@@ -7,11 +7,14 @@
          plain text, XML or bare-ROOT formats.
 
          Syntax:
-           gntpc -i input_file [-o output_file] [-n nev]
+           gntpc -i input_file [-o output_file] [-n nev] [-d]
 
          Options :
 
            [] denotes an optional argument
+
+	   -d
+	      Dump output of some branches for debugging
 
            -n 
               Number of events to convert 
@@ -193,6 +196,8 @@ string     gOptOutFileName;         ///< output file name
 GNtpcFmt_t gOptInpFileFormat;       ///< input file format id
 Long64_t   gOptN;                   ///< number of events to process
 int        gOptRunNu;               ///< run number
+
+bool       gOptDumpBranches = false; ///< dump output of some branches for debugging
 
 const int kNPmax = 20;
 //____________________________________________________________________________________
@@ -576,7 +581,7 @@ void ConvertFromGST(void)
     delete event;
 
     // dump output
-    if(false){
+    if( gOptDumpBranches ){
       LOG( "grvntpc", pDEBUG ) << "DUMPING OUTPUT OF INTERESTING BRANCHES NOW:"
 			       << "\niev          = " << brIev
 			       << "\nneu          = " << brNeutrino
@@ -657,6 +662,12 @@ void GetCommandLineArgs(int argc, char ** argv)
   // Parse run options for this app
 
   CmdLnArgParser parser(argc,argv);
+
+  // dump branches?
+  if( parser.OptionExists('d') ) {
+    LOG("gntpc", pINFO) << "Dumping branch output to stdout";
+    gOptDumpBranches = true;
+  }
 
   // get input ROOT file (containing a GENIE GHEP event tree)
   if( parser.OptionExists('i') ) {

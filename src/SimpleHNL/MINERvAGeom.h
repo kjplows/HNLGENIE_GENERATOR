@@ -27,7 +27,6 @@
 
 #include "Conventions/Constants.h"
 #include "Conventions/Units.h"
-#include "Messenger/Messenger.h"
 
 namespace genie {
 namespace HNL {

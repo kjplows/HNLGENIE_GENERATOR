@@ -37,7 +37,6 @@
 // -- GENIE includes
 
 #include "Conventions/Units.h"
-#include "Messenger/Messenger.h"
 
 #include "Enums.h"
 #include "KinUtils.h"

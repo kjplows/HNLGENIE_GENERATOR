@@ -1,7 +1,8 @@
 #include "MINERvAGeom.h"
+#include "Messenger/Messenger.h"
 
 std::vector< double > * genie::HNL::HNLMINERvAGeom::GetEntryPointIDBox( const std::vector< double > * prodVtx,
-								     const std::vector< double > * momVec ){
+									const std::vector< double > * momVec ){
   // very barebones implementation - box centred around ID centre
   // RETHERE - this has *nothing* to do with actual MINERvA geometry!
 

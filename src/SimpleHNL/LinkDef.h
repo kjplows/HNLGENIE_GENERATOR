@@ -14,9 +14,9 @@
 #pragma link C++ namespace genie::HNL::HNLutils;
 #pragma link C++ namespace genie::HNL::HNLMINERvAGeom;
 
-#pragma link C++ class genie::HNLDecayModelI;
+//#pragma link C++ class genie::HNLDecayModelI;
 #pragma link C++ class genie::HNL::SimpleHNL;
-#pragma link C++ class genie::HNL::HNLDecayer;
+//#pragma link C++ class genie::HNL::HNLDecayer;
 
 #pragma link C++ class genie::DummyHNLInteractionListGenerator;
 #pragma link C++ class genie::HNLDummyPXSec;

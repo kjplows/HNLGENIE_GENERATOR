@@ -149,7 +149,7 @@
 #include "PDG/PDGLibrary.h"
 #include "SimpleHNL/DummyHNLInteractionListGenerator.h"
 #include "SimpleHNL/FluxReader.h"
-#include "SimpleHNL/HNLDecayer.h"
+//#include "SimpleHNL/HNLDecayer.h"
 #include "SimpleHNL/SimpleHNL.h"
 #include "Utils/StringUtils.h"
 #include "Utils/UnitUtils.h"
@@ -246,9 +246,13 @@ int main(int argc, char ** argv)
   // need to find the closest mass point to ensure gst consistency. RETHERE
   const int iMassPoint = genie::HNL::HNLFluxReader::selectMass( gOptHNLMass );
   // assert the "heavy" HNL that can decay to pimu
-  const double massLow2  = ( ( genie::HNL::HNLenums::massHypMap ).find( genie::HNL::HNLenums::kMedium9Hyp ) )->second;
-  const double massLow   = ( ( genie::HNL::HNLenums::massHypMap ).find( genie::HNL::HNLenums::kHeavy0Hyp ) )->second;
-  const double massHigh  = ( ( genie::HNL::HNLenums::massHypMap ).find( genie::HNL::HNLenums::kHeavyJHyp ) )->second;
+  //std::map< genie::HNL::HNLenums::massHyp_t, double > massHypMap = genie::HNL::HNLenums::BuildMassHypMap();
+  //const double massLow2  = ( ( massHypMap ).find( genie::HNL::HNLenums::kMedium9Hyp ) )->second;
+  //const double massLow   = ( ( massHypMap ).find( genie::HNL::HNLenums::kHeavy0Hyp ) )->second;
+  //const double massHigh  = ( ( massHypMap ).find( genie::HNL::HNLenums::kHeavyJHyp ) )->second;
+  const double massLow2 = 0.230706;
+  const double massLow  = 0.245229;
+  const double massHigh = 0.492166;
   // slightly smaller masses get bumped up to the first heavy point. Include them.
   assert( gOptHNLMass >= massLow2 + 1.0 / 2.0 * ( massLow - massLow2 ) );
   int iMass = iMassPoint - 30; // 30 light+medium, 20 heavy

@@ -20,6 +20,8 @@
 // -- GENIE includes
 
 #include "PDG/PDGCodes.h"
+#include "Conventions/Constants.h"
+#include "Conventions/Units.h"
 
 namespace genie {
 namespace HNL {

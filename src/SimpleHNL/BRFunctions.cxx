@@ -1,8 +1,9 @@
 #include "BRFunctions.h"
+#include "Messenger/Messenger.h"
 
 // Get Coloma et al's form factor functions
 double genie::HNL::HNLSelector::GetColomaF1( double x ) {
-  if( x < 0. || x > 0.5 ) { LOG( "SimpleHNL", pERROR ) << "BRFunctions::GetColomaF1:: Illegal x = " << x; exit( 3 ); }
+  if( x < 0. || x > 0.5 ) { LOG( "SimpleHNL", pERROR ) << "BRFunctions::GetColomaF1:: Illegal x = " << x; return 0.; }
   if( x == 0.5 ) return 0.;
   int i = x/genie::HNL::HNLSelector::PARTWIDTH;
   if( x - i*genie::HNL::HNLSelector::PARTWIDTH ==0 ) return genie::HNL::HNLSelector::ColomaF1[i];
@@ -10,7 +11,7 @@ double genie::HNL::HNLSelector::GetColomaF1( double x ) {
 }
 
 double genie::HNL::HNLSelector::GetColomaF2( double x ) {
-  if( x < 0. || x > 0.5 ) { LOG( "SimpleHNL", pERROR ) << "BRFunctions::GetColomaF2:: Illegal x = " << x; exit( 3 ); }
+  if( x < 0. || x > 0.5 ) { LOG( "SimpleHNL", pERROR ) << "BRFunctions::GetColomaF2:: Illegal x = " << x; return 0.; }
   if( x == 0.5 ) return 0.;
   int i = x/genie::HNL::HNLSelector::PARTWIDTH;
   if( x - i*genie::HNL::HNLSelector::PARTWIDTH==0 ) return genie::HNL::HNLSelector::ColomaF2[i];
@@ -20,6 +21,7 @@ double genie::HNL::HNLSelector::GetColomaF2( double x ) {
 // total decay widths, various channels
 double genie::HNL::HNLSelector::DWidth_PiZeroAndNu( const double M, const double Ue42, const double Umu42, const double Ut42 ) {
   const double x       = genie::HNL::HNLutils::MassX( mPi0, M );
+  //const double x       = MassX( mPi0, M );
   const double preFac  = GF2 * M*M*M / ( 32. * pi );
   const double kinPart = ( 1. - x*x ) * ( 1. - x*x );
   return preFac * ( Ue42 + Umu42 + Ut42 ) * fpi2 * kinPart;
@@ -28,8 +30,11 @@ double genie::HNL::HNLSelector::DWidth_PiZeroAndNu( const double M, const double
 double genie::HNL::HNLSelector::DWidth_PiAndLepton( const double M, const double Ua42, const double ma ) {
   const double xPi     = genie::HNL::HNLutils::MassX( mPi, M );
   const double xLep    = genie::HNL::HNLutils::MassX( ma, M );
+  //const double xPi     = MassX( mPi, M );
+  //const double xLep    = MassX( ma, M );
   const double preFac  = GF2 * M*M*M / ( 16. * pi );
   const double kalPart = TMath::Sqrt( genie::HNL::HNLutils::Kallen( 1, xPi*xPi, xLep*xLep ) );
+  //const double kalPart = TMath::Sqrt( Kallen( 1.0, xPi*xPi, xLep*xLep ) );
   const double othPart = 1. - xPi*xPi - xLep*xLep * ( 2. + xPi*xPi - xLep*xLep );
 
   return preFac * fpi2 * Ua42 * Vud2 * kalPart * othPart;

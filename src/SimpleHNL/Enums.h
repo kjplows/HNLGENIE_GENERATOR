@@ -27,7 +27,12 @@
 
 #include <map>
 
+// -- GENIE includes
+
+#include "Conventions/Units.h"
+
 namespace genie {
+
 namespace HNL {
 
     namespace HNLenums {
@@ -131,59 +136,8 @@ namespace HNL {
 
 	} massHyp_t;
 
-	static std::map< massHyp_t, double > massHypMap = std::map< massHyp_t, double > {
-	    { kInitHyp,      -1.000 * genie::units::keV },
-	    { kLight0Hyp,     1.000 * genie::units::keV },
-	    { kLight1Hyp,    10.000 * genie::units::keV },
-	    { kLight2Hyp,   100.000 * genie::units::keV },
-	    { kLight3Hyp,   500.000 * genie::units::keV },
-	    { kLight4Hyp,     1.000 * genie::units::MeV },
-	    { kLight5Hyp,     5.000 * genie::units::MeV },
-	    { kLight6Hyp,    10.000 * genie::units::MeV },
-	    { kLight7Hyp,    15.000 * genie::units::MeV },
-	    { kLight8Hyp,    20.000 * genie::units::MeV },
-	    { kLight9Hyp,    25.000 * genie::units::MeV },
-	    { kLightAHyp,    30.000 * genie::units::MeV },
-	    { kLightBHyp,    33.000 * genie::units::MeV },
-	    { kLightCHyp,    35.000 * genie::units::MeV },
-	    { kLightDHyp,    40.000 * genie::units::MeV },
-	    { kLightEHyp,    45.000 * genie::units::MeV },
-	    { kLightFHyp,    50.000 * genie::units::MeV },
-	    { kLightGHyp,    60.000 * genie::units::MeV },
-	    { kLightHHyp,    70.000 * genie::units::MeV },
-	    { kLightIHyp,    80.000 * genie::units::MeV },
-	    { kLightJHyp,    90.000 * genie::units::MeV },
-	    { kMedium0Hyp,  100.000 * genie::units::MeV },
-	    { kMedium1Hyp,  114.523 * genie::units::MeV },
-	    { kMedium2Hyp,  129.046 * genie::units::MeV },
-	    { kMedium3Hyp,  143.569 * genie::units::MeV },
-	    { kMedium4Hyp,  158.092 * genie::units::MeV },
-	    { kMedium5Hyp,  172.614 * genie::units::MeV },
-	    { kMedium6Hyp,  187.137 * genie::units::MeV },
-	    { kMedium7Hyp,  201.660 * genie::units::MeV },
-	    { kMedium8Hyp,  216.183 * genie::units::MeV },
-	    { kMedium9Hyp,  230.706 * genie::units::MeV },
-	    { kHeavy0Hyp,   245.229 * genie::units::MeV },
-	    { kHeavy1Hyp,   260.983 * genie::units::MeV },
-	    { kHeavy2Hyp,   276.738 * genie::units::MeV },
-	    { kHeavy3Hyp,   292.492 * genie::units::MeV },
-	    { kHeavy4Hyp,   308.246 * genie::units::MeV },
-	    { kHeavy5Hyp,   324.001 * genie::units::MeV },
-	    { kHeavy6Hyp,   339.755 * genie::units::MeV },
-	    { kHeavy7Hyp,   355.510 * genie::units::MeV },
-	    { kHeavy8Hyp,   371.264 * genie::units::MeV },
-	    { kHeavy9Hyp,   387.019 * genie::units::MeV },
-	    { kHeavyAHyp,   397.434 * genie::units::MeV },
-	    { kHeavyBHyp,   407.948 * genie::units::MeV },
-	    { kHeavyCHyp,   418.626 * genie::units::MeV },
-	    { kHeavyDHyp,   428.978 * genie::units::MeV },
-	    { kHeavyEHyp,   439.493 * genie::units::MeV },
-	    { kHeavyFHyp,   450.007 * genie::units::MeV },
-	    { kHeavyGHyp,   460.622 * genie::units::MeV },
-	    { kHeavyHHyp,   471.137 * genie::units::MeV },
-	    { kHeavyIHyp,   481.652 * genie::units::MeV },
-	    { kHeavyJHyp,   492.166 * genie::units::MeV } 
-	};
+	//std::map< massHyp_t, double > massHypMap; 
+	//std::map< massHyp_t, double > BuildMassHypMap(void);
 
 	typedef enum t_parent {
 

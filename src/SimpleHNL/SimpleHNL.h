@@ -35,9 +35,9 @@
 //#include "HNLAuxiliary/Defaults.h"
 //#include "HNLAuxiliary/Enums.h"  
 //#include "HNLAuxiliary/Stepper.h"
-#include "Messenger/Messenger.h"
 
-#include "DecayChannels.h"
+//#include "Messenger/Messenger.h"
+
 #include "DecaySelector.h"
 #include "Defaults.h"
 #include "Enums.h"  
@@ -183,9 +183,11 @@ namespace genie {
 
 	    inline void SetEnergy( const double E ) { // TODO make exception & error code!!
 		// updates beta, gamma, 4P, lifetime. Doesn't change angles.
-		if( E < fMass ) { LOG( "SimpleHNL", pERROR ) << 
-		    "genie::HNL::SimpleHNL:: Set E too low." <<
-			"\nE = " << E << ", M = " << fMass; exit(3); }
+		//if( E < fMass ) { LOG( "SimpleHNL", pERROR ) << 
+		//    "genie::HNL::SimpleHNL:: Set E too low." <<
+		//	"\nE = " << E << ", M = " << fMass; exit(3); }
+	      if( E < fMass ){ std::cerr << "Set E too low. E = " << E << ", M = " << fMass << "\n"; }
+	      assert( E >= fMass );
 		double mom3 = std::sqrt( E*E - fMass*fMass );
 		double oldmom = GetMomentum( );
 		fPmag = mom3;		    
@@ -234,9 +236,12 @@ namespace genie {
 		/// does not change magnitude
 		// TODO polish the null exception
 		if( ux == 0.0 && uy == 0.0 && uz == 0.0 ){
-		    LOG( "SimpleHNL", pERROR ) << 
-		      "genie::HNL::SimpleHNL::SetMomentumDirection:: " <<
-		      "Zero vector entered. Exiting."; exit(3); }
+		  //LOG( "SimpleHNL", pERROR ) << 
+		  //    "genie::HNL::SimpleHNL::SetMomentumDirection:: " <<
+		  //    "Zero vector entered. Exiting."; exit(3); }
+		  std::cerr << "Zero momentum unit vector.\n";
+		}
+		assert( !( ux == 0.0 && uy == 0.0 && uz == 0.0 ) );
 		const double umag = std::sqrt( ( ux*ux + uy*uy + uz*uz ) );
 		const double invu = 1.0 / umag;
 		ux *= invu; uy *= invu; uz *= invu;
@@ -250,17 +255,23 @@ namespace genie {
 	    inline void SetPolMag( const double pm ){
 		// TODO polish this exception
 		if( pm < -1.0 || pm > 1.0 ){
-		    LOG( "SimpleHNL", pERROR ) << 
-		      "genie::HNL::SimpleHNL::SetPolMag:: " <<
-		      "Pol.vec. magnitude must be in [-1,1]. Exiting."; exit(3); }
+		  //LOG( "SimpleHNL", pERROR ) << 
+		  //    "genie::HNL::SimpleHNL::SetPolMag:: " <<
+		  //    "Pol.vec. magnitude must be in [-1,1]. Exiting."; exit(3); }
+		  std::cerr << "Illegal polarisation magnitude " << pm << "\n";
+		}
+		assert( pm >= -1.0 && pm <= 1.0 );
 		fPol = pm; }
 
 	    inline void SetPolarisationDirection( const double plx,
 						  const double ply, const double plz ){
 		if( plx == 0.0 && ply == 0.0 && plz == 0.0 ){
-		    LOG( "SimpleHNL", pERROR ) << 
-		      "genie::HNL::SimpleHNL::SetPolarisationDirection:: " <<
-		      "Zero vector entered. Exiting."; exit(1); }
+		  //LOG( "SimpleHNL", pERROR ) << 
+		  //    "genie::HNL::SimpleHNL::SetPolarisationDirection:: " <<
+		  //    "Zero vector entered. Exiting."; exit(1); }
+		  std::cerr << "Zero polarisation unit vector.\n";
+		}
+		assert( !( plx == 0.0 && ply == 0.0 && plz == 0.0 ) );
 		const double PM = std::sqrt( plx*plx + ply*ply * plz*plz );
 		fPolUx = plx / PM; fPolUy = ply / PM; fPolUz = plz / PM;
 		if( !fPolDir || fPolDir == 0 ) fPolDir = new std::vector< double >( );

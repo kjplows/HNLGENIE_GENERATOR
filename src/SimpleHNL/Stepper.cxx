@@ -5,6 +5,7 @@
 //----------------------------------------------------------------------------
 
 #include "Stepper.h"
+#include "Messenger/Messenger.h"
 
 using namespace ::genie::HNL::HNLSelector;
 
