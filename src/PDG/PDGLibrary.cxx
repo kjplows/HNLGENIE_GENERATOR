@@ -67,6 +67,7 @@ TParticlePDG * PDGLibrary::Find(int pdgc)
   return fDatabasePDG->GetParticle(pdgc);
 }
 //____________________________________________________________________________
+#ifdef __GENIE_SIMPLE_HNL_ENABLED__
 void PDGLibrary::AddSimpleHNL( int pdgc, double mHNL, double Ue42, double Um42 )
 { 
   // use mass and couplings to get valid channels and add up their width
@@ -78,6 +79,7 @@ void PDGLibrary::AddSimpleHNL( int pdgc, double mHNL, double Ue42, double Um42 )
   TParticlePDG * HNLParticle = fDatabasePDG->AddParticle( "HNL", "Generic Heavy Neutral Lepton", mHNL, false, totGamma, 0, "lepton", std::abs(pdgc) );
   TParticlePDG * HNLAntiParticle = fDatabasePDG->AddParticle( "HNLBar", "Generic Heavy Neutral Lepton", mHNL, false, totGamma, 0, "lepton", -std::abs(pdgc) );
 }
+#endif
 //____________________________________________________________________________
 bool PDGLibrary::LoadDBase(void)
 {

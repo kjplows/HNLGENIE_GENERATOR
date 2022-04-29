@@ -157,8 +157,10 @@ using std::setiosflags;
 using std::vector;
 
 using namespace genie;
-using namespace genie::HNL;
 using namespace genie::constants;
+#ifdef __GENIE_SIMPLE_HNL_ENABLED__
+using namespace genie::HNL;
+#endif
 
 //format enum
 typedef enum EGNtpcFmt {
@@ -245,6 +247,7 @@ void ConvertFromGST(void)
   bool   brIsHNLDecay  = false;  // Is HNL decay?
   int    brCodeNeut    = 0;      // The equivalent NEUT reaction code (if any)
   int    brCodeNuance  = 0;      // The equivalent NUANCE reaction code (if any)
+#ifdef __GENIE_SIMPLE_HNL_ENABLED__
   // --- HNL specific branches
   double brHNLMass     = 0;      // HNL mass in GeV
   double brHNLECoup    = 0;      // |U_e4|^2
@@ -268,6 +271,7 @@ void ConvertFromGST(void)
   double brFS2Py       = 0;      // 3rd daughter: Py
   double brFS2Pz       = 0;      // 3rd daughter: Pz
   // --- END OF HNL specific branches
+#endif
   double brWeight      = 0;      // Event weight
   double brKineXs      = 0;      // Bjorken x as was generated during kinematical selection; takes fermi momentum / off-shellness into account
   double brKineYs      = 0;      // Inelasticity y as was generated during kinematical selection; takes fermi momentum / off-shellness into account
@@ -385,6 +389,7 @@ void ConvertFromGST(void)
   s_tree->SetBranchAddress( "nhl", &brIsHNLDecay );
   s_tree->SetBranchAddress( "neut_code", &brCodeNeut );
   s_tree->SetBranchAddress( "nuance_code", &brCodeNuance );
+#ifdef __GENIE_SIMPLE_HNL_ENABLED__
   s_tree->SetBranchAddress( "nhl_mass", &brHNLMass );
   s_tree->SetBranchAddress( "nhl_e_coup", &brHNLECoup );
   s_tree->SetBranchAddress( "nhl_m_coup", &brHNLMCoup );
@@ -406,6 +411,7 @@ void ConvertFromGST(void)
   s_tree->SetBranchAddress( "nhl_FS2_Px", &brFS2Px );
   s_tree->SetBranchAddress( "nhl_FS2_Py", &brFS2Py );
   s_tree->SetBranchAddress( "nhl_FS2_Pz", &brFS2Pz );
+#endif
   s_tree->SetBranchAddress( "wght", &brWeight );
   s_tree->SetBranchAddress( "xs", &brKineXs );
   s_tree->SetBranchAddress( "ys", &brKineYs );
@@ -474,9 +480,11 @@ void ConvertFromGST(void)
   s_tree->SetBranchAddress( "calresp0", &brCalResp0 );
 
   // and add some custom branches to NtupleWriter
+#ifdef __GENIE_SIMPLE_HNL_ENABLED__
   ntpw.EventTree()->Branch("hnl_mass", &brHNLMass, "brHNLMass/D");
   ntpw.EventTree()->Branch("hnl_coup_e", &brHNLECoup, "brHNLECoup/D");
   ntpw.EventTree()->Branch("hnl_coup_mu", &brHNLMCoup, "brHNLMCoup/D");
+#endif
 
   // Figure out how many events to analyze
   Long64_t nmax = (gOptN<0) ? 
@@ -494,10 +502,12 @@ void ConvertFromGST(void)
     
     s_tree->GetEntry(iev);
 
-    if( !PDGLibrary::Instance()->Find( brNeutrino ) ){ // must add to PDGLibrary first.
+#ifdef __GENIE_SIMPLE_HNL_ENABLED__
+    if( !PDGLibrary::Instance()->Find( brNeutrino ) && brIsHNLDecay ){ // must add to PDGLibrary first.
       LOG( "grvntpc", pINFO ) << "Adding code " << brNeutrino << " to PDGLibrary...";
       PDGLibrary::Instance()->AddSimpleHNL( brNeutrino, brHNLMass, brHNLECoup, brHNLMCoup );
     }
+#endif
     
     // Create the event record and set it
     LOG( "grvntpc", pDEBUG ) << "Creating event record. . .";
@@ -508,6 +518,8 @@ void ConvertFromGST(void)
     TLorentzVector p4HNL( brPxv, brPyv, brPzv, brEv );
     TLorentzVector x4HNL( brVtxX, brVtxY, brVtxZ, brVtxT );
     int probepdg = brNeutrino;
+    if( !brIsHNLDecay ){ LOG( "grvntpc", pFATAL ) << "Can only handle HNL so far..."; }
+    assert( brIsHNLDecay );
     Interaction * interaction = Interaction::HNLDecay( probepdg, HNLenums::kInit, p4HNL );
     // make sure InitialState knows about this!
     interaction->InitStatePtr()->SetProbePdg( probepdg );
@@ -573,12 +585,14 @@ void ConvertFromGST(void)
 			       << "\nZ            = " << brTargetZ
 			       << "\nA            = " << brTargetA
 			       << "\nnhl          = " << brIsHNLDecay
+#ifdef __GENIE_SIMPLE_HNL_ENABLED__
 			       << "\nnhl_mass     = " << brHNLMass
 			       << "\nnhl_e_coup   = " << brHNLECoup
 			       << "\nnhl_m_coup   = " << brHNLMCoup
 			       << "\nnhl_t_coup   = " << brHNLTCoup
 			       << "\nnhl_type     = " << brHNLType
 			       << "\nnhl_majorana = " << brHNLMajorana
+#endif
 			       << "\nwght         = " << brWeight
 			       << "\nts           = " << brKineTs
 			       << "\nQ2s          = " << brKineQ2s

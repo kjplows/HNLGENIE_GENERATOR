@@ -309,11 +309,12 @@ GEvGenMode_t GHepRecord::EventGenerationMode(void) const
   }
 
   // In HNL decay mode, the first entry is an HNL.
-  
-  if( pdg::IsHeavyNeutralLepton( p0pdg ) && p0st == kIStInitialState )
+#ifdef __GENIE_SIMPLE_HNL_ENABLED__
+  if( pdg::IsHeavyNeutralLepton( std::abs(p0pdg) ) && p0st == kIStInitialState )
     {
       return kGMdHNLDecay;
     }
+#endif
 
   return kGMdUnknown;
 }

@@ -23,7 +23,10 @@
 #include <TParticlePDG.h>
 
 #include "PDG/PDGCodes.h"
+
+#ifdef __GENIE_SIMPLE_HNL_ENABLED__
 #include "SimpleHNL/SimpleHNL.h"
+#endif
 
 namespace genie {
 
@@ -36,7 +39,9 @@ public:
   TDatabasePDG * DBase (void);
   TParticlePDG * Find  (int pdgc);
 
+#ifdef __GENIE_SIMPLE_HNL_ENABLED__
   void AddSimpleHNL( int pdgc, double mHNL, double Ue42, double Um42 );
+#endif
 
 private:
 

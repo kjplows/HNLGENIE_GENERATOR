@@ -92,6 +92,13 @@ if(@nret>0)
       { print GBLD   "#define __GENIE_GSL_ENABLED__\n"; }
 else  { print GBLD "//#define __GENIE_GSL_ENABLED__\n"; }
 
+# SimpleHNL enabled?
+#
+@nret = `grep 'GOPT_ENABLE_SIMPLE_HNL=YES' $GCONF_FILE`;
+if(@nret>0)
+     { print GBLD   "#define __GENIE_SIMPLE_HNL_ENABLED__\n"; }
+else { print GBLD "//#define __GENIE_SIMPLE_HNL_ENABLED__\n"; }
+
 # grab libxml2 version information
 #
 $libxml2_inc = "";

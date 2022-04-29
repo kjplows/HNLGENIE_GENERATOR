@@ -544,7 +544,7 @@ void ConvertToGST(void)
   TLorentzVector pdummy(0,0,0,0);
   
   // if HNL, pick up branches about mass + couplings + nature
-  
+#ifdef __GENIE_SIMPLE_HNL_ENABLED__
   double locHNLMass, locHNLECoup, locHNLMuCoup; bool locHNLIsMajorana; int locHNLType;
   TBranch * BRHNLMass = er_tree->GetBranch( "hnl_mass" ); BRHNLMass->SetAddress( &locHNLMass );
   TBranch * BRHNLECoup = er_tree->GetBranch( "hnl_coup_e" ); BRHNLECoup->SetAddress( &locHNLECoup );
@@ -553,11 +553,14 @@ void ConvertToGST(void)
     TBranch * BRHNLIsMajorana = er_tree->GetBranch( "hnl_ismaj" ); BRHNLIsMajorana->SetAddress( &locHNLIsMajorana );
     TBranch * BRHNLType = er_tree->GetBranch( "hnl_type" ); BRHNLType->SetAddress( &locHNLType );
   }
+#endif
 
   // Event loop
   for(Long64_t iev = 0; iev < nmax; iev++) {
+    LOG("gntpc", pINFO) << " ** Event : " << iev;
     er_tree->GetEntry(iev);
 
+#ifdef __GENIE_SIMPLE_HNL_ENABLED__
     if( BRHNLMass && !PDGLibrary::Instance()->Find(genie::kPdgHNL) ){ // hack to let gst insert HNL into PDGLibrary
       LOG("gntpc", pDEBUG) << "Adding HNL to PDG library "
 			   << "with mass = " << locHNLMass << ", "
@@ -565,6 +568,7 @@ void ConvertToGST(void)
 			   << "|U_m4|^2 = " << locHNLMuCoup;
       PDGLibrary::Instance()->AddSimpleHNL( genie::kPdgHNL, locHNLMass, locHNLECoup, locHNLMuCoup );
     }
+#endif
 
     NtpMCRecHeader rec_header = mcrec->hdr;
     EventRecord &  event      = *(mcrec->event);
