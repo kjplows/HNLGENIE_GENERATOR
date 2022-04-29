@@ -45,6 +45,12 @@ endif
 ifeq ($(strip $(GOPT_ENABLE_NUCLEON_DECAY)),YES)
 TGT_BASE += gevgen_ndcy
 endif
+ifeq ($(strip $(GOPT_ENABLE_SIMPLE_HNL)),YES)
+TGT_BASE += gevgen_hnl
+endif
+ifeq ($(strip $(GOPT_ENABLE_REVERSE_GNTPC)),YES)
+TGT_BASE += grvntpc
+endif
 ifeq ($(strip $(GOPT_ENABLE_NEUTRON_OSC)),YES)
 TGT_BASE += gevgen_nosc
 # Require C++11 for NeutronOsc module.
@@ -64,12 +70,6 @@ TGT_BASE += grwghtnp
 endif
 ifeq ($(strip $(GOPT_ENABLE_MASTERCLASS)),YES)
 TGT_BASE += gmstcl
-endif
-ifeq ($(strip $(GOPT_ENABLE_SIMPLE_HNL)),YES)
-TGT_BASE += gevgen_hnl
-endif
-ifeq ($(strip $(GOPT_ENABLE_REVERSE_GNTPC)), YES)
-TGT_BASE += grvntpc
 endif
 
 TGT = $(addprefix $(GENIE_BIN_PATH)/,$(TGT_BASE))
@@ -136,12 +136,6 @@ $(GENIE_BIN_PATH)/gevgen_ndcy: gNucleonDecayEvGen.o $(call find_libs,gevgen_ndcy
 $(GENIE_BIN_PATH)/gevgen_hnl: gHNLEvGen.o $(call find_libs,gevgen_hnl)
 	@echo "** Building gevgen_hnl"
 	$(LD) $(LDFLAGS) gHNLEvGen.o $(LIBRARIES) -o $(GENIE_BIN_PATH)/gevgen_hnl
-
-# Reverse gntpc app
-#
-$(GENIE_BIN_PATH)/grvntpc: gReverseNtpConv.o $(call find_libs,grvntpc)
-	@echo "** Building grvntpc"
-	$(LD) $(LDFLAGS) gReverseNtpConv.o $(LIBRARIES) -o $(GENIE_BIN_PATH)/grvntpc
 
 # neutron-antineutron event generation app
 #
@@ -221,6 +215,12 @@ $(GENIE_BIN_PATH)/grwghtnp: gRwghtNCorrelatedParams.o $(call find_libs,grwghtnp)
 $(GENIE_BIN_PATH)/gntpc: gNtpConv.o $(call find_libs,gntpc)
 	@echo "** Building gntpc"
 	$(LD) $(LDFLAGS) gNtpConv.o $(LIBRARIES) -o $(GENIE_BIN_PATH)/gntpc
+
+# inverse ntuple conversion utility
+#
+$(GENIE_BIN_PATH)/grvntpc: gReverseNtpConv.o $(call find_libs, grvntpc)
+	@echo "** Building grvntpc"
+	$(LD) $(LDFLAGS) gReverseNtpConv.o $(LIBRARIES) -o $(GENIE_BIN_PATH)/grvntpc
 
 # Masterclass app
 #

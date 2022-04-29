@@ -28,6 +28,7 @@ if(($match = grep(/--help/i, @ARGV)) > 0) {
   print "    geom-drivers      Built-in detector geometry drivers                          default: enabled  \n";
   print "    vle-extension     GENIE very low energy (1 MeV - 100 MeV) extension           default: disabled (Experimental) \n";
   print "    simple-hnl        Simple HNL decayer using the nuMSM model                    default: disabled (Development) \n";
+  print "    reverse-gntpc     Utility to convert non-GHEP GENIE formats to GHEP           default: disabled (Development) \n";
   print "    mueloss           Muon energy loss modeling                                   default: enabled  \n";
   print "    test              Build test programs                                         default: disabled \n";
   print "    t2k               Enable T2K-specific event generation app                    default: disabled \n";
@@ -136,6 +137,7 @@ my $gopt_enable_flux_drivers     = "YES";
 my $gopt_enable_geom_drivers     = "YES";
 my $gopt_enable_vle_extension    = "NO";
 my $gopt_enable_simple_hnl       = "NO";
+my $gopt_enable_reverse_gntpc    = "NO";
 my $gopt_enable_mueloss          = "YES";
 my $gopt_enable_test             = "NO";
 my $gopt_enable_t2k              = "NO";
@@ -158,7 +160,8 @@ if(($match = grep(/--disable-lhapdf/i,          @ARGV)) > 0) { $gopt_enable_lhap
 if(($match = grep(/--disable-flux-drivers/i,    @ARGV)) > 0) { $gopt_enable_flux_drivers     = "NO";  }
 if(($match = grep(/--disable-geom-drivers/i,    @ARGV)) > 0) { $gopt_enable_geom_drivers     = "NO";  }
 if(($match = grep(/--enable-vle-extension/i,    @ARGV)) > 0) { $gopt_enable_vle_extension    = "YES"; }
-if(($match = grep(/--enable-simple-hnl/i,       @ARGV)) > 0) { $gopt_enable_simple_hnl    = "YES"; }
+if(($match = grep(/--enable-simple-hnl/i,       @ARGV)) > 0) { $gopt_enable_simple_hnl       = "YES"; }
+if(($match = grep(/--enable-reverse-gntpc/i,    @ARGV)) > 0) { $gopt_enable_reverse_gntpc    = "YES"; }
 if(($match = grep(/--disable-mueloss/i,         @ARGV)) > 0) { $gopt_enable_mueloss          = "NO";  }
 if(($match = grep(/--enable-test/i,             @ARGV)) > 0) { $gopt_enable_test             = "YES"; }
 if(($match = grep(/--enable-t2k/i,              @ARGV)) > 0) { $gopt_enable_t2k              = "YES"; }
@@ -417,6 +420,7 @@ print MKCONF "GOPT_ENABLE_FLUX_DRIVERS=$gopt_enable_flux_drivers\n";
 print MKCONF "GOPT_ENABLE_GEOM_DRIVERS=$gopt_enable_geom_drivers\n";
 print MKCONF "GOPT_ENABLE_VLE_EXTENSION=$gopt_enable_vle_extension\n";
 print MKCONF "GOPT_ENABLE_SIMPLE_HNL=$gopt_enable_simple_hnl\n";
+print MKCONF "GOPT_ENABLE_REVERSE_GNTPC=$gopt_enable_reverse_gntpc\n";
 print MKCONF "GOPT_ENABLE_MUELOSS=$gopt_enable_mueloss\n";
 print MKCONF "GOPT_ENABLE_TEST=$gopt_enable_test\n";
 print MKCONF "GOPT_ENABLE_T2K=$gopt_enable_t2k\n";
